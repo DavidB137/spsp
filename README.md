@@ -1,3 +1,4 @@
 # Simple publish-subscribe protocol
 
-Based on ESPNow protocol. With (planned) support for OpenWrt.
+Bridge between MQTT and ESP-NOW (with possibility to use other layer than ESP-NOW).
+With (planned) support for OpenWrt.
