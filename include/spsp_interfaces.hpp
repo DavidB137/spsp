@@ -121,6 +121,12 @@ namespace SPSP
          * 
          */
         virtual void init() = 0;
+
+        /**
+         * @brief Deinitializes the node
+         * 
+         */
+        virtual void deinit() = 0;
     
     protected:
         /**

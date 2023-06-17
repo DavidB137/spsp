@@ -28,6 +28,12 @@ namespace SPSP::Nodes
          */
         void init();
 
+        /**
+         * @brief Deinitializes client node
+         * 
+         */
+        void deinit();
+
     protected:
         /**
          * @brief Receives the message from local layer
@@ -63,6 +69,12 @@ namespace SPSP::Nodes
          */
         void init();
 
+        /**
+         * @brief Deinitializes bridge node
+         * 
+         */
+        void deinit();
+
     protected:
         /**
          * @brief Receives the message from local layer
@@ -97,6 +109,12 @@ namespace SPSP::Nodes
          * 
          */
         void init();
+
+        /**
+         * @brief Deinitializes client-bridge node
+         * 
+         */
+        void deinit();
     
     protected:
         /**
