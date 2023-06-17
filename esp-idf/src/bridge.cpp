@@ -16,7 +16,7 @@ static const char* SPSP_LOG_TAG = "SPSP/Bridge";
 
 namespace SPSP::Nodes
 {
-    Bridge::Bridge(SPSP::ILocalLayer* ll, SPSP::IFarLayer* fl) : SPSP::INode{ll}, fl{fl}
+    Bridge::Bridge(SPSP::ILocalLayer* ll, SPSP::IFarLayer* fl) : SPSP::INode{ll}, m_fl{fl}
     {
         // WiFi
         WiFi& wifi = WiFi::instance();
@@ -32,8 +32,8 @@ namespace SPSP::Nodes
     Bridge::~Bridge()
     {
         // Layers
-        ll->setNode(nullptr);
-        fl->setNode(nullptr);
+        m_ll->setNode(nullptr);
+        m_fl->setNode(nullptr);
 
         // WiFi
         WiFi& wifi = WiFi::instance();

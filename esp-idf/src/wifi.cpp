@@ -25,8 +25,8 @@ namespace SPSP
     void WiFi::init(std::string ssid, std::string password)
     {
         // Store given parameters
-        this->ssid = ssid;
-        this->password = password;
+        this->m_ssid = ssid;
+        this->m_password = password;
 
         bool ssidNotEmpty = ssid.length() > 0;
 

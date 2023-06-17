@@ -39,7 +39,7 @@ namespace SPSP::Nodes
     class Bridge : public SPSP::INode
     {
     protected:
-        SPSP::IFarLayer* fl;
+        SPSP::IFarLayer* m_fl;
     public:
         /**
          * @brief Constructs a new bridge node

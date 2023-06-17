@@ -24,8 +24,8 @@ namespace SPSP
      */
     class WiFi
     {
-        std::string ssid;
-        std::string password;
+        std::string m_ssid;
+        std::string m_password;
 
         WiFi() {}
     public:

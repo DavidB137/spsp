@@ -26,21 +26,21 @@ namespace SPSP
     class ILocalOrFarLayer
     {
     private:
-        INode* node;
+        INode* m_node;
 
     public:
         /**
          * @brief Constructs a new layer object
          * 
          */
-        ILocalOrFarLayer() : node{nullptr} {};
+        ILocalOrFarLayer() : m_node{nullptr} {};
 
         /**
          * @brief Sets the pointer to the owner node.
          * 
          * @param n Owner node
          */
-        void setNode(INode* n) { node = n; };
+        void setNode(INode* n) { m_node = n; };
 
         /**
          * @brief Gets the node object
@@ -51,8 +51,8 @@ namespace SPSP
          */
         INode* getNode()
         {
-            assert(node != nullptr);
-            return node;
+            assert(m_node != nullptr);
+            return m_node;
         }
     };
 
@@ -103,7 +103,7 @@ namespace SPSP
     class INode
     {
     protected:
-        ILocalLayer* ll;
+        ILocalLayer* m_ll;
 
     public:
         /**
@@ -111,9 +111,9 @@ namespace SPSP
          * 
          * @param ll Local layer
          */
-        INode(ILocalLayer* ll) : ll{ll}
+        INode(ILocalLayer* ll) : m_ll{ll}
         {
-            ll->setNode(this);
+            m_ll->setNode(this);
         };
 
         /**

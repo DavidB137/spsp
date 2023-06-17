@@ -26,9 +26,9 @@ namespace SPSP::LocalLayers::ESPNOW
     class Layer : public SPSP::ILocalLayer
     {
     private:
-        std::string ssid;
-        std::string password;
-        uint8_t datarate;
+        std::string m_ssid;
+        std::string m_password;
+        uint8_t m_datarate;
 
     public:
         /**
@@ -39,7 +39,7 @@ namespace SPSP::LocalLayers::ESPNOW
          * @param datarate In case of ESP-IDF, use values of `wifi_phy_rate_t` enum.
          */
         Layer(const char ssid[SSID_LEN], const char password[PASSWORD_LEN], uint8_t datarate = 0)
-            : ssid{ssid}, password{password}, datarate{datarate} {};
+            : m_ssid{ssid}, m_password{password}, m_datarate{datarate} {};
 
     protected:
         /**
