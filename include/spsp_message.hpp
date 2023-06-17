@@ -9,7 +9,6 @@
 
 #pragma once
 
-#include <stdexcept>
 #include <string>
 
 namespace SPSP
@@ -36,7 +35,7 @@ namespace SPSP
      * @param mt Message type
      * @return String representation
      */
-    constexpr const char* messageTypeToStr(MessageType mt) throw()
+    constexpr const char* messageTypeToStr(MessageType mt) noexcept
     {
         switch (mt)
         {
@@ -48,7 +47,7 @@ namespace SPSP
             case MessageType::PUB: return "PUB";
             case MessageType::SUB_REQ: return "SUB_REQ";
             case MessageType::SUB_RES: return "SUB_RES";
-            default: throw std::invalid_argument("Unimplemented message type");
+            default: return "???";
         }
     }
 
