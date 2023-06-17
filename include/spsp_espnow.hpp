@@ -24,7 +24,7 @@ namespace SPSP::LocalLayers::ESPNOW
      * @brief ESP-NOW local layer
      * 
      */
-    class Layer : public SPSP::LocalLayer
+    class Layer : public SPSP::ILocalLayer
     {
     private:
         std::string ssid;
@@ -41,6 +41,14 @@ namespace SPSP::LocalLayers::ESPNOW
          */
         Layer(const char ssid[SSID_LEN], const char password[PASSWORD_LEN], uint8_t datarate = 0)
             : ssid{ssid}, password{password}, datarate{datarate} {};
+
+    protected:
+        /**
+         * @brief Sends the message to given node
+         * 
+         * @param msg Message
+         */
+        void send(Message msg);
     };
 } // namespace SPSP::LocalLayers::ESPNOW
 

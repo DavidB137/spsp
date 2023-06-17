@@ -18,8 +18,16 @@ namespace SPSP::FarLayers::MQTT
      * @brief MQTT far layer
      * 
      */
-    class Layer : public SPSP::FarLayer
+    class Layer : public SPSP::IFarLayer
     {
+    protected:
+        /**
+         * @brief Publishes message coming from node
+         * 
+         * @param topic Topic
+         * @param payload Payload (data)
+         */
+        void publish(std::string topic, std::string payload);
     };
 } // namespace SPSP::FarLayers::MQTT
 

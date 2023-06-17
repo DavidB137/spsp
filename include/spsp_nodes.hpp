@@ -18,10 +18,10 @@ namespace SPSP::Nodes
      * @brief Client node
      * 
      */
-    class Client : public SPSP::Node
+    class Client : public SPSP::INode
     {
     public:
-        using SPSP::Node::Node;
+        using SPSP::INode::INode;
 
         /**
          * @brief Initializes client node
@@ -36,19 +36,27 @@ namespace SPSP::Nodes
          * Acts as a callback for local layer receiver.
          * 
          * @param msg Received message
-         * @return Message Reply that should be sent back
          */
-        Message receive(Message msg);
+        void receiveLocal(Message msg);
+
+        /**
+         * @brief Receives the message from far layer
+         * 
+         * Acts as a callback for far layer receiver.
+         * 
+         * @param msg Received message
+         */
+        void receiveFar(Message msg);
     };
 
     /**
      * @brief Bridge node
      * 
      */
-    class Bridge : public SPSP::Node
+    class Bridge : public SPSP::INode
     {
     public:
-        using SPSP::Node::Node;
+        using SPSP::INode::INode;
 
         /**
          * @brief Initializes bridge node
@@ -63,9 +71,17 @@ namespace SPSP::Nodes
          * Acts as a callback for local layer receiver.
          * 
          * @param msg Received message
-         * @return Message Reply that should be sent back
          */
-        Message receive(Message msg);
+        void receiveLocal(Message msg);
+
+        /**
+         * @brief Receives the message from far layer
+         * 
+         * Acts as a callback for far layer receiver.
+         * 
+         * @param msg Received message
+         */
+        void receiveFar(Message msg);
     };
 
     /**
@@ -90,9 +106,17 @@ namespace SPSP::Nodes
          * Acts as a callback for local layer receiver.
          * 
          * @param msg Received message
-         * @return Message Reply that should be sent back
          */
-        Message receive(Message msg);
+        void receiveLocal(Message msg);
+
+        /**
+         * @brief Receives the message from far layer
+         * 
+         * Acts as a callback for far layer receiver.
+         * 
+         * @param msg Received message
+         */
+        void receiveFar(Message msg);
     };
 } // namespace SPSP::Nodes
 

@@ -17,40 +17,43 @@
 namespace SPSP
 {
     // Forward declaration
-    class Node;
+    class INode;
 
     /**
      * @brief Generic interface for local or far layer
      * 
      * Has a pointer to owner node (to directly call `Node::receive()` method). 
      */
-    class LocalOrFarLayer
+    class ILocalOrFarLayer
     {
+        friend class INode;
+
     private:
-        Node* node;
+        INode* node;
 
     public:
         /**
          * @brief Constructs a new layer object
          * 
          */
-        LocalOrFarLayer() : node{nullptr} {};
+        ILocalOrFarLayer() : node{nullptr} {};
 
+    protected:
         /**
          * @brief Sets the pointer to the owner node.
          * 
          * @param n Owner node
          */
-        void setNode(Node* n) { node = n; };
+        void setNode(INode* n) { node = n; };
 
         /**
          * @brief Gets the node object
          * 
          * Asserts the node is not NULL.
          * 
-         * @return Node* Node pointer
+         * @return Node pointer
          */
-        Node* getNode()
+        INode* getNode()
         {
             assert(node != nullptr);
             return node;
@@ -61,16 +64,31 @@ namespace SPSP
      * @brief Interface for local layer
      * 
      */
-    class LocalLayer : public LocalOrFarLayer
+    class ILocalLayer : public ILocalOrFarLayer
     {
+    protected:
+        /**
+         * @brief Sends the message to given node
+         * 
+         * @param msg Message
+         */
+        virtual void send(Message msg) = 0;
     };
 
     /**
      * @brief Interface for far layer
      * 
      */
-    class FarLayer : public LocalOrFarLayer
+    class IFarLayer : public ILocalOrFarLayer
     {
+    protected:
+        /**
+         * @brief Publishes message coming from node
+         * 
+         * @param topic Topic
+         * @param payload Payload (data)
+         */
+        virtual void publish(std::string topic, std::string payload) = 0;
     };
 
     /**
@@ -78,13 +96,13 @@ namespace SPSP
      * 
      * Implements common functionality for client and bridge node types.
      */
-    class Node
+    class INode
     {
-        friend class LocalLayer;
+        friend class ILocalOrFarLayer;
 
     protected:
-        LocalLayer ll;
-        FarLayer fl;
+        ILocalLayer& ll;
+        IFarLayer& fl;
 
     public:
         /**
@@ -93,7 +111,11 @@ namespace SPSP
          * @param ll Local layer
          * @param fl Far layer
          */
-        Node(LocalLayer ll, FarLayer fl) : ll{ll}, fl{fl} { ll.setNode(this); };
+        INode(ILocalLayer& ll, IFarLayer& fl) : ll{ll}, fl{fl}
+        {
+            ll.setNode(this);
+            fl.setNode(this);
+        };
 
         /**
          * @brief Initializes the node
@@ -108,9 +130,17 @@ namespace SPSP
          * Acts as a callback for local layer receiver.
          * 
          * @param msg Received message
-         * @return Message Reply that should be sent back
          */
-        virtual Message receive(Message msg) = 0;
+        virtual void receiveLocal(Message msg) = 0;
+
+        /**
+         * @brief Receives the message from far layer
+         * 
+         * Acts as a callback for far layer receiver.
+         * 
+         * @param msg Received message
+         */
+        virtual void receiveFar(Message msg) = 0;
     };
 } // namespace SPSP
 
