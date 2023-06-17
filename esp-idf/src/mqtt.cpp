@@ -14,5 +14,6 @@ namespace SPSP::FarLayers::MQTT
 {
     bool Layer::publish(std::string topic, std::string payload)
     {
+        return true;
     }
 }

@@ -14,5 +14,6 @@ namespace SPSP::LocalLayers::ESPNOW
 {
     bool Layer::send(Message msg)
     {
+        return true;
     }
 } // namespace SPSP::LocalLayers::ESPNOW

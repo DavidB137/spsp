@@ -21,12 +21,10 @@ namespace SPSP
     /**
      * @brief Generic interface for local or far layer
      * 
-     * Has a pointer to owner node (to directly call `Node::receive()` method). 
+     * Has a pointer to owner node (to directly call `INode::receive()` method). 
      */
     class ILocalOrFarLayer
     {
-        friend class INode;
-
     private:
         INode* node;
 
@@ -37,7 +35,6 @@ namespace SPSP
          */
         ILocalOrFarLayer() : node{nullptr} {};
 
-    protected:
         /**
          * @brief Sets the pointer to the owner node.
          * 
@@ -65,9 +62,11 @@ namespace SPSP
      */
     class ILocalLayer : public ILocalOrFarLayer
     {
-    protected:
+    public:
         /**
          * @brief Sends the message to given node
+         * 
+         * Should be used by `INode` only!
          * 
          * @param msg Message
          * @return true Delivery successful
@@ -82,9 +81,11 @@ namespace SPSP
      */
     class IFarLayer : public ILocalOrFarLayer
     {
-    protected:
+    public:
         /**
          * @brief Publishes message coming from node
+         * 
+         * Should be used by `INode` only!
          * 
          * @param topic Topic
          * @param payload Payload (data)
@@ -101,38 +102,20 @@ namespace SPSP
      */
     class INode
     {
-        friend class ILocalOrFarLayer;
-
     protected:
-        ILocalLayer& ll;
-        IFarLayer& fl;
+        ILocalLayer* ll;
 
     public:
         /**
          * @brief Constructs a new Node object
          * 
          * @param ll Local layer
-         * @param fl Far layer
          */
-        INode(ILocalLayer& ll, IFarLayer& fl) : ll{ll}, fl{fl}
+        INode(ILocalLayer* ll) : ll{ll}
         {
-            ll.setNode(this);
-            fl.setNode(this);
+            ll->setNode(this);
         };
 
-        /**
-         * @brief Initializes the node
-         * 
-         */
-        virtual void init() = 0;
-
-        /**
-         * @brief Deinitializes the node
-         * 
-         */
-        virtual void deinit() = 0;
-    
-    protected:
         /**
          * @brief Receives the message from local layer
          * 
@@ -141,14 +124,5 @@ namespace SPSP
          * @param msg Received message
          */
         virtual void receiveLocal(Message msg) = 0;
-
-        /**
-         * @brief Receives the message from far layer
-         * 
-         * Acts as a callback for far layer receiver.
-         * 
-         * @param msg Received message
-         */
-        virtual void receiveFar(Message msg) = 0;
     };
 } // namespace SPSP

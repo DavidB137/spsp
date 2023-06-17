@@ -23,19 +23,6 @@ namespace SPSP::Nodes
         using SPSP::INode::INode;
 
         /**
-         * @brief Initializes client node
-         * 
-         */
-        void init();
-
-        /**
-         * @brief Deinitializes client node
-         * 
-         */
-        void deinit();
-
-    protected:
-        /**
          * @brief Receives the message from local layer
          * 
          * Acts as a callback for local layer receiver.
@@ -43,15 +30,6 @@ namespace SPSP::Nodes
          * @param msg Received message
          */
         void receiveLocal(Message msg);
-
-        /**
-         * @brief Receives the message from far layer
-         * 
-         * Acts as a callback for far layer receiver.
-         * 
-         * @param msg Received message
-         */
-        void receiveFar(Message msg);
     };
 
     /**
@@ -60,22 +38,23 @@ namespace SPSP::Nodes
      */
     class Bridge : public SPSP::INode
     {
-    public:
-        using SPSP::INode::INode;
-
-        /**
-         * @brief Initializes bridge node
-         * 
-         */
-        void init();
-
-        /**
-         * @brief Deinitializes bridge node
-         * 
-         */
-        void deinit();
-
     protected:
+        SPSP::IFarLayer* fl;
+    public:
+        /**
+         * @brief Constructs a new bridge node
+         * 
+         * @param ll Local layer
+         * @param fl Far layer
+         */
+        Bridge(SPSP::ILocalLayer* ll, SPSP::IFarLayer* fl);
+
+        /**
+         * @brief Destroys the bridge node
+         * 
+         */
+        ~Bridge();
+
         /**
          * @brief Receives the message from local layer
          * 
@@ -105,19 +84,6 @@ namespace SPSP::Nodes
         using Bridge::Bridge;
 
         /**
-         * @brief Initializes client-bridge node
-         * 
-         */
-        void init();
-
-        /**
-         * @brief Deinitializes client-bridge node
-         * 
-         */
-        void deinit();
-    
-    protected:
-        /**
          * @brief Receives the message from local layer
          * 
          * Acts as a callback for local layer receiver.
@@ -126,13 +92,6 @@ namespace SPSP::Nodes
          */
         void receiveLocal(Message msg);
 
-        /**
-         * @brief Receives the message from far layer
-         * 
-         * Acts as a callback for far layer receiver.
-         * 
-         * @param msg Received message
-         */
-        void receiveFar(Message msg);
+        using Bridge::receiveFar;
     };
 } // namespace SPSP::Nodes
