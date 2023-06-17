@@ -10,6 +10,8 @@
 #ifndef SPSP_HPP
 #define SPSP_HPP
 
+#include <cassert>
+
 #include "spsp_message.hpp"
 
 namespace SPSP
@@ -18,34 +20,56 @@ namespace SPSP
     class Node;
 
     /**
-     * @brief Interface for local layer
+     * @brief Generic interface for local or far layer
      * 
+     * Has a pointer to owner node (to directly call `Node::receive()` method). 
      */
-    class LocalLayer
+    class LocalOrFarLayer
     {
-    protected:
+    private:
         Node* node;
 
     public:
         /**
-         * @brief Constructs a new local layer object
+         * @brief Constructs a new layer object
          * 
          */
-        LocalLayer() : node{nullptr} {};
+        LocalOrFarLayer() : node{nullptr} {};
 
         /**
          * @brief Sets the pointer to the owner node.
          * 
-         * @param n 
+         * @param n Owner node
          */
         void setNode(Node* n) { node = n; };
+
+        /**
+         * @brief Gets the node object
+         * 
+         * Asserts the node is not NULL.
+         * 
+         * @return Node* Node pointer
+         */
+        Node* getNode()
+        {
+            assert(node != nullptr);
+            return node;
+        }
+    };
+
+    /**
+     * @brief Interface for local layer
+     * 
+     */
+    class LocalLayer : public LocalOrFarLayer
+    {
     };
 
     /**
      * @brief Interface for far layer
      * 
      */
-    class FarLayer
+    class FarLayer : public LocalOrFarLayer
     {
     };
 
