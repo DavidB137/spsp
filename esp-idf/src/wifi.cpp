@@ -30,22 +30,22 @@ namespace SPSP
         this->ssid = ssid;
         this->password = password;
 
-        bool ssid_not_empty = ssid.length() > 0;
+        bool ssidNotEmpty = ssid.length() > 0;
 
         ESP_ERROR_CHECK(esp_netif_init());
         ESP_ERROR_CHECK(esp_event_loop_create_default());
 
         // Create net interface
-        if (ssid_not_empty) {
+        if (ssidNotEmpty) {
             esp_netif_t *netif = esp_netif_create_default_wifi_sta();
 
             // Set hostname
             std::string hostname = WIFI_HOSTNAME_PREFIX;
             uint8_t mac[8];
-            char mac_str[16];
+            char macStr[16];
             ESP_ERROR_CHECK(esp_efuse_mac_get_default(mac));
-            sprintf(mac_str, "%02x%02x%02x%02x%02x%02x", MAC2STR(mac));
-            hostname += mac_str;
+            sprintf(macStr, "%02x%02x%02x%02x%02x%02x", MAC2STR(mac));
+            hostname += macStr;
             esp_netif_set_hostname(netif, hostname.c_str());
         }
 
@@ -56,7 +56,7 @@ namespace SPSP
         // TODO
 
         // WiFi config
-        if (ssid_not_empty) {
+        if (ssidNotEmpty) {
             wifi_config_t wifi_config = {};
             strcpy((char*) wifi_config.sta.ssid, ssid.c_str());
             strcpy((char*) wifi_config.sta.password, password.c_str());
@@ -79,7 +79,7 @@ namespace SPSP
         ESP_ERROR_CHECK(esp_wifi_start());
 
         // No power saving for bridge (IMPORTANT!)
-        if (ssid_not_empty) {
+        if (ssidNotEmpty) {
             esp_wifi_set_ps(WIFI_PS_NONE);
         }
 
