@@ -14,6 +14,12 @@
 
 namespace SPSP
 {
+    /**
+     * @brief Logger
+     * 
+     * Provices common logging API for all platforms.
+     * On ESP-IDF just uses `ESP_LOG*` macros.
+     */
     class Logger
     {
         std::string tag;  //!< Logging tag
