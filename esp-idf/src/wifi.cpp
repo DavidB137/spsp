@@ -24,8 +24,6 @@ namespace SPSP
 {
     void WiFi::init(std::string ssid, std::string password)
     {
-        SPSP_LOGI("Initializing...");
-
         // Store given parameters
         this->ssid = ssid;
         this->password = password;
@@ -88,8 +86,6 @@ namespace SPSP
 
     void WiFi::deinit()
     {
-        SPSP_LOGI("Deinitializing...");
-
         ESP_ERROR_CHECK(esp_wifi_stop());
         ESP_ERROR_CHECK(esp_wifi_deinit());
         ESP_ERROR_CHECK(esp_event_loop_delete_default());
