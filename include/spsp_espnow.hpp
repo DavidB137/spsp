@@ -15,9 +15,9 @@
 
 namespace SPSP::LocalLayers::ESPNOW
 {
-    const static uint8_t PROTO_VERSION = 2;   //!< Current protocol version
-    const static uint8_t SSID_LEN      = 8;   //!< SSID length in bytes
-    const static uint8_t PASSWORD_LEN  = 32;  //!< Password length in bytes
+    static const uint8_t PROTO_VERSION = 2;   //!< Current protocol version
+    static const uint8_t SSID_LEN      = 8;   //!< SSID length in bytes
+    static const uint8_t PASSWORD_LEN  = 32;  //!< Password length in bytes
 
     /**
      * @brief ESP-NOW local layer
