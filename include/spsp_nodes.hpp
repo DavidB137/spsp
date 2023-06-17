@@ -10,7 +10,7 @@
 #ifndef SPSP_NODES_HPP
 #define SPSP_NODES_HPP
 
-#include "spsp.hpp"
+#include "spsp_interfaces.hpp"
 
 namespace SPSP::Nodes
 {

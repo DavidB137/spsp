@@ -7,8 +7,8 @@
  * 
  */
 
-#ifndef SPSP_HPP
-#define SPSP_HPP
+#ifndef SPSP_INTERFACES_HPP
+#define SPSP_INTERFACES_HPP
 
 #include <cassert>
 

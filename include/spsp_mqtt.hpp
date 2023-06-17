@@ -10,7 +10,7 @@
 #ifndef SPSP_MQTT_HPP
 #define SPSP_MQTT_HPP
 
-#include "spsp.hpp"
+#include "spsp_interfaces.hpp"
 
 namespace SPSP::FarLayers::MQTT
 {
