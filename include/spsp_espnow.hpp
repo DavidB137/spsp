@@ -24,7 +24,7 @@ namespace SPSP::LocalLayers::ESPNOW
      * @brief ESP-NOW local layer
      * 
      */
-    class Layer : public LocalLayer
+    class Layer : public SPSP::LocalLayer
     {
     private:
         std::string ssid;

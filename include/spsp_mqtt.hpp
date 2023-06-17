@@ -18,7 +18,7 @@ namespace SPSP::FarLayers::MQTT
      * @brief MQTT far layer
      * 
      */
-    class Layer : public FarLayer
+    class Layer : public SPSP::FarLayer
     {
     };
 } // namespace SPSP::FarLayers::MQTT
