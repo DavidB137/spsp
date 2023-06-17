@@ -7,8 +7,12 @@
  * 
  */
 
+#include "logger.hpp"
 #include "spsp_espnow.hpp"
 
 namespace SPSP::LocalLayers::ESPNOW
 {
+    void Layer::send(Message msg)
+    {
+    }
 } // namespace SPSP::LocalLayers::ESPNOW
