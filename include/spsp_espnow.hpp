@@ -30,6 +30,7 @@ namespace SPSP::LocalLayers::ESPNOW
         std::string ssid;
         std::string password;
         uint8_t datarate;
+
     public:
         /**
          * @brief Constructs a new ESP-NOW layer object

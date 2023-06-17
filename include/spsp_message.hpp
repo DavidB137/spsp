@@ -31,12 +31,12 @@ namespace SPSP
     };
 
     /**
-     * @brief Internal message representation
+     * @brief Message representation
      * 
      * Used primarily for communication between `LocalLayer` and `Node` classes.
      * 
      */
-    struct MessageInternal
+    struct Message
     {
         MessageType type;     //!< Type of message
         std::string src;      //!< Source address
