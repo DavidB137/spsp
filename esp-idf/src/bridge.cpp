@@ -8,11 +8,20 @@
  */
 
 #include "spsp_nodes.hpp"
+#include "wifi.hpp"
 
 namespace SPSP::Nodes
 {
     void Bridge::init()
     {
+        WiFi& wifi = WiFi::instance();
+        wifi.init();
+    }
+
+    void Bridge::deinit()
+    {
+        WiFi& wifi = WiFi::instance();
+        wifi.deinit();
     }
 
     void Bridge::receiveLocal(Message msg)
