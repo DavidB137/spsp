@@ -9,6 +9,7 @@
 
 #pragma once
 
+#include <stdexcept>
 #include <string>
 
 namespace SPSP
@@ -30,6 +31,28 @@ namespace SPSP
     };
 
     /**
+     * @brief Helper to convert `MessageType` to string representation.
+     * 
+     * @param mt Message type
+     * @return String representation
+     */
+    constexpr const char* messageTypeToStr(MessageType mt) throw()
+    {
+        switch (mt)
+        {
+            case MessageType::NONE: return "NONE";
+            case MessageType::OK: return "OK";
+            case MessageType::FAIL: return "FAIL";
+            case MessageType::PING: return "PING";
+            case MessageType::PONG: return "PONG";
+            case MessageType::PUB: return "PUB";
+            case MessageType::SUB_REQ: return "SUB_REQ";
+            case MessageType::SUB_RES: return "SUB_RES";
+            default: throw std::invalid_argument("Unimplemented message type");
+        }
+    }
+
+    /**
      * @brief Message representation
      * 
      * Used primarily for communication between `LocalLayer` and `Node` classes.
@@ -41,5 +64,20 @@ namespace SPSP
         std::string src;      //!< Source address
         std::string topic;    //!< Topic of message
         std::string payload;  //!< Payload of message
+
+        /**
+         * @brief Converts `Message` to printable string
+         * 
+         * Primarily for logging purposes
+         * 
+         * @return String representation of contained data
+         */
+        std::string toString() const
+        {
+            return std::string{messageTypeToStr(type)}
+                + " " + src
+                + " " + topic
+                + " " + payload;
+        }
     };
 } // namespace SPSP
