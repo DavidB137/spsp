@@ -1,5 +1,5 @@
 /**
- * @file spsp_espnow.cpp
+ * @file espnow.cpp
  * @author Dávid Benko (davidbenko@davidbenko.dev)
  * @brief ESP-NOW local layer for SPSP
  * 
