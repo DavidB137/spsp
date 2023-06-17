@@ -25,7 +25,9 @@ namespace SPSP::FarLayers::MQTT
          * 
          * @param topic Topic
          * @param payload Payload (data)
+         * @return true Delivery successful
+         * @return false Delivery failed
          */
-        void publish(std::string topic, std::string payload);
+        bool publish(std::string topic, std::string payload);
     };
 } // namespace SPSP::FarLayers::MQTT

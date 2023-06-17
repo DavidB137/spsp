@@ -46,7 +46,9 @@ namespace SPSP::LocalLayers::ESPNOW
          * @brief Sends the message to given node
          * 
          * @param msg Message
+         * @return true Delivery successful
+         * @return false Delivery failed
          */
-        void send(Message msg);
+        bool send(Message msg);
     };
 } // namespace SPSP::LocalLayers::ESPNOW

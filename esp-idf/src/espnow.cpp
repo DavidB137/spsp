@@ -12,7 +12,7 @@
 
 namespace SPSP::LocalLayers::ESPNOW
 {
-    void Layer::send(Message msg)
+    bool Layer::send(Message msg)
     {
     }
 } // namespace SPSP::LocalLayers::ESPNOW

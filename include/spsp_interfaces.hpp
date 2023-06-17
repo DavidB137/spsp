@@ -70,8 +70,10 @@ namespace SPSP
          * @brief Sends the message to given node
          * 
          * @param msg Message
+         * @return true Delivery successful
+         * @return false Delivery failed
          */
-        virtual void send(Message msg) = 0;
+        virtual bool send(Message msg) = 0;
     };
 
     /**
@@ -86,8 +88,10 @@ namespace SPSP
          * 
          * @param topic Topic
          * @param payload Payload (data)
+         * @return true Delivery successful
+         * @return false Delivery failed
          */
-        virtual void publish(std::string topic, std::string payload) = 0;
+        virtual bool publish(std::string topic, std::string payload) = 0;
     };
 
     /**
