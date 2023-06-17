@@ -18,7 +18,12 @@ namespace SPSP
     {
         std::string tag;  //!< Logging tag
     public:
-        Logger(std::string moduleTag) : tag{"SPSP"}
+        /**
+         * @brief Constructs a new logger
+         * 
+         * @param moduleTag Optional module name appended to the tag
+         */
+        Logger(std::string moduleTag = "") : tag{"SPSP"}
         {
             // Append module tag
             if (moduleTag.length() > 0) {
