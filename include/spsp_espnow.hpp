@@ -7,8 +7,7 @@
  * 
  */
 
-#ifndef SPSP_ESPNOW_HPP
-#define SPSP_ESPNOW_HPP
+#pragma once
 
 #include <string>
 
@@ -51,5 +50,3 @@ namespace SPSP::LocalLayers::ESPNOW
         void send(Message msg);
     };
 } // namespace SPSP::LocalLayers::ESPNOW
-
-#endif

@@ -7,8 +7,7 @@
  * 
  */
 
-#ifndef SPSP_LOGGER_HPP
-#define SPSP_LOGGER_HPP
+#pragma once
 
 #include <string>
 
@@ -44,5 +43,3 @@ namespace SPSP
         template<typename... Targs> inline void debug(Targs... args) const noexcept;
     };
 } // namespace SPSP
-
-#endif

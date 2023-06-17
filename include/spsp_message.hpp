@@ -7,8 +7,7 @@
  * 
  */
 
-#ifndef SPSP_MESSAGE_HPP
-#define SPSP_MESSAGE_HPP
+#pragma once
 
 #include <string>
 
@@ -44,5 +43,3 @@ namespace SPSP
         std::string payload;  //!< Payload of message
     };
 } // namespace SPSP
-
-#endif

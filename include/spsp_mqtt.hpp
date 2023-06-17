@@ -7,8 +7,7 @@
  * 
  */
 
-#ifndef SPSP_MQTT_HPP
-#define SPSP_MQTT_HPP
+#pragma once
 
 #include "spsp_interfaces.hpp"
 
@@ -30,5 +29,3 @@ namespace SPSP::FarLayers::MQTT
         void publish(std::string topic, std::string payload);
     };
 } // namespace SPSP::FarLayers::MQTT
-
-#endif

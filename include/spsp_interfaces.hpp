@@ -7,8 +7,7 @@
  * 
  */
 
-#ifndef SPSP_INTERFACES_HPP
-#define SPSP_INTERFACES_HPP
+#pragma once
 
 #include <cassert>
 
@@ -143,5 +142,3 @@ namespace SPSP
         virtual void receiveFar(Message msg) = 0;
     };
 } // namespace SPSP
-
-#endif

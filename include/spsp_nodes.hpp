@@ -7,8 +7,7 @@
  * 
  */
 
-#ifndef SPSP_NODES_HPP
-#define SPSP_NODES_HPP
+#pragma once
 
 #include "spsp_interfaces.hpp"
 
@@ -119,5 +118,3 @@ namespace SPSP::Nodes
         void receiveFar(Message msg);
     };
 } // namespace SPSP::Nodes
-
-#endif
