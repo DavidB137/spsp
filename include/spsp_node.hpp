@@ -76,8 +76,7 @@ namespace SPSP
          * 
          * Sends back PONG message.
          * 
-         * This is universal for all nodes, so method's implementation is
-         * present.
+         * This is universal behaviour for all nodes.
          * 
          * @param req Request message
          * @return true Message delivery successful
