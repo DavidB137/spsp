@@ -7,7 +7,7 @@
  * 
  */
 
-#include "logger.hpp"
+#include "spsp_logger.hpp"
 #include "spsp_mqtt.hpp"
 #include "spsp_wifi.hpp"
 

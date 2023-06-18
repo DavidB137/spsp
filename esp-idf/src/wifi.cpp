@@ -14,7 +14,7 @@
 #include "esp_netif.h"
 #include "esp_wifi.h"
 
-#include "logger.hpp"
+#include "spsp_logger.hpp"
 #include "spsp_wifi.hpp"
 
 // Log tag

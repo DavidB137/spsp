@@ -1,5 +1,5 @@
 /**
- * @file logger.hpp
+ * @file spsp_logger.hpp
  * @author Dávid Benko (davidbenko@davidbenko.dev)
  * @brief Logger for SPSP
  * 
