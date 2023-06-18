@@ -9,12 +9,29 @@
 
 #pragma once
 
+#include <unordered_map>
+
 #include "spsp_client.hpp"
 #include "spsp_layers.hpp"
 #include "spsp_node.hpp"
 
 namespace SPSP::Nodes
 {
+    const uint8_t BRIDGE_SUB_LIFETIME = 30;  // in minutes
+
+    /**
+     * @brief Bridge subscribe entry
+     * 
+     * Single entry in subscribe database of a bridge.
+     */
+    struct BridgeSubEntry
+    {
+        bool localLayer = true;
+        uint8_t lifetime = BRIDGE_SUB_LIFETIME;
+    };
+
+    using BridgeSubDB = std::unordered_map<std::string, std::unordered_map<std::string, BridgeSubEntry>>;
+
     /**
      * @brief Bridge node
      * 
@@ -23,6 +40,8 @@ namespace SPSP::Nodes
     {
     protected:
         SPSP::IFarLayer* m_fl = nullptr;
+        BridgeSubDB m_subDB;
+
     public:
         /**
          * @brief Constructs a new bridge node
@@ -43,26 +62,13 @@ namespace SPSP::Nodes
          * 
          * @param fl New far layer
          */
-        void setFarLayer(IFarLayer* fl)
-        {
-            // Unset old far layer
-            if (m_fl != nullptr) this->unsetFarLayer();
-
-            m_fl = fl;
-            m_fl->setNode(this);
-        }
+        void setFarLayer(IFarLayer* fl);
 
         /**
          * @brief Unsets pointer to the far layer.
          * 
          */
-        void unsetFarLayer()
-        {
-            if (m_fl != nullptr) {
-                m_fl->unsetNode();
-                m_fl = nullptr;
-            }
-        }
+        void unsetFarLayer();
 
         /**
          * @brief Checks whether the far layer is connected
@@ -124,5 +130,28 @@ namespace SPSP::Nodes
          * @return false Message delivery failed
          */
         bool processSubData(const Message req) { return true; }
+
+        /**
+         * @brief Inserts entry into subscribe database
+         * 
+         * @param topic Topic
+         * @param src Source node
+         * @param localLayer True if this is local layer subscribe, false if this node's.
+         * @param lifetime Lifetime of subscribe in minutes
+         * @return true New topic - noone else is subscribed
+         * @return false Subscribe to topic already exists
+         */
+        bool subDBInsert(const std::string topic, const std::string src,
+                         bool localLayer = true,
+                         uint8_t lifetime = BRIDGE_SUB_LIFETIME);
+
+        /**
+         * @brief Time tick callback for subscribe DB
+         * 
+         * Decrements subscribe database lifetimes.
+         * If any item completely expires, removes it from DB and if it was
+         * the last one for given topic, unsubscribes from it.
+         */
+        void subDBTick();
     };
 } // namespace SPSP::Nodes

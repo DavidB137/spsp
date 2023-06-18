@@ -34,7 +34,7 @@ namespace SPSP
 
     bool INode::receiveLocal(const Message msg)
     {
-        SPSP_LOGI("Received local msg: %s", msg.toString().c_str());
+        SPSP_LOGD("Received local msg: %s", msg.toString().c_str());
 
         bool delivered = true;
 
@@ -46,11 +46,9 @@ namespace SPSP
         case MessageType::SUB_REQ: delivered = processSubReq(msg); break;
         case MessageType::SUB_DATA: delivered = processSubData(msg); break;
         default:
-            SPSP_LOGW(
-                "Unprocessable message type %s (%d)",
-                messageTypeToStr(msg.type),
-                static_cast<uint8_t>(msg.type)
-            );
+            SPSP_LOGW("Unprocessable message type %s (%d)",
+                      messageTypeToStr(msg.type),
+                      static_cast<uint8_t>(msg.type));
             break;
         }
 
