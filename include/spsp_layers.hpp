@@ -105,5 +105,16 @@ namespace SPSP
          * @return false Subscribe failed
          */
         virtual bool subscribe(const std::string topic) = 0;
+
+         /**
+         * @brief Unsubscribes from given topic
+         * 
+         * Should be used by `INode` only!
+         * 
+         * @param topic Topic
+         * @return true Unsubscribe successful
+         * @return false Unsubscribe failed
+         */
+        virtual bool unsubscribe(const std::string topic) = 0;
     };
 } // namespace SPSP

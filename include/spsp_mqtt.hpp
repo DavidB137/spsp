@@ -54,5 +54,16 @@ namespace SPSP::FarLayers::MQTT
          * @return false Subscribe failed
          */
         bool subscribe(const std::string topic);
+
+        /**
+         * @brief Unsubscribes from given topic
+         * 
+         * Should be used by `INode` only!
+         * 
+         * @param topic Topic
+         * @return true Unsubscribe successful
+         * @return false Unsubscribe failed
+         */
+        bool unsubscribe(const std::string topic);
     };
 } // namespace SPSP::FarLayers::MQTT

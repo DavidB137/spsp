@@ -43,4 +43,9 @@ namespace SPSP::FarLayers::MQTT
     {
         return true;
     }
+
+    bool Layer::unsubscribe(const std::string topic)
+    {
+        return true;
+    }
 }
