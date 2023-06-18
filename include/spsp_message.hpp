@@ -26,7 +26,7 @@ namespace SPSP
         PONG       = 11,
         PUB        = 20,
         SUB_REQ    = 30,
-        SUB_RES    = 31,
+        SUB_DATA   = 31,
     };
 
     /**
@@ -46,7 +46,7 @@ namespace SPSP
             case MessageType::PONG: return "PONG";
             case MessageType::PUB: return "PUB";
             case MessageType::SUB_REQ: return "SUB_REQ";
-            case MessageType::SUB_RES: return "SUB_RES";
+            case MessageType::SUB_DATA: return "SUB_DATA";
             default: return "???";
         }
     }
@@ -59,10 +59,10 @@ namespace SPSP
      */
     struct Message
     {
-        MessageType type;     //!< Type of message
-        std::string src;      //!< Source address
-        std::string topic;    //!< Topic of message
-        std::string payload;  //!< Payload of message
+        MessageType type;          //!< Type of message
+        std::string src = "";      //!< Source address
+        std::string topic = "";    //!< Topic of message
+        std::string payload = "";  //!< Payload of message
 
         /**
          * @brief Converts `Message` to printable string
@@ -73,10 +73,10 @@ namespace SPSP
          */
         std::string toString() const
         {
-            return std::string{messageTypeToStr(type)}
-                + " " + src
-                + " " + topic
-                + " " + payload;
+            return std::string{messageTypeToStr(type)} + " " +
+                (src.length() > 0     ? src     : ".") + " " +
+                (topic.length() > 0   ? topic   : "-") + " " +
+                (payload.length() > 0 ? payload : "-");
         }
     };
 } // namespace SPSP
