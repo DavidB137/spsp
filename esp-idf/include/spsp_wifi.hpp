@@ -52,7 +52,7 @@ namespace SPSP
          * @param ssid Service-set identifier
          * @param password Password for given SSID
          */
-        void init(std::string ssid = "", std::string password = "");
+        void init(const std::string ssid = "", const std::string password = "");
 
         /**
          * @brief Deinitializes WiFi

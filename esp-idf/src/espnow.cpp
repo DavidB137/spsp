@@ -35,7 +35,7 @@ namespace SPSP::LocalLayers::ESPNOW
         SPSP_LOGI("Deinitialized");
     }
 
-    bool Layer::send(Message msg)
+    bool Layer::send(const Message msg)
     {
         return true;
     }

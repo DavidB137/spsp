@@ -56,6 +56,6 @@ namespace SPSP::LocalLayers::ESPNOW
          * @return true Delivery successful
          * @return false Delivery failed
          */
-        bool send(Message msg);
+        bool send(const Message msg);
     };
 } // namespace SPSP::LocalLayers::ESPNOW

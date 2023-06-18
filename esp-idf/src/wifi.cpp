@@ -22,7 +22,7 @@ static const char* SPSP_LOG_TAG = "SPSP/WiFi";
 
 namespace SPSP
 {
-    void WiFi::init(std::string ssid, std::string password)
+    void WiFi::init(const std::string ssid, const std::string password)
     {
         // Don't do anything if already initialized
         if (this->initialized) return;
