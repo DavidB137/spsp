@@ -39,21 +39,55 @@ namespace SPSP::Nodes
     class Bridge : public SPSP::INode
     {
     protected:
-        SPSP::IFarLayer* m_fl;
+        SPSP::IFarLayer* m_fl = nullptr;
     public:
         /**
          * @brief Constructs a new bridge node
          * 
-         * @param ll Local layer
-         * @param fl Far layer
          */
-        Bridge(SPSP::ILocalLayer* ll, SPSP::IFarLayer* fl);
+        Bridge();
 
         /**
          * @brief Destroys the bridge node
          * 
          */
         ~Bridge();
+
+        /**
+         * @brief Sets pointer to the far layer.
+         * 
+         * Safe to call even when far layer is already set.
+         * 
+         * @param fl New far layer
+         */
+        void setFarLayer(IFarLayer* fl)
+        {
+            // Unset old far layer
+            if (m_fl != nullptr) this->unsetFarLayer();
+
+            m_fl = fl;
+            m_fl->setNode(this);
+        }
+
+        /**
+         * @brief Unsets pointer to the far layer.
+         * 
+         */
+        void unsetFarLayer()
+        {
+            if (m_fl != nullptr) {
+                m_fl->unsetNode();
+                m_fl = nullptr;
+            }
+        }
+
+        /**
+         * @brief Checks whether the far layer is connected
+         * 
+         * @return true Far layer is connected
+         * @return false Far layer is disconnected
+         */
+        inline bool farLayerConnected() const { return m_fl != nullptr; }
 
         /**
          * @brief Receives the message from local layer
