@@ -1,5 +1,5 @@
 /**
- * @file wifi.hpp
+ * @file spsp_wifi.hpp
  * @author Dávid Benko (davidbenko@davidbenko.dev)
  * @brief WiFi manager for ESP platform
  * 
@@ -24,17 +24,18 @@ namespace SPSP
      */
     class WiFi
     {
-        std::string m_ssid;
-        std::string m_password;
+        std::string m_ssid = "";
+        std::string m_password = "";
+        bool initialized = false;
 
         WiFi() {}
     public:
         /**
-         * @brief Singleton instantiator
+         * @brief Returns instance of this singleton class
          * 
          * @return This instance
          */
-        static WiFi& instance()
+        static WiFi& getInstance()
         {
             static WiFi inst;
             return inst;
@@ -46,6 +47,8 @@ namespace SPSP
          * If SSID is zero-length (or not given), no net interface is created
          * and WiFi is initalized in ESP-NOW-only mode.
          * 
+         * May be called multiple times.
+         * 
          * @param ssid Service-set identifier
          * @param password Password for given SSID
          */
@@ -54,6 +57,7 @@ namespace SPSP
         /**
          * @brief Deinitializes WiFi
          * 
+         * May be called multiple times.
          */
         void deinit();
 

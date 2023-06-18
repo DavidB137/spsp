@@ -15,7 +15,7 @@
 #include "esp_wifi.h"
 
 #include "logger.hpp"
-#include "wifi.hpp"
+#include "spsp_wifi.hpp"
 
 // Log tag
 static const char* SPSP_LOG_TAG = "SPSP/WiFi";
@@ -24,6 +24,9 @@ namespace SPSP
 {
     void WiFi::init(std::string ssid, std::string password)
     {
+        // Don't do anything if already initialized
+        if (this->initialized) return;
+
         // Store given parameters
         this->m_ssid = ssid;
         this->m_password = password;
@@ -81,11 +84,16 @@ namespace SPSP
             esp_wifi_set_ps(WIFI_PS_NONE);
         }
 
+        this->initialized = true;
+
         SPSP_LOGI("Initialized");
     }
 
     void WiFi::deinit()
     {
+        // Don't do anything if already deinitialized
+        if (!this->initialized) return;
+
         ESP_ERROR_CHECK(esp_wifi_stop());
         ESP_ERROR_CHECK(esp_wifi_deinit());
         ESP_ERROR_CHECK(esp_event_loop_delete_default());

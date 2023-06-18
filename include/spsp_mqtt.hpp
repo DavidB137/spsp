@@ -19,6 +19,20 @@ namespace SPSP::FarLayers::MQTT
      */
     class Layer : public SPSP::IFarLayer
     {
+    public:
+        /**
+         * @brief Constructs a new MQTT layer object
+         * 
+         * Also initializes WiFi (if not already initialized).
+         */
+        Layer();
+
+        /**
+         * @brief Destroys MQTT layer object
+         * 
+         */
+        ~Layer();
+
     protected:
         /**
          * @brief Publishes message coming from node

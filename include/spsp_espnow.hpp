@@ -34,12 +34,19 @@ namespace SPSP::LocalLayers::ESPNOW
         /**
          * @brief Constructs a new ESP-NOW layer object
          * 
+         * Also initializes WiFi (if not already initialized).
+         * 
          * @param ssid Service-set identifier
          * @param password Encryption password for communication
          * @param datarate In case of ESP-IDF, use values of `wifi_phy_rate_t` enum.
          */
-        Layer(const char ssid[SSID_LEN], const char password[PASSWORD_LEN], uint8_t datarate = 0)
-            : m_ssid{ssid}, m_password{password}, m_datarate{datarate} {};
+        Layer(const char ssid[SSID_LEN], const char password[PASSWORD_LEN], uint8_t datarate = 0);
+
+        /**
+         * @brief Destroys ESP-NOW layer object
+         * 
+         */
+        ~Layer();
 
     protected:
         /**

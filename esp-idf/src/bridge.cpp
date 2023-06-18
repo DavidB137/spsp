@@ -9,35 +9,21 @@
 
 #include "logger.hpp"
 #include "spsp_nodes.hpp"
-#include "wifi.hpp"
 
 // Log tag
 static const char* SPSP_LOG_TAG = "SPSP/Bridge";
 
 namespace SPSP::Nodes
 {
-    Bridge::Bridge(SPSP::ILocalLayer* ll, SPSP::IFarLayer* fl) : SPSP::INode{ll}, m_fl{fl}
+    Bridge::Bridge()
     {
-        // WiFi
-        WiFi& wifi = WiFi::instance();
-        wifi.init();
-
-        // Layers
-        ll->setNode(this);
-        fl->setNode(this);
-
         SPSP_LOGI("Initialized");
     }
 
     Bridge::~Bridge()
     {
-        // Layers
-        m_ll->setNode(nullptr);
-        m_fl->setNode(nullptr);
-
-        // WiFi
-        WiFi& wifi = WiFi::instance();
-        wifi.deinit();
+        // Unset far layer (if not already unset)
+        this->unsetFarLayer();
 
         SPSP_LOGI("Deinitialized");
     }
