@@ -77,8 +77,10 @@ namespace SPSP::Nodes
          * Acts as a callback for local layer receiver.
          * 
          * @param msg Received message
+         * @return true Message delivery successful
+         * @return false Message delivery failed
          */
-        void receiveLocal(const Message msg);
+        bool receiveLocal(const Message msg);
 
         /**
          * @brief Receives the message from far layer
@@ -87,27 +89,22 @@ namespace SPSP::Nodes
          * 
          * @param topic Topic
          * @param payload Payload (data)
-         */
-        void receiveFar(const std::string topic, const std::string payload);
-
-    protected:
-        /**
-         * @brief Sends the message to local layer
-         * 
-         * @param msg Message to send
          * @return true Message delivery successful
          * @return false Message delivery failed
          */
-        bool sendLocal(const Message msg);
+        bool receiveFar(const std::string topic, const std::string payload);
 
+    protected:
         /**
          * @brief Processes PONG message
+         * 
+         * Doesn't do anything.
          * 
          * @param req Request message
          * @return true Message delivery successful
          * @return false Message delivery failed
          */
-        bool processPong(const Message req);
+        bool processPong(const Message req) { return true; }
 
         /**
          * @brief Processes PUB message
@@ -130,10 +127,12 @@ namespace SPSP::Nodes
         /**
          * @brief Processes SUB_DATA message
          * 
+         * Doesn't do anything.
+         * 
          * @param req Request message
          * @return true Message delivery successful
          * @return false Message delivery failed
          */
-        bool processSubData(const Message req);
+        bool processSubData(const Message req) { return true; }
     };
 } // namespace SPSP::Nodes

@@ -43,5 +43,16 @@ namespace SPSP::FarLayers::MQTT
          * @return false Delivery failed
          */
         bool publish(const std::string topic, const std::string payload);
+
+        /**
+         * @brief Subscribes to given topic
+         * 
+         * Should be used by `INode` only!
+         * 
+         * @param topic Topic
+         * @return true Subscribe successful
+         * @return false Subscribe failed
+         */
+        bool subscribe(const std::string topic);
     };
 } // namespace SPSP::FarLayers::MQTT

@@ -28,7 +28,9 @@ namespace SPSP::Nodes
          * Acts as a callback for local layer receiver.
          * 
          * @param msg Received message
+         * @return true Message delivery successful
+         * @return false Message delivery failed
          */
-        void receiveLocal(Message msg);
+        bool receiveLocal(Message msg);
     };
 } // namespace SPSP::Nodes

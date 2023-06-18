@@ -94,6 +94,17 @@ namespace SPSP
          * @return false Delivery failed
          */
         virtual bool publish(const std::string topic, const std::string payload) = 0;
+
+        /**
+         * @brief Subscribes to given topic
+         * 
+         * Should be used by `INode` only!
+         * 
+         * @param topic Topic
+         * @return true Subscribe successful
+         * @return false Subscribe failed
+         */
+        virtual bool subscribe(const std::string topic) = 0;
     };
 
     /**
@@ -151,8 +162,10 @@ namespace SPSP
          * Acts as a callback for local layer receiver.
          * 
          * @param msg Received message
+         * @return true Message delivery successful
+         * @return false Message delivery failed
          */
-        virtual void receiveLocal(const Message msg) = 0;
+        virtual bool receiveLocal(const Message msg) = 0;
 
     protected:
         /**
@@ -162,7 +175,14 @@ namespace SPSP
          * @return true Message delivery successful
          * @return false Message delivery failed
          */
-        virtual bool sendLocal(const Message msg) = 0;
+        bool sendLocal(const Message msg)
+        {
+            // Local layer is not connected - can't deliver
+            if (!this->localLayerConnected()) return false;
+
+            // Send to local layer
+            return m_ll->send(msg);
+        }
 
         /**
          * @brief Processes PING message
