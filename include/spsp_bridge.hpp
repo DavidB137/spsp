@@ -73,17 +73,6 @@ namespace SPSP::Nodes
         inline bool farLayerConnected() const { return m_fl != nullptr; }
 
         /**
-         * @brief Receives the message from local layer
-         * 
-         * Acts as a callback for local layer receiver.
-         * 
-         * @param msg Received message
-         * @return true Message delivery successful
-         * @return false Message delivery failed
-         */
-        bool receiveLocal(const Message msg);
-
-        /**
          * @brief Receives the message from far layer
          * 
          * Acts as a callback for far layer receiver.

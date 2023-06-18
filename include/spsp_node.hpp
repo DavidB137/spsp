@@ -34,26 +34,13 @@ namespace SPSP
          * 
          * @param ll New local layer
          */
-        void setLocalLayer(ILocalLayer* ll)
-        {
-            // Unset old local layer
-            if (m_ll != nullptr) this->unsetLocalLayer();
-
-            m_ll = ll;
-            m_ll->setNode(this);
-        }
+        void setLocalLayer(ILocalLayer* ll);
 
         /**
          * @brief Unsets pointer to the local layer.
          * 
          */
-        void unsetLocalLayer()
-        {
-            if (m_ll != nullptr) {
-                m_ll->unsetNode();
-                m_ll = nullptr;
-            }
-        }
+        void unsetLocalLayer();
 
         /**
          * @brief Checks whether the local layer is connected
@@ -72,7 +59,7 @@ namespace SPSP
          * @return true Message delivery successful
          * @return false Message delivery failed
          */
-        virtual bool receiveLocal(const Message msg) = 0;
+        bool receiveLocal(const Message msg);
 
     protected:
         /**
@@ -82,14 +69,7 @@ namespace SPSP
          * @return true Message delivery successful
          * @return false Message delivery failed
          */
-        bool sendLocal(const Message msg)
-        {
-            // Local layer is not connected - can't deliver
-            if (!this->localLayerConnected()) return false;
-
-            // Send to local layer
-            return m_ll->send(msg);
-        }
+        bool sendLocal(const Message msg);
 
         /**
          * @brief Processes PING message
@@ -103,12 +83,7 @@ namespace SPSP
          * @return true Message delivery successful
          * @return false Message delivery failed
          */
-        bool processPing(const Message req)
-        {
-            Message res = req;
-            res.type = MessageType::PONG;
-            return this->sendLocal(res);
-        }
+        bool processPing(const Message req);
 
         /**
          * @brief Processes PONG message
