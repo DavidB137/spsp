@@ -13,7 +13,7 @@
 
 namespace SPSP
 {
-    const char* const WIFI_HOSTNAME_PREFIX = "spsp";
+    const char* const WIFI_HOSTNAME_PREFIX = "spsp-";
 
     /**
      * @brief WiFi manager for ESP platform (singleton)
