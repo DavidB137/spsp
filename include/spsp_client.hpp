@@ -9,7 +9,8 @@
 
 #pragma once
 
-#include "spsp_interfaces.hpp"
+#include "spsp_layers.hpp"
+#include "spsp_node.hpp"
 
 namespace SPSP::Nodes
 {

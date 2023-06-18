@@ -11,7 +11,7 @@
 
 #include <string>
 
-#include "spsp_interfaces.hpp"
+#include "spsp_layers.hpp"
 
 namespace SPSP::LocalLayers::ESPNOW
 {
