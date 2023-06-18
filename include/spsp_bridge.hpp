@@ -1,7 +1,7 @@
 /**
- * @file spsp_nodes.hpp
+ * @file spsp_bridge.hpp
  * @author Dávid Benko (davidbenko@davidbenko.dev)
- * @brief Node types of SPSP
+ * @brief Bridge node type of SPSP
  * 
  * @copyright Copyright (c) 2023
  * 
@@ -9,29 +9,11 @@
 
 #pragma once
 
+#include "spsp_client.hpp"
 #include "spsp_interfaces.hpp"
 
 namespace SPSP::Nodes
 {
-    /**
-     * @brief Client node
-     * 
-     */
-    class Client : public SPSP::INode
-    {
-    public:
-        using SPSP::INode::INode;
-
-        /**
-         * @brief Receives the message from local layer
-         * 
-         * Acts as a callback for local layer receiver.
-         * 
-         * @param msg Received message
-         */
-        void receiveLocal(Message msg);
-    };
-
     /**
      * @brief Bridge node
      * 
@@ -96,36 +78,62 @@ namespace SPSP::Nodes
          * 
          * @param msg Received message
          */
-        void receiveLocal(Message msg);
+        void receiveLocal(const Message msg);
 
         /**
          * @brief Receives the message from far layer
          * 
          * Acts as a callback for far layer receiver.
          * 
-         * @param msg Received message
+         * @param topic Topic
+         * @param payload Payload (data)
          */
-        void receiveFar(Message msg);
-    };
+        void receiveFar(const std::string topic, const std::string payload);
 
-    /**
-     * @brief Client and bridge node
-     * 
-     */
-    class ClientBridge : public Client, public Bridge
-    {
-    public:
-        using Bridge::Bridge;
+    protected:
+        /**
+         * @brief Sends the message to local layer
+         * 
+         * @param msg Message to send
+         * @return true Message delivery successful
+         * @return false Message delivery failed
+         */
+        bool sendLocal(const Message msg);
 
         /**
-         * @brief Receives the message from local layer
+         * @brief Processes PONG message
          * 
-         * Acts as a callback for local layer receiver.
-         * 
-         * @param msg Received message
+         * @param req Request message
+         * @return true Message delivery successful
+         * @return false Message delivery failed
          */
-        void receiveLocal(Message msg);
+        bool processPong(const Message req);
 
-        using Bridge::receiveFar;
+        /**
+         * @brief Processes PUB message
+         * 
+         * @param req Request message
+         * @return true Message delivery successful
+         * @return false Message delivery failed
+         */
+        bool processPub(const Message req);
+
+        /**
+         * @brief Processes SUB_REQ message
+         * 
+         * @param req Request message
+         * @return true Message delivery successful
+         * @return false Message delivery failed
+         */
+        bool processSubReq(const Message req);
+
+        /**
+         * @brief Processes SUB_DATA message
+         * 
+         * @param req Request message
+         * @return true Message delivery successful
+         * @return false Message delivery failed
+         */
+        bool processSubData(const Message req);
     };
 } // namespace SPSP::Nodes

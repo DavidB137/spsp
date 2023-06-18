@@ -42,6 +42,6 @@ namespace SPSP::FarLayers::MQTT
          * @return true Delivery successful
          * @return false Delivery failed
          */
-        bool publish(std::string topic, std::string payload);
+        bool publish(const std::string topic, const std::string payload);
     };
 } // namespace SPSP::FarLayers::MQTT

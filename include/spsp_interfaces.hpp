@@ -73,7 +73,7 @@ namespace SPSP
          * @return true Delivery successful
          * @return false Delivery failed
          */
-        virtual bool send(Message msg) = 0;
+        virtual bool send(const Message msg) = 0;
     };
 
     /**
@@ -93,7 +93,7 @@ namespace SPSP
          * @return true Delivery successful
          * @return false Delivery failed
          */
-        virtual bool publish(std::string topic, std::string payload) = 0;
+        virtual bool publish(const std::string topic, const std::string payload) = 0;
     };
 
     /**
@@ -152,6 +152,71 @@ namespace SPSP
          * 
          * @param msg Received message
          */
-        virtual void receiveLocal(Message msg) = 0;
+        virtual void receiveLocal(const Message msg) = 0;
+
+    protected:
+        /**
+         * @brief Sends the message to local layer
+         * 
+         * @param msg Message to send
+         * @return true Message delivery successful
+         * @return false Message delivery failed
+         */
+        virtual bool sendLocal(const Message msg) = 0;
+
+        /**
+         * @brief Processes PING message
+         * 
+         * Sends back PONG message.
+         * 
+         * This is universal for all nodes, so method's implementation is
+         * present.
+         * 
+         * @param req Request message
+         * @return true Message delivery successful
+         * @return false Message delivery failed
+         */
+        bool processPing(const Message req)
+        {
+            Message res = req;
+            res.type = MessageType::PONG;
+            return this->sendLocal(res);
+        }
+
+        /**
+         * @brief Processes PONG message
+         * 
+         * @param req Request message
+         * @return true Message delivery successful
+         * @return false Message delivery failed
+         */
+        virtual bool processPong(const Message req) = 0;
+
+        /**
+         * @brief Processes PUB message
+         * 
+         * @param req Request message
+         * @return true Message delivery successful
+         * @return false Message delivery failed
+         */
+        virtual bool processPub(const Message req) = 0;
+
+        /**
+         * @brief Processes SUB_REQ message
+         * 
+         * @param req Request message
+         * @return true Message delivery successful
+         * @return false Message delivery failed
+         */
+        virtual bool processSubReq(const Message req) = 0;
+
+        /**
+         * @brief Processes SUB_DATA message
+         * 
+         * @param req Request message
+         * @return true Message delivery successful
+         * @return false Message delivery failed
+         */
+        virtual bool processSubData(const Message req) = 0;
     };
 } // namespace SPSP
