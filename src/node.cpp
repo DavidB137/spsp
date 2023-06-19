@@ -32,7 +32,7 @@ namespace SPSP
         }
     }
 
-    bool INode::receiveLocal(const Message msg, int rssi)
+    bool INode::receiveLocal(const LocalMessage msg, int rssi)
     {
         if (rssi < INT_MAX) {
             SPSP_LOGD("Received local msg: %s (%d dBm)", msg.toString().c_str(), rssi);
@@ -44,14 +44,14 @@ namespace SPSP
 
         // Call responsible handler
         switch (msg.type) {
-        case MessageType::PING: delivered = processPing(msg); break;
-        case MessageType::PONG: delivered = processPong(msg); break;
-        case MessageType::PUB: delivered = processPub(msg); break;
-        case MessageType::SUB_REQ: delivered = processSubReq(msg); break;
-        case MessageType::SUB_DATA: delivered = processSubData(msg); break;
+        case LocalMessageType::PING: delivered = processPing(msg); break;
+        case LocalMessageType::PONG: delivered = processPong(msg); break;
+        case LocalMessageType::PUB: delivered = processPub(msg); break;
+        case LocalMessageType::SUB_REQ: delivered = processSubReq(msg); break;
+        case LocalMessageType::SUB_DATA: delivered = processSubData(msg); break;
         default:
             SPSP_LOGW("Unprocessable message type %s (%d)",
-                      messageTypeToStr(msg.type),
+                      localMessageTypeToStr(msg.type),
                       static_cast<uint8_t>(msg.type));
             break;
         }
@@ -63,7 +63,7 @@ namespace SPSP
         return delivered;
     }
 
-    bool INode::sendLocal(const Message msg)
+    bool INode::sendLocal(const LocalMessage msg)
     {
         // Local layer is not connected - can't deliver
         if (!this->localLayerConnected()) {
@@ -75,10 +75,10 @@ namespace SPSP
         return m_ll->send(msg);
     }
 
-    bool INode::processPing(const Message req)
+    bool INode::processPing(const LocalMessage req)
     {
-        Message res = req;
-        res.type = MessageType::PONG;
+        LocalMessage res = req;
+        res.type = LocalMessageType::PONG;
         return this->sendLocal(res);
     }
 } // namespace SPSP

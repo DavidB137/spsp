@@ -11,8 +11,8 @@
 
 #include <unordered_map>
 
-#include "spsp_client.hpp"
 #include "spsp_layers.hpp"
+#include "spsp_local_addr.hpp"
 #include "spsp_node.hpp"
 
 namespace SPSP::Nodes
@@ -30,7 +30,7 @@ namespace SPSP::Nodes
         uint8_t lifetime = BRIDGE_SUB_LIFETIME;
     };
 
-    using BridgeSubDB = std::unordered_map<std::string, std::unordered_map<std::string, BridgeSubEntry>>;
+    using BridgeSubDB = std::unordered_map<std::string, std::unordered_map<LocalAddr, BridgeSubEntry>>;
 
     /**
      * @brief Bridge node
@@ -102,7 +102,7 @@ namespace SPSP::Nodes
          * @return true Message delivery successful
          * @return false Message delivery failed
          */
-        bool processPong(const Message req) { return true; }
+        bool processPong(const LocalMessage req) { return true; }
 
         /**
          * @brief Processes PUB message
@@ -111,7 +111,7 @@ namespace SPSP::Nodes
          * @return true Message delivery successful
          * @return false Message delivery failed
          */
-        bool processPub(const Message req);
+        bool processPub(const LocalMessage req);
 
         /**
          * @brief Processes SUB_REQ message
@@ -120,7 +120,7 @@ namespace SPSP::Nodes
          * @return true Message delivery successful
          * @return false Message delivery failed
          */
-        bool processSubReq(const Message req);
+        bool processSubReq(const LocalMessage req);
 
         /**
          * @brief Processes SUB_DATA message
@@ -131,7 +131,7 @@ namespace SPSP::Nodes
          * @return true Message delivery successful
          * @return false Message delivery failed
          */
-        bool processSubData(const Message req) { return true; }
+        bool processSubData(const LocalMessage req) { return true; }
 
         /**
          * @brief Inserts entry into subscribe database
@@ -143,7 +143,7 @@ namespace SPSP::Nodes
          * @return true New topic - noone else is subscribed
          * @return false Subscribe to topic already exists
          */
-        bool subDBInsert(const std::string topic, const std::string src,
+        bool subDBInsert(const std::string topic, const LocalAddr src,
                          bool localLayer = true,
                          uint8_t lifetime = BRIDGE_SUB_LIFETIME);
 

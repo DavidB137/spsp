@@ -1,7 +1,7 @@
 /**
- * @file message.hpp
+ * @file spsp_local_message.hpp
  * @author Dávid Benko (davidbenko@davidbenko.dev)
- * @brief Message classes
+ * @brief Local message classes
  * 
  * @copyright Copyright (c) 2023
  * 
@@ -11,13 +11,15 @@
 
 #include <string>
 
+#include "spsp_local_addr.hpp"
+
 namespace SPSP
 {
     /**
-     * @brief Message types
+     * @brief Local message types
      * 
      */
-    enum class MessageType : uint8_t
+    enum class LocalMessageType : uint8_t
     {
         NONE       = 0,
         OK         = 1,  // currently unused
@@ -30,42 +32,42 @@ namespace SPSP
     };
 
     /**
-     * @brief Helper to convert `MessageType` to string representation.
+     * @brief Helper to convert `LocalMessageType` to string representation.
      * 
      * @param mt Message type
      * @return String representation
      */
-    constexpr const char* messageTypeToStr(MessageType mt) noexcept
+    constexpr const char* localMessageTypeToStr(LocalMessageType mt) noexcept
     {
         switch (mt)
         {
-            case MessageType::NONE: return "NONE";
-            case MessageType::OK: return "OK";
-            case MessageType::FAIL: return "FAIL";
-            case MessageType::PING: return "PING";
-            case MessageType::PONG: return "PONG";
-            case MessageType::PUB: return "PUB";
-            case MessageType::SUB_REQ: return "SUB_REQ";
-            case MessageType::SUB_DATA: return "SUB_DATA";
+            case LocalMessageType::NONE: return "NONE";
+            case LocalMessageType::OK: return "OK";
+            case LocalMessageType::FAIL: return "FAIL";
+            case LocalMessageType::PING: return "PING";
+            case LocalMessageType::PONG: return "PONG";
+            case LocalMessageType::PUB: return "PUB";
+            case LocalMessageType::SUB_REQ: return "SUB_REQ";
+            case LocalMessageType::SUB_DATA: return "SUB_DATA";
             default: return "???";
         }
     }
 
     /**
-     * @brief Message representation
+     * @brief Local message representation
      * 
      * Used primarily for communication between `LocalLayer` and `Node` classes.
      * 
      */
-    struct Message
+    struct LocalMessage
     {
-        MessageType type;          //!< Type of message
-        std::string src = "";      //!< Source address
+        LocalMessageType type;     //!< Type of message
+        LocalAddr src = {};        //!< Source address
         std::string topic = "";    //!< Topic of message
         std::string payload = "";  //!< Payload of message
 
         /**
-         * @brief Converts `Message` to printable string
+         * @brief Converts `LocalMessage` to printable string
          * 
          * Primarily for logging purposes
          * 
@@ -73,8 +75,8 @@ namespace SPSP
          */
         std::string toString() const
         {
-            return std::string{messageTypeToStr(type)} + " " +
-                (src.length() > 0     ? src     : ".") + " " +
+            return std::string{localMessageTypeToStr(type)} + " " +
+                (src.str.length() > 0 ? src.str : ".") + " " +
                 (topic.length() > 0   ? topic   : "-") + " " +
                 (payload.length() > 0 ? payload : "-");
         }

@@ -52,7 +52,7 @@ namespace SPSP::Nodes
         return true;
     }
 
-    bool Bridge::processPub(const Message req)
+    bool Bridge::processPub(const LocalMessage req)
     {
         // Far layer is not connected - can't deliver
         if (!this->farLayerConnected()) {
@@ -64,7 +64,7 @@ namespace SPSP::Nodes
         return m_fl->publish(req.topic, req.payload);
     }
 
-    bool Bridge::processSubReq(const Message req)
+    bool Bridge::processSubReq(const LocalMessage req)
     {
         // Far layer is not connected - can't deliver
         if (!this->farLayerConnected()) {
@@ -89,7 +89,7 @@ namespace SPSP::Nodes
         return true;
     }
 
-    bool Bridge::subDBInsert(const std::string topic, const std::string src,
+    bool Bridge::subDBInsert(const std::string topic, const LocalAddr src,
                              bool localLayer, uint8_t lifetime)
     {
         // Create sub entry
@@ -103,7 +103,8 @@ namespace SPSP::Nodes
         m_subDB[topic][src] = subEntry;
 
         SPSP_LOGD("Sub DB: inserted entry: %s@%s (expires in %d min)", 
-                  (localLayer ? src.c_str() : "."), topic.c_str(), lifetime);
+                  (localLayer ? src.str.c_str() : "."), topic.c_str(),
+                  lifetime);
 
         return newTopic;
     }

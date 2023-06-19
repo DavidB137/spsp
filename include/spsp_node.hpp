@@ -12,7 +12,7 @@
 #include <climits>
 
 #include "spsp_layers.hpp"
-#include "spsp_message.hpp"
+#include "spsp_local_message.hpp"
 
 namespace SPSP
 {
@@ -64,7 +64,7 @@ namespace SPSP
          * @return true Message delivery successful
          * @return false Message delivery failed
          */
-        bool receiveLocal(const Message msg, int rssi = INT_MAX);
+        bool receiveLocal(const LocalMessage msg, int rssi = INT_MAX);
 
     protected:
         /**
@@ -74,7 +74,7 @@ namespace SPSP
          * @return true Message delivery successful
          * @return false Message delivery failed
          */
-        bool sendLocal(const Message msg);
+        bool sendLocal(const LocalMessage msg);
 
         /**
          * @brief Processes PING message
@@ -87,7 +87,7 @@ namespace SPSP
          * @return true Message delivery successful
          * @return false Message delivery failed
          */
-        bool processPing(const Message req);
+        bool processPing(const LocalMessage req);
 
         /**
          * @brief Processes PONG message
@@ -96,7 +96,7 @@ namespace SPSP
          * @return true Message delivery successful
          * @return false Message delivery failed
          */
-        virtual bool processPong(const Message req) = 0;
+        virtual bool processPong(const LocalMessage req) = 0;
 
         /**
          * @brief Processes PUB message
@@ -105,7 +105,7 @@ namespace SPSP
          * @return true Message delivery successful
          * @return false Message delivery failed
          */
-        virtual bool processPub(const Message req) = 0;
+        virtual bool processPub(const LocalMessage req) = 0;
 
         /**
          * @brief Processes SUB_REQ message
@@ -114,7 +114,7 @@ namespace SPSP
          * @return true Message delivery successful
          * @return false Message delivery failed
          */
-        virtual bool processSubReq(const Message req) = 0;
+        virtual bool processSubReq(const LocalMessage req) = 0;
 
         /**
          * @brief Processes SUB_DATA message
@@ -123,6 +123,6 @@ namespace SPSP
          * @return true Message delivery successful
          * @return false Message delivery failed
          */
-        virtual bool processSubData(const Message req) = 0;
+        virtual bool processSubData(const LocalMessage req) = 0;
     };
 } // namespace SPSP
