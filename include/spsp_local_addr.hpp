@@ -17,6 +17,9 @@ namespace SPSP
     /**
      * @brief Local layer address container
      * 
+     * Internal representation is decisive. Two addresses are the same if they
+     * have the same internal representation.
+     * Printable string may be anything.
      */
     struct LocalAddr
     {
