@@ -13,6 +13,7 @@
 #include "esp_mac.h"
 #include "esp_netif.h"
 #include "esp_wifi.h"
+#include "nvs_flash.h"
 
 #include "spsp_logger.hpp"
 #include "spsp_wifi.hpp"
@@ -32,6 +33,15 @@ namespace SPSP
         this->m_password = password;
 
         bool ssidNotEmpty = ssid.length() > 0;
+
+        // Initialize NVS
+        esp_err_t nvsInitCode = nvs_flash_init();
+        if (nvsInitCode == ESP_ERR_NVS_NO_FREE_PAGES || nvsInitCode == ESP_ERR_NVS_NEW_VERSION_FOUND) {
+            ESP_ERROR_CHECK(nvs_flash_erase());
+            nvsInitCode = nvs_flash_init();
+        }
+        ESP_ERROR_CHECK(nvsInitCode);
+        SPSP_LOGI("NVS initialized");
 
         ESP_ERROR_CHECK(esp_netif_init());
         ESP_ERROR_CHECK(esp_event_loop_create_default());
