@@ -58,6 +58,8 @@ namespace SPSP::Nodes
         /**
          * @brief Sets pointer to the far layer.
          * 
+         * The pointer must be valid until the `Bridge` is destroyed
+         * or `unsetFarLayer` is called.
          * Safe to call even when far layer is already set.
          * 
          * @param fl New far layer

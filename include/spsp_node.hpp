@@ -32,6 +32,8 @@ namespace SPSP
         /**
          * @brief Sets pointer to the local layer.
          * 
+         * The pointer must be valid until the node is destroyed
+         * or `unsetLocalLayer` is called.
          * Safe to call even when local layer is already set.
          * 
          * @param ll New local layer
