@@ -23,7 +23,7 @@ namespace SPSP::FarLayers::MQTT
         /**
          * @brief Constructs a new MQTT layer object
          * 
-         * Also initializes WiFi (if not already initialized).
+         * Requires already initialized WiFi (with IP address).
          */
         Layer();
 

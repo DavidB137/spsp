@@ -18,19 +18,11 @@ namespace SPSP::FarLayers::MQTT
 {
     Layer::Layer()
     {
-        // WiFi
-        WiFi& wifi = WiFi::getInstance();
-        wifi.init();
-
         SPSP_LOGI("Initialized");
     }
 
     Layer::~Layer()
     {
-        // WiFi
-        WiFi& wifi = WiFi::getInstance();
-        wifi.deinit();
-
         SPSP_LOGI("Deinitialized");
     }
 
