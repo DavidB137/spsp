@@ -9,6 +9,8 @@
 
 #pragma once
 
+#include <climits>
+
 #include "spsp_layers.hpp"
 #include "spsp_message.hpp"
 
@@ -56,10 +58,11 @@ namespace SPSP
          * Acts as a callback for local layer receiver.
          * 
          * @param msg Received message
+         * @param rssi Received signal strength indicator (in dBm)
          * @return true Message delivery successful
          * @return false Message delivery failed
          */
-        bool receiveLocal(const Message msg);
+        bool receiveLocal(const Message msg, int rssi = INT_MAX);
 
     protected:
         /**

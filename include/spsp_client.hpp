@@ -22,16 +22,5 @@ namespace SPSP::Nodes
     {
     public:
         using SPSP::INode::INode;
-
-        /**
-         * @brief Receives the message from local layer
-         * 
-         * Acts as a callback for local layer receiver.
-         * 
-         * @param msg Received message
-         * @return true Message delivery successful
-         * @return false Message delivery failed
-         */
-        bool receiveLocal(Message msg);
     };
 } // namespace SPSP::Nodes

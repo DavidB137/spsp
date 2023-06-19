@@ -32,9 +32,13 @@ namespace SPSP
         }
     }
 
-    bool INode::receiveLocal(const Message msg)
+    bool INode::receiveLocal(const Message msg, int rssi)
     {
-        SPSP_LOGD("Received local msg: %s", msg.toString().c_str());
+        if (rssi < INT_MAX) {
+            SPSP_LOGD("Received local msg: %s (%d dBm)", msg.toString().c_str(), rssi);
+        } else {
+            SPSP_LOGD("Received local msg: %s", msg.toString().c_str());
+        }
 
         bool delivered = true;
 
