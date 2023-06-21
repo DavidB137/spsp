@@ -19,12 +19,13 @@ namespace SPSP
      * 
      * Internal representation is decisive. Two addresses are the same if they
      * have the same internal representation.
-     * Printable string may be anything.
+     * 
+     * Printable string is also passed to far layer (MQTT).
      */
     struct LocalAddr
     {
         std::vector<uint8_t> addr;  //!< Internal address representation
-        std::string str;            //!< Printable string
+        std::string str;            //!< Printable string (also used in MQTT topic)
 
         bool operator==(const LocalAddr &other) const
         {
