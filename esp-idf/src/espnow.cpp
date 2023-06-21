@@ -74,10 +74,10 @@ namespace SPSP::LocalLayers::ESPNOW
         uint8_t* data = new uint8_t[dataLen];
         this->preparePacket(msg, data);
 
-        SPSP_LOGD("Sending %u bytes to %s", dataLen, msg.src.str.c_str());
+        SPSP_LOGD("Sending %u bytes to %s", dataLen, msg.addr.str.c_str());
 
         // Promise/mutex bucket
-        auto bucketId = this->getBucketIdFromLocalAddr(msg.src);
+        auto bucketId = this->getBucketIdFromLocalAddr(msg.addr);
 
         // Lock both `m_mutex` and MAC's `m_sendingMutexes` entry without
         // deadlock
@@ -86,7 +86,7 @@ namespace SPSP::LocalLayers::ESPNOW
         auto future = m_sendingPromises[bucketId].get_future();
 
         // Send
-        this->sendRaw(msg.src, data, dataLen);
+        this->sendRaw(msg.addr, data, dataLen);
 
         m_mutex.unlock();
 
@@ -101,7 +101,7 @@ namespace SPSP::LocalLayers::ESPNOW
 
         m_sendingMutexes[bucketId].unlock();
 
-        SPSP_LOGD("Sent %u bytes to %s: %s", dataLen, msg.src.str.c_str(),
+        SPSP_LOGD("Sent %u bytes to %s: %s", dataLen, msg.addr.str.c_str(),
                   delivered ? "success" : "fail");
 
         return delivered;
@@ -210,7 +210,7 @@ namespace SPSP::LocalLayers::ESPNOW
         // Construct message
         LocalMessage msg;
         msg.type = p->payload.type;
-        msg.src = this->macTolocalAddr(src);
+        msg.addr = this->macTolocalAddr(src);
         msg.topic = std::string{topicAndPayload, p->payload.topicLen};
         msg.payload = std::string{topicAndPayload + p->payload.topicLen,
                               p->payload.payloadLen};

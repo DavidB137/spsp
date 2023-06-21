@@ -80,7 +80,7 @@ namespace SPSP::Nodes
         }
 
         // Add to subscribe database
-        if (this->subDBInsert(req.topic, req.src)) {
+        if (this->subDBInsert(req.topic, req.addr)) {
             // Subscribe
             bool delivered = m_fl->subscribe(req.topic);
 

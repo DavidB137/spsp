@@ -62,7 +62,7 @@ namespace SPSP
     struct LocalMessage
     {
         LocalMessageType type;     //!< Type of message
-        LocalAddr src = {};        //!< Source address
+        LocalAddr addr = {};       //!< Source/destination address
         std::string topic = "";    //!< Topic of message
         std::string payload = "";  //!< Payload of message
 
@@ -76,9 +76,9 @@ namespace SPSP
         std::string toString() const
         {
             return std::string{localMessageTypeToStr(type)} + " " +
-                (src.str.length() > 0 ? src.str : ".") + " " +
-                (topic.length() > 0   ? topic   : "-") + " " +
-                (payload.length() > 0 ? payload : "-");
+                (addr.str.length() > 0 ? addr.str : ".") + " " +
+                (topic.length() > 0    ? topic   : "-") + " " +
+                (payload.length() > 0  ? payload : "-");
         }
     };
 } // namespace SPSP
