@@ -77,26 +77,22 @@ namespace SPSP
         bool sendLocal(const LocalMessage msg);
 
         /**
-         * @brief Processes PING message
-         * 
-         * Sends back PONG message.
-         * 
-         * This is universal behaviour for all nodes.
+         * @brief Processes PROBE_REQ message
          * 
          * @param req Request message
          * @return true Message delivery successful
          * @return false Message delivery failed
          */
-        bool processPing(const LocalMessage req);
+        virtual bool processProbeReq(const LocalMessage req) = 0;
 
         /**
-         * @brief Processes PONG message
+         * @brief Processes PROBE_RES message
          * 
          * @param req Request message
          * @return true Message delivery successful
          * @return false Message delivery failed
          */
-        virtual bool processPong(const LocalMessage req) = 0;
+        virtual bool processProbeRes(const LocalMessage req) = 0;
 
         /**
          * @brief Processes PUB message

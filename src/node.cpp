@@ -44,8 +44,8 @@ namespace SPSP
 
         // Call responsible handler
         switch (msg.type) {
-        case LocalMessageType::PING: delivered = processPing(msg); break;
-        case LocalMessageType::PONG: delivered = processPong(msg); break;
+        case LocalMessageType::PROBE_REQ: delivered = processProbeReq(msg); break;
+        case LocalMessageType::PROBE_RES: delivered = processProbeRes(msg); break;
         case LocalMessageType::PUB: delivered = processPub(msg); break;
         case LocalMessageType::SUB_REQ: delivered = processSubReq(msg); break;
         case LocalMessageType::SUB_DATA: delivered = processSubData(msg); break;
@@ -73,12 +73,5 @@ namespace SPSP
 
         // Send to local layer
         return m_ll->send(msg);
-    }
-
-    bool INode::processPing(const LocalMessage req)
-    {
-        LocalMessage res = req;
-        res.type = LocalMessageType::PONG;
-        return this->sendLocal(res);
     }
 } // namespace SPSP

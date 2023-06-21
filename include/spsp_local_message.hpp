@@ -24,8 +24,8 @@ namespace SPSP
         NONE       = 0,
         OK         = 1,  // currently unused
         FAIL       = 2,  // currently unused
-        PING       = 10,
-        PONG       = 11,
+        PROBE_REQ  = 10,
+        PROBE_RES  = 11,
         PUB        = 20,
         SUB_REQ    = 30,
         SUB_DATA   = 31,
@@ -44,8 +44,8 @@ namespace SPSP
             case LocalMessageType::NONE: return "NONE";
             case LocalMessageType::OK: return "OK";
             case LocalMessageType::FAIL: return "FAIL";
-            case LocalMessageType::PING: return "PING";
-            case LocalMessageType::PONG: return "PONG";
+            case LocalMessageType::PROBE_REQ: return "PROBE_REQ";
+            case LocalMessageType::PROBE_RES: return "PROBE_RES";
             case LocalMessageType::PUB: return "PUB";
             case LocalMessageType::SUB_REQ: return "SUB_REQ";
             case LocalMessageType::SUB_DATA: return "SUB_DATA";

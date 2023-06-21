@@ -94,7 +94,16 @@ namespace SPSP::Nodes
 
     protected:
         /**
-         * @brief Processes PONG message
+         * @brief Processes PROBE_REQ message
+         * 
+         * @param req Request message
+         * @return true Message delivery successful
+         * @return false Message delivery failed
+         */
+        bool processProbeReq(const LocalMessage req);
+
+        /**
+         * @brief Processes PROBE_RES message
          * 
          * Doesn't do anything.
          * 
@@ -102,7 +111,7 @@ namespace SPSP::Nodes
          * @return true Message delivery successful
          * @return false Message delivery failed
          */
-        bool processPong(const LocalMessage req) { return true; }
+        bool processProbeRes(const LocalMessage req) { return true; }
 
         /**
          * @brief Processes PUB message
