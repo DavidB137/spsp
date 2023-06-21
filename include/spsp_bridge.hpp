@@ -176,11 +176,13 @@ namespace SPSP::Nodes
          * @param topic Topic
          * @param src Source node
          * @param lifetime Lifetime of subscribe in minutes
+         * @param cb Subscribe callback (only for local subscribes)
          * @return true Insert successful
          * @return false Insert failed
          */
         bool subDBInsert(const std::string topic, const LocalAddr src,
-                         uint8_t lifetime = BRIDGE_SUB_LIFETIME);
+                         uint8_t lifetime = BRIDGE_SUB_LIFETIME,
+                         SubscribeCb cb = nullptr);
 
         /**
          * @brief Removes entry from subscribe database and unsubscribes from

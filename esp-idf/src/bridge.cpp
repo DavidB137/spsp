@@ -63,7 +63,7 @@ namespace SPSP::Nodes
     {
         SPSP_LOGD("Subscribing locally to %s", topic.c_str());
 
-        return this->subDBInsert(topic, LocalAddr{});
+        return this->subDBInsert(topic, LocalAddr{}, BRIDGE_SUB_NO_EXPIRE, cb);
     }
 
     bool Bridge::processProbeReq(const LocalMessage req)
@@ -97,11 +97,12 @@ namespace SPSP::Nodes
     }
 
     bool Bridge::subDBInsert(const std::string topic, const LocalAddr src,
-                             uint8_t lifetime)
+                             uint8_t lifetime, SubscribeCb cb)
     {
         // Create sub entry
         BridgeSubEntry subEntry;
         subEntry.lifetime = lifetime;
+        subEntry.cb = cb;
 
         bool newTopic = m_subDB.find(topic) == m_subDB.end();
 
