@@ -71,7 +71,13 @@ namespace SPSP
             return false;
         }
 
+        SPSP_LOGD("Sending local msg: %s", msg.toString().c_str());
+
         // Send to local layer
-        return m_ll->send(msg);
+        bool delivered = m_ll->send(msg);
+
+        SPSP_LOGD("Message not delivered: %s", msg.toString().c_str());
+
+        return delivered;
     }
 } // namespace SPSP
