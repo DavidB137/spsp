@@ -56,7 +56,7 @@ namespace SPSP::Nodes
     {
         SPSP_LOGD("Publishing locally: %s %s", topic.c_str(), payload.c_str());
 
-        return m_fl->publish(topic, payload);
+        return m_fl->publish(LocalAddr{}.str, topic, payload);
     }
 
     bool Bridge::subscribe(const std::string topic, SubscribeCb cb)
@@ -82,7 +82,7 @@ namespace SPSP::Nodes
         }
 
         // Publish to far layer
-        return m_fl->publish(req.topic, req.payload);
+        return m_fl->publish(req.addr.str, req.topic, req.payload);
     }
 
     bool Bridge::processSubReq(const LocalMessage req)

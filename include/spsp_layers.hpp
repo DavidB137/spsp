@@ -88,12 +88,14 @@ namespace SPSP
          * 
          * Should be used by `INode` only!
          * 
+         * @param src Source address
          * @param topic Topic
          * @param payload Payload (data)
          * @return true Delivery successful
          * @return false Delivery failed
          */
-        virtual bool publish(const std::string topic, const std::string payload) = 0;
+        virtual bool publish(const std::string src, const std::string topic,
+                             const std::string payload) = 0;
 
         /**
          * @brief Subscribes to given topic

@@ -37,12 +37,14 @@ namespace SPSP::FarLayers::MQTT
         /**
          * @brief Publishes message coming from node
          * 
+         * @param src Source address
          * @param topic Topic
          * @param payload Payload (data)
          * @return true Delivery successful
          * @return false Delivery failed
          */
-        bool publish(const std::string topic, const std::string payload);
+        bool publish(const std::string src, const std::string topic,
+                     const std::string payload);
 
         /**
          * @brief Subscribes to given topic

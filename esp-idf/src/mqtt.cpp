@@ -26,7 +26,8 @@ namespace SPSP::FarLayers::MQTT
         SPSP_LOGI("Deinitialized");
     }
 
-    bool Layer::publish(const std::string topic, const std::string payload)
+    bool Layer::publish(const std::string src, const std::string topic,
+                        const std::string payload)
     {
         return true;
     }
