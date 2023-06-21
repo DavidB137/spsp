@@ -31,6 +31,17 @@ namespace SPSP
         {
             return addr == other.addr;
         }
+
+        /**
+         * @brief Checks whether the address is empty
+         * 
+         * @return true Local address is empty
+         * @return false Local address is not empty
+         */
+        inline bool empty() const
+        {
+            return addr.empty();
+        }
     };
 }
 
