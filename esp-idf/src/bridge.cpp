@@ -52,6 +52,13 @@ namespace SPSP::Nodes
         return true;
     }
 
+    bool Bridge::processProbeReq(const LocalMessage req)
+    {
+        LocalMessage res = req;
+        res.type = LocalMessageType::PROBE_RES;
+        return this->sendLocal(res);
+    }
+
     bool Bridge::processPub(const LocalMessage req)
     {
         // Far layer is not connected - can't deliver
