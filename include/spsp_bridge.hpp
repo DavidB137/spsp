@@ -17,17 +17,20 @@
 
 namespace SPSP::Nodes
 {
-    const uint8_t BRIDGE_SUB_LIFETIME = 30;  // in minutes
+    static const uint8_t BRIDGE_SUB_LIFETIME  = 30;         //!< Default subscribe lifetime
+    static const uint8_t BRIDGE_SUB_NO_EXPIRE = UINT8_MAX;  //!< Subscribe lifetime for no expire
 
     /**
      * @brief Bridge subscribe entry
      * 
      * Single entry in subscribe database of a bridge.
+     * 
+     * Empty addresses are treated as local to this node.
      */
     struct BridgeSubEntry
     {
-        bool localLayer = true;
-        uint8_t lifetime = BRIDGE_SUB_LIFETIME;
+        uint8_t lifetime = BRIDGE_SUB_LIFETIME;  //!< Lifetime in minutes
+        SPSP::SubscribeCb cb = nullptr;          //!< Callback for incoming data
     };
 
     using BridgeSubDB = std::unordered_map<std::string, std::unordered_map<LocalAddr, BridgeSubEntry>>;
@@ -92,6 +95,30 @@ namespace SPSP::Nodes
          */
         bool receiveFar(const std::string topic, const std::string payload);
 
+        /**
+         * @brief Publishes payload to topic
+         * 
+         * This is primary endpoint for publishing locally data on this node.
+         * Directly sends data to far layer.
+         * 
+         * @param topic Topic
+         * @param payload Payload
+         * @return true Delivery successful
+         * @return false Delivery failed
+         */
+        bool publish(const std::string topic, const std::string payload);
+
+        /**
+         * @brief Subscribes to topic
+         * 
+         * This is primary endpoint for subscribing locally on this node.
+         * Directly forwards incoming data from far layer to given callback.
+         * 
+         * @param topic Topic
+         * @param cb Callback function
+         */
+        bool subscribe(const std::string topic, SubscribeCb cb);
+
     protected:
         /**
          * @brief Processes PROBE_REQ message
@@ -143,18 +170,28 @@ namespace SPSP::Nodes
         bool processSubData(const LocalMessage req) { return true; }
 
         /**
-         * @brief Inserts entry into subscribe database
+         * @brief Inserts entry into subscribe database and subscribes to given
+         *        topic (if needed).
          * 
          * @param topic Topic
          * @param src Source node
-         * @param localLayer True if this is local layer subscribe, false if this node's.
          * @param lifetime Lifetime of subscribe in minutes
-         * @return true New topic - noone else is subscribed
-         * @return false Subscribe to topic already exists
+         * @return true Insert successful
+         * @return false Insert failed
          */
         bool subDBInsert(const std::string topic, const LocalAddr src,
-                         bool localLayer = true,
                          uint8_t lifetime = BRIDGE_SUB_LIFETIME);
+
+        /**
+         * @brief Removes entry from subscribe database and unsubscribes from
+         *        given topic (if needed).
+         * 
+         * @param topic Topic
+         * @param src Source node
+         * @return true Removal successful
+         * @return false Removal failed
+         */
+        bool subDBRemove(const std::string topic, const LocalAddr src);
 
         /**
          * @brief Time tick callback for subscribe DB

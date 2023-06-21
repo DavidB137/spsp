@@ -52,6 +52,20 @@ namespace SPSP::Nodes
         return true;
     }
 
+    bool Bridge::publish(const std::string topic, const std::string payload)
+    {
+        SPSP_LOGD("Publishing locally: %s %s", topic.c_str(), payload.c_str());
+
+        return m_fl->publish(topic, payload);
+    }
+
+    bool Bridge::subscribe(const std::string topic, SubscribeCb cb)
+    {
+        SPSP_LOGD("Subscribing locally to %s", topic.c_str());
+
+        return this->subDBInsert(topic, LocalAddr{});
+    }
+
     bool Bridge::processProbeReq(const LocalMessage req)
     {
         LocalMessage res = req;
@@ -79,64 +93,76 @@ namespace SPSP::Nodes
             return false;
         }
 
-        // Add to subscribe database
-        if (this->subDBInsert(req.topic, req.addr)) {
-            // Subscribe
-            bool delivered = m_fl->subscribe(req.topic);
-
-            if (delivered) {
-                SPSP_LOGD("Subscribed to topic %s", req.topic.c_str());
-            } else {
-                SPSP_LOGE("Subscribe to topic %s failed", req.topic.c_str());
-            }
-
-            return delivered;
-        }
-
-        return true;
+        return this->subDBInsert(req.topic, req.addr);
     }
 
     bool Bridge::subDBInsert(const std::string topic, const LocalAddr src,
-                             bool localLayer, uint8_t lifetime)
+                             uint8_t lifetime)
     {
         // Create sub entry
         BridgeSubEntry subEntry;
-        subEntry.localLayer = localLayer;
         subEntry.lifetime = lifetime;
 
         bool newTopic = m_subDB.find(topic) == m_subDB.end();
 
+        // Subscribe
+        if (newTopic) {
+            bool subSuccess = m_fl->subscribe(topic);
+
+            SPSP_LOGD("Subscribe to topic %s: %s", topic.c_str(),
+                      subSuccess ? "success" : "fail");
+
+            if (!subSuccess) return false;
+        }
+
         // Add/update the entry
         m_subDB[topic][src] = subEntry;
 
-        SPSP_LOGD("Sub DB: inserted entry: %s@%s (expires in %d min)", 
-                  (localLayer ? src.str.c_str() : "."), topic.c_str(),
+        SPSP_LOGD("Sub DB: inserted entry: %s@%s (expires in %d min)",
+                  (src.empty() ? src.str.c_str() : "."), topic.c_str(),
                   lifetime);
 
-        return newTopic;
+        return true;
+    }
+
+    bool Bridge::subDBRemove(const std::string topic, const LocalAddr src)
+    {
+        auto entry = m_subDB[topic][src];
+        m_subDB[topic].erase(src);
+
+        // Noone is subscribed to this topic anymore
+        if (m_subDB[topic].size() == 0) {
+            // Unsubscribe
+            bool unsubSuccess = m_fl->unsubscribe(topic);
+
+            SPSP_LOGD("Unsubscribe from topic %s: %s", topic.c_str(),
+                      unsubSuccess ? "success" : "fail");
+
+            if (!unsubSuccess) {
+                // Restore original state
+                m_subDB[topic][src] = entry;
+
+                return false;
+            }
+
+            m_subDB.erase(topic);
+        }
+
+        return true;
     }
 
     void Bridge::subDBTick()
     {
         for (auto const& [topic, topicEntry] : m_subDB) {
             for (auto const& [src, subEntry] : topicEntry) {
-                // Don't delete entries with lifetime UINT8_MAX
-                if (subEntry.lifetime != UINT8_MAX) {
+                // Don't decrement entries with infinite lifetime
+                if (subEntry.lifetime != BRIDGE_SUB_NO_EXPIRE) {
                     m_subDB[topic][src].lifetime--;
                 }
 
-                // Expired
+                // Expired -> remove it
                 if (subEntry.lifetime == 0) {
-                    // Remove it
-                    m_subDB[topic].erase(src);
-
-                    // Noone is subscribed to this topic anymore
-                    if (m_subDB[topic].size() == 0) {
-                        m_subDB.erase(topic);
-
-                        // Unsubscribe
-                        m_fl->unsubscribe(topic);
-                    }
+                    this->subDBRemove(topic, src);
                 }
             }
         }

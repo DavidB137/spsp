@@ -17,6 +17,12 @@
 namespace SPSP
 {
     /**
+     * @brief Subscribe callback type
+     * 
+     */
+    using SubscribeCb = void (*)(const std::string topic, const std::string payload);
+
+    /**
      * @brief Generic node of SPSP
      * 
      * Implements common functionality for client and bridge node types.
@@ -65,6 +71,28 @@ namespace SPSP
          * @return false Message delivery failed
          */
         bool receiveLocal(const LocalMessage msg, int rssi = INT_MAX);
+
+        /**
+         * @brief Publishes payload to topic
+         * 
+         * This is primary endpoint for publishing data locally on all node types.
+         * 
+         * @param topic Topic
+         * @param payload Payload
+         * @return true Delivery successful
+         * @return false Delivery failed
+         */
+        virtual bool publish(const std::string topic, const std::string payload) = 0;
+
+        /**
+         * @brief Subscribes to topic
+         * 
+         * This is primary endpoint for subscribing locally on all node types.
+         * 
+         * @param topic Topic
+         * @param cb Callback function
+         */
+        virtual bool subscribe(const std::string topic, SubscribeCb cb) = 0;
 
     protected:
         /**
