@@ -7,6 +7,9 @@
  * 
  */
 
+#include "freertos/FreeRTOS.h"
+#include "freertos/timers.h"
+
 #include "spsp_logger.hpp"
 #include "spsp_bridge.hpp"
 
@@ -15,8 +18,19 @@ static const char* SPSP_LOG_TAG = "SPSP/Bridge";
 
 namespace SPSP::Nodes
 {
+    // Wrapper for C timer callback
+    void _bridge_subdb_tick(TimerHandle_t xTimer)
+    {
+        Bridge* b = static_cast<Bridge*>(pvTimerGetTimerID(xTimer));
+        b->subDBTick();
+    }
+
     Bridge::Bridge()
     {
+        // Create timer for subDBTick()
+        xTimerCreate("Bridge::subDBTick", pdMS_TO_TICKS(60*1000), pdTRUE, this,
+                     _bridge_subdb_tick);
+
         SPSP_LOGI("Initialized");
     }
 
@@ -30,6 +44,8 @@ namespace SPSP::Nodes
 
     void Bridge::setFarLayer(IFarLayer* fl)
     {
+        const std::lock_guard lock(m_mutex);
+
         // Unset old far layer
         if (m_fl != nullptr) this->unsetFarLayer();
 
@@ -39,6 +55,8 @@ namespace SPSP::Nodes
 
     void Bridge::unsetFarLayer()
     {
+        const std::lock_guard lock(m_mutex);
+
         if (m_fl != nullptr) {
             m_fl->unsetNode();
             m_fl = nullptr;
@@ -104,6 +122,8 @@ namespace SPSP::Nodes
     bool Bridge::subDBInsert(const std::string topic, const LocalAddr src,
                              uint8_t lifetime, SubscribeCb cb)
     {
+        m_mutex.lock();
+
         // Create sub entry
         BridgeSubEntry subEntry;
         subEntry.lifetime = lifetime;
@@ -115,8 +135,11 @@ namespace SPSP::Nodes
         if (newTopic) {
             if (!this->farLayerConnected()) {
                 SPSP_LOGE("Sub DB: far layer is not connected");
+                m_mutex.unlock();
                 return false;
             }
+
+            m_mutex.unlock();
 
             bool subSuccess = m_fl->subscribe(topic);
 
@@ -124,10 +147,14 @@ namespace SPSP::Nodes
                       subSuccess ? "success" : "fail");
 
             if (!subSuccess) return false;
+
+            m_mutex.lock();
         }
 
         // Add/update the entry
         m_subDB[topic][src] = subEntry;
+
+        m_mutex.unlock();
 
         SPSP_LOGD("Sub DB: inserted entry: %s@%s (expires in %d min)",
                   (src.empty() ? src.str.c_str() : "."), topic.c_str(),
@@ -138,6 +165,8 @@ namespace SPSP::Nodes
 
     bool Bridge::subDBRemove(const std::string topic, const LocalAddr src)
     {
+        m_mutex.lock();
+
         auto entry = m_subDB[topic][src];
         m_subDB[topic].erase(src);
 
@@ -145,8 +174,11 @@ namespace SPSP::Nodes
         if (m_subDB[topic].size() == 0) {
             if (!this->farLayerConnected()) {
                 SPSP_LOGE("Sub DB: far layer is not connected");
+                m_mutex.unlock();
                 return false;
             }
+
+            m_mutex.unlock();
 
             // Unsubscribe
             bool unsubSuccess = m_fl->unsubscribe(topic);
@@ -154,15 +186,19 @@ namespace SPSP::Nodes
             SPSP_LOGD("Unsubscribe from topic %s: %s", topic.c_str(),
                       unsubSuccess ? "success" : "fail");
 
+            m_mutex.lock();
+
             if (!unsubSuccess) {
                 // Restore original state
                 m_subDB[topic][src] = entry;
-
+                m_mutex.unlock();
                 return false;
             }
 
             m_subDB.erase(topic);
         }
+
+        m_mutex.unlock();
 
         return true;
     }

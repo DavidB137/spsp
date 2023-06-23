@@ -9,6 +9,7 @@
 
 #pragma once
 
+#include <mutex>
 #include <unordered_map>
 
 #include "spsp_layers.hpp"
@@ -17,7 +18,7 @@
 
 namespace SPSP::Nodes
 {
-    static const uint8_t BRIDGE_SUB_LIFETIME  = 30;         //!< Default subscribe lifetime
+    static const uint8_t BRIDGE_SUB_LIFETIME  = 15;         //!< Default subscribe lifetime
     static const uint8_t BRIDGE_SUB_NO_EXPIRE = UINT8_MAX;  //!< Subscribe lifetime for no expire
 
     /**
@@ -127,6 +128,15 @@ namespace SPSP::Nodes
          */
         inline bool isBridge() { return true; }
 
+        /**
+         * @brief Time tick callback for subscribe DB
+         * 
+         * Decrements subscribe database lifetimes.
+         * If any item completely expires, removes it from DB and if it was
+         * the last one for given topic, unsubscribes from it.
+         */
+        void subDBTick();
+
     protected:
         /**
          * @brief Processes PROBE_REQ message
@@ -202,14 +212,5 @@ namespace SPSP::Nodes
          * @return false Removal failed
          */
         bool subDBRemove(const std::string topic, const LocalAddr src);
-
-        /**
-         * @brief Time tick callback for subscribe DB
-         * 
-         * Decrements subscribe database lifetimes.
-         * If any item completely expires, removes it from DB and if it was
-         * the last one for given topic, unsubscribes from it.
-         */
-        void subDBTick();
     };
 } // namespace SPSP::Nodes
