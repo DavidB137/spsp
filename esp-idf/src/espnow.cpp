@@ -294,8 +294,13 @@ namespace SPSP::LocalLayers::ESPNOW
         const std::lock_guard lock(m_mutex);
 
         if (this->getNode()->isBridge()) {
-            ESP_LOGE("Connect to bridge: this node is a bridge");
+            SPSP_LOGE("Connect to bridge: this node is a bridge");
             return false;
+        }
+
+        // Unregister old bridge (if present)
+        if (!m_bestBridgeAddr.empty()) {
+            this->unregisterPeer(m_bestBridgeAddr);
         }
 
         WiFi& wifi = SPSP::WiFi::getInstance();
@@ -341,7 +346,7 @@ namespace SPSP::LocalLayers::ESPNOW
         this->registerPeer(m_bestBridgeAddr);
 
         if (br != nullptr) {
-            memcpy(br, &m_bestBridgeAddr, sizeof(m_bestBridgeAddr));
+            *br = m_bestBridgeAddr;
         }
 
         return true;
