@@ -23,7 +23,7 @@ namespace SPSP
     const auto WIFI_INIT_TIMEOUT = std::chrono::seconds(20);  //!< Timeout for connecting to AP
 
     /**
-     * @brief WiFi connection error exception
+     * @brief WiFi connection error
      * 
      * Thrown when `WIFI_INIT_TIMEOUT` expires before successful connection.
      */
