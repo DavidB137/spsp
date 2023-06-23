@@ -10,6 +10,7 @@
 #pragma once
 
 #include <climits>
+#include <mutex>
 
 #include "spsp_layers.hpp"
 #include "spsp_local_message.hpp"
@@ -33,6 +34,7 @@ namespace SPSP
     {
     protected:
         ILocalLayer* m_ll = nullptr;
+        std::mutex m_mutex;  //!< Mutex to prevent race conditions
 
     public:
         /**

@@ -17,6 +17,8 @@ namespace SPSP
 {
     void INode::setLocalLayer(ILocalLayer* ll)
     {
+        const std::lock_guard lock(m_mutex);
+
         // Unset old local layer
         if (m_ll != nullptr) this->unsetLocalLayer();
 
@@ -26,6 +28,8 @@ namespace SPSP
 
     void INode::unsetLocalLayer()
     {
+        const std::lock_guard lock(m_mutex);
+
         if (m_ll != nullptr) {
             m_ll->unsetNode();
             m_ll = nullptr;
