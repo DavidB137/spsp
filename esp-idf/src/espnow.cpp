@@ -201,7 +201,7 @@ namespace SPSP::LocalLayers::ESPNOW
         ESP_ERROR_CHECK(esp_now_del_peer(peerInfo.peer_addr));
     }
 
-    void Layer::receiveCallback(const uint8_t* src, uint8_t* data, unsigned dataLen, int rssi) const
+    void Layer::receiveCallback(const uint8_t* src, uint8_t* data, unsigned dataLen, int rssi)
     {
         SPSP_LOGD("Receive: packet from %s", macTolocalAddr(src).str.c_str());
 
@@ -227,6 +227,22 @@ namespace SPSP::LocalLayers::ESPNOW
         msg.topic = std::string{topicAndPayload, p->payload.topicLen};
         msg.payload = std::string{topicAndPayload + p->payload.topicLen,
                               p->payload.payloadLen};
+
+        // Process probe requests internally
+        if (msg.type == LocalMessageType::PROBE_RES) {
+            m_bestBridgeMutex.lock();
+
+            SPSP_LOGI("Receive: probe response from %s (%d dBm)",
+                      msg.addr.str.c_str(), rssi);
+
+            // Store bridge with best signal
+            if (m_bestBridgeSignal < rssi) {
+                m_bestBridgeSignal = rssi;
+                m_bestBridgeAddr = msg.addr;
+            }
+
+            m_bestBridgeMutex.unlock();
+        }
 
         // Send to the Node
         if (this->nodeConnected()) {

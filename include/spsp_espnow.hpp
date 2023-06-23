@@ -79,6 +79,7 @@ namespace SPSP::LocalLayers::ESPNOW
         LocalAddr m_bestBridgeAddr = {};       //!< Address of bridge with the best signal
         int m_bestBridgeSignal = SIGNAL_MIN;   //!< Signal RSSI of bridge with the best signal
         std::mutex m_mutex;                    //!< Mutex to prevent race conditions
+        std::mutex m_bestBridgeMutex;          //!< Mutex for modifying m_bestBridge* attributes
 
         /**
          * @brief Container for promises of being-sent messages
@@ -155,7 +156,7 @@ namespace SPSP::LocalLayers::ESPNOW
          * @param dataLen Length of data
          * @param rssi Received signal strength indicator (in dBm)
          */
-        void receiveCallback(const uint8_t* src, uint8_t* data, unsigned dataLen, int rssi) const;
+        void receiveCallback(const uint8_t* src, uint8_t* data, unsigned dataLen, int rssi);
 
         /**
          * @brief Send callback for underlaying ESP-NOW C functions.
