@@ -119,6 +119,14 @@ namespace SPSP::Nodes
          */
         bool subscribe(const std::string topic, SubscribeCb cb);
 
+        /**
+         * @brief Predicate whether this node is a bridge
+         * 
+         * @return true This is a bridge
+         * @return false This is not a bridge
+         */
+        inline bool isBridge() { return true; }
+
     protected:
         /**
          * @brief Processes PROBE_REQ message

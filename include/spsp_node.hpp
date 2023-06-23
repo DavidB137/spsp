@@ -94,6 +94,14 @@ namespace SPSP
          */
         virtual bool subscribe(const std::string topic, SubscribeCb cb) = 0;
 
+        /**
+         * @brief Predicate whether this node is a bridge
+         * 
+         * @return true This is a bridge
+         * @return false This is not a bridge
+         */
+        virtual bool isBridge() = 0;
+
     protected:
         /**
          * @brief Sends the message to local layer
