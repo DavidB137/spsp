@@ -181,7 +181,7 @@ namespace SPSP
     void WiFi::setChannel(uint8_t ch)
     {
         // Mutex
-        const std::lock_guard<std::mutex> lock(m_mutex);
+        const std::lock_guard lock(m_mutex);
 
         ESP_ERROR_CHECK(esp_wifi_set_channel(ch, WIFI_SECOND_CHAN_NONE));
         SPSP_LOGI("Set channel %d", ch);
