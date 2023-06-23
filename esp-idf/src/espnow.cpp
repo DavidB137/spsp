@@ -7,11 +7,14 @@
  * 
  */
 
+#include <chrono>
 #include <cstring>
+#include <thread>
 
 #include "esp_mac.h"
 #include "esp_now.h"
 #include "esp_random.h"
+#include "esp_wifi.h"
 
 #include "spsp_chacha20.hpp"
 #include "spsp_espnow.hpp"
@@ -109,8 +112,12 @@ namespace SPSP::LocalLayers::ESPNOW
 
     void Layer::sendRaw(const LocalAddr& dst, const uint8_t* data, size_t dataLen)
     {
+        bool isBroadcast = dst == this->broadcastAddr();
+
         // Register peer
-        this->registerPeer(dst);
+        if (!isBroadcast) {
+            this->registerPeer(dst);
+        }
 
         // Get MAC address
         esp_now_peer_info_t peerInfo = {};
@@ -120,7 +127,9 @@ namespace SPSP::LocalLayers::ESPNOW
         ESP_ERROR_CHECK(esp_now_send(peerInfo.peer_addr, data, dataLen));
 
         // Unregister peer
-        this->registerPeer(dst);
+        if (!isBroadcast) {
+            this->registerPeer(dst);
+        }
     }
 
     bool Layer::validateMessage(const LocalMessage msg) const
@@ -176,7 +185,11 @@ namespace SPSP::LocalLayers::ESPNOW
         esp_now_peer_info_t peerInfo = {};
         this->localAddrToMac(addr, peerInfo.peer_addr);
 
-        ESP_ERROR_CHECK(esp_now_add_peer(&peerInfo));
+        // Allow duplicate registrations
+        auto ret = esp_now_add_peer(&peerInfo);
+        if (ret != ESP_ERR_ESPNOW_EXIST) {
+            ESP_ERROR_CHECK(ret);
+        }
     }
 
     void Layer::unregisterPeer(const LocalAddr& addr)
@@ -275,6 +288,65 @@ namespace SPSP::LocalLayers::ESPNOW
         m_sendingPromises[bucketId].set_value(delivered);
     }
 
+    bool Layer::connectToBridge(LocalAddr* br)
+    {
+        // Mutex
+        const std::lock_guard lock(m_mutex);
+
+        if (this->getNode()->isBridge()) {
+            ESP_LOGE("Connect to bridge: this node is a bridge");
+            return false;
+        }
+
+        WiFi& wifi = SPSP::WiFi::getInstance();
+
+        // Get country restrictions
+        wifi_country_t wifiCountry;
+        ESP_ERROR_CHECK(esp_wifi_get_country(&wifiCountry));
+        uint8_t lowCh = wifiCountry.schan;
+        uint8_t highCh = lowCh + wifiCountry.nchan;
+
+        SPSP_LOGI("Connect to bridge: country %s, channels %u - %u",
+                 wifiCountry.cc, lowCh, highCh - 1);
+
+        // Clear previous results
+        m_bestBridgeSignal = SIGNAL_MIN;
+
+        // Prepare message
+        LocalMessage msg;
+        msg.addr = this->broadcastAddr();
+        msg.type = LocalMessageType::PROBE_REQ;
+
+        // Convert to raw data
+        size_t dataLen = sizeof(Packet);
+        uint8_t* data = new uint8_t[dataLen];
+        this->preparePacket(msg, data);
+
+        // Probe all channels
+        for (uint8_t ch = lowCh; ch < highCh; ch++) {
+            wifi.setChannel(ch);
+            this->sendRaw(msg.addr, data, dataLen);
+
+            // Sleep
+            std::this_thread::sleep_for(std::chrono::milliseconds(100));
+        }
+
+        // No response
+        if (m_bestBridgeSignal == SIGNAL_MIN) {
+            SPSP_LOGE("Connect to bridge: no response from bridge");
+            return false;
+        }
+
+        // Register the bridge
+        this->registerPeer(m_bestBridgeAddr);
+
+        if (br != nullptr) {
+            memcpy(br, &m_bestBridgeAddr, sizeof(m_bestBridgeAddr));
+        }
+
+        return true;
+    }
+
     const LocalAddr Layer::macTolocalAddr(const uint8_t* mac)
     {
         LocalAddr la;
@@ -321,5 +393,12 @@ namespace SPSP::LocalLayers::ESPNOW
     uint8_t Layer::getBucketIdFromLocalAddr(const LocalAddr& addr) const
     {
         return std::hash<LocalAddr>{}(addr) % this->m_sendingPromises.size();
+    }
+
+    const LocalAddr Layer::broadcastAddr()
+    {
+        uint8_t bcst[ESP_NOW_ETH_ALEN];
+        memset(bcst, 0xFF, ESP_NOW_ETH_ALEN);
+        return Layer::macTolocalAddr(bcst);
     }
 } // namespace SPSP::LocalLayers::ESPNOW

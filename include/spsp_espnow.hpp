@@ -18,9 +18,10 @@
 
 namespace SPSP::LocalLayers::ESPNOW
 {
-    static const uint8_t PROTO_VERSION = 1;   //!< Current protocol version
-    static const uint8_t PASSWORD_LEN  = 32;  //!< Password length in bytes
-    static const uint8_t NONCE_LEN     = 8;   //!< Length of encryption nonce
+    static const uint8_t PROTO_VERSION = 1;        //!< Current protocol version
+    static const uint8_t PASSWORD_LEN  = 32;       //!< Password length in bytes
+    static const uint8_t NONCE_LEN     = 8;        //!< Length of encryption nonce
+    static const int SIGNAL_MIN        = INT_MIN;  //!< Worst signal value
 
     /**
      * @brief Maximum number of simultaneous peers
@@ -73,10 +74,11 @@ namespace SPSP::LocalLayers::ESPNOW
     class Layer : public SPSP::ILocalLayer
     {
     private:
-        uint32_t m_ssid;
-        std::string m_password;
-
-        std::mutex m_mutex;  //!< Mutex to prevent race conditions
+        uint32_t m_ssid;                       //!< Numeric SSID
+        std::string m_password;                //!< Password for packet payload encryption
+        LocalAddr m_bestBridgeAddr = {};       //!< Address of bridge with the best signal
+        int m_bestBridgeSignal = SIGNAL_MIN;   //!< Signal RSSI of bridge with the best signal
+        std::mutex m_mutex;                    //!< Mutex to prevent race conditions
 
         /**
          * @brief Container for promises of being-sent messages
@@ -119,6 +121,31 @@ namespace SPSP::LocalLayers::ESPNOW
         ~Layer();
 
         /**
+         * @brief Sends the message to given node
+         * 
+         * In the message, empty address means send to the bridge peer.
+         * 
+         * Note: this will block until delivery status is confirmed!
+         * 
+         * @param msg Message
+         * @return true Delivery successful
+         * @return false Delivery failed
+         */
+        bool send(const LocalMessage msg);
+
+        /**
+         * @brief Connects to the bridge
+         * 
+         * Probes all wireless channels (available in the currently configured
+         * country) and selects bridge with the best signal.
+         * 
+         * @param br Bridge peer address storage (if connection successful and `br` != nullptr)
+         * @return true Connection successful
+         * @return false Connection failed
+         */
+        bool connectToBridge(LocalAddr* br = nullptr);
+
+        /**
          * @brief Receive callback for underlaying ESP-NOW C functions.
          * 
          * Used indirectly.
@@ -158,17 +185,6 @@ namespace SPSP::LocalLayers::ESPNOW
         static void localAddrToMac(const LocalAddr& la, uint8_t* mac);
 
     protected:
-        /**
-         * @brief Sends the message to given node
-         * 
-         * Note: this will block until delivery status is confirmed!
-         * 
-         * @param msg Message
-         * @return true Delivery successful
-         * @return false Delivery failed
-         */
-        bool send(const LocalMessage msg);
-
         /**
          * @brief Sends raw packet to the underlaying library
          * 
@@ -272,5 +288,12 @@ namespace SPSP::LocalLayers::ESPNOW
          * @return Bucket id
          */
         uint8_t getBucketIdFromLocalAddr(const LocalAddr& addr) const;
+
+        /**
+         * @brief Returns broadcast address
+         * 
+         * @return Broadcast address
+         */
+        static const LocalAddr broadcastAddr();
     };
 } // namespace SPSP::LocalLayers::ESPNOW

@@ -69,11 +69,25 @@ namespace SPSP
          * 
          * Should be used by `INode` only!
          * 
+         * In the message, empty address means send to the bridge peer.
+         * 
          * @param msg Message
          * @return true Delivery successful
          * @return false Delivery failed
          */
         virtual bool send(const LocalMessage msg) = 0;
+
+        /**
+         * @brief Connects to bridge
+         * 
+         * After call to this method, client should be able to successfully
+         * send publish and subscribe messages.
+         * 
+         * @param br Bridge peer address storage (if connection successful and `br` != nullptr)
+         * @return true Connection successful
+         * @return false Connection failed
+         */
+        virtual bool connectToBridge(LocalAddr* br = nullptr) = 0;
     };
 
     /**
