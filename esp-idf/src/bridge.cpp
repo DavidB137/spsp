@@ -56,6 +56,11 @@ namespace SPSP::Nodes
     {
         SPSP_LOGD("Publishing locally: %s %s", topic.c_str(), payload.c_str());
 
+        if (!this->farLayerConnected()) {
+            SPSP_LOGE("Publish: far layer is not connected");
+            return false;
+        }
+
         return m_fl->publish(LocalAddr{}.str, topic, payload);
     }
 
@@ -108,6 +113,11 @@ namespace SPSP::Nodes
 
         // Subscribe
         if (newTopic) {
+            if (!this->farLayerConnected()) {
+                SPSP_LOGE("Sub DB: far layer is not connected");
+                return false;
+            }
+
             bool subSuccess = m_fl->subscribe(topic);
 
             SPSP_LOGD("Subscribe to topic %s: %s", topic.c_str(),
@@ -133,6 +143,11 @@ namespace SPSP::Nodes
 
         // Noone is subscribed to this topic anymore
         if (m_subDB[topic].size() == 0) {
+            if (!this->farLayerConnected()) {
+                SPSP_LOGE("Sub DB: far layer is not connected");
+                return false;
+            }
+
             // Unsubscribe
             bool unsubSuccess = m_fl->unsubscribe(topic);
 
