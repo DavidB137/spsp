@@ -9,14 +9,27 @@
 
 #pragma once
 
+#include <unordered_map>
+
 #include "spsp_layers.hpp"
 #include "spsp_node.hpp"
 
-#include <unordered_map>
-
 namespace SPSP::Nodes
 {
-    using ClientSubDB = std::unordered_map<LocalAddr, SubscribeCb>;
+    static const uint8_t CLIENT_SUB_LIFETIME = 10;  //!< Default subscribe lifetime
+
+    /**
+     * @brief Client subscribe entry
+     * 
+     * Single entry in subscribe database of a client.
+     */
+    struct ClientSubEntry
+    {
+        uint8_t lifetime = CLIENT_SUB_LIFETIME;  //!< Lifetime in minutes
+        SPSP::SubscribeCb cb = nullptr;          //!< Callback for incoming data
+    };
+
+    using ClientSubDB = std::unordered_map<std::string, ClientSubEntry>;
 
     /**
      * @brief Client node
@@ -70,7 +83,15 @@ namespace SPSP::Nodes
          * @return false This is not a bridge
          */
         inline bool isBridge() { return false; }
-    
+
+        /**
+         * @brief Time tick callback for subscribe DB
+         * 
+         * Decrements subscribe database lifetimes.
+         * If any item completely expires, removes it from DB.
+         */
+        void subDBTick();
+
     protected:
         /**
          * @brief Processes PROBE_REQ message
@@ -86,11 +107,14 @@ namespace SPSP::Nodes
         /**
          * @brief Processes PROBE_RES message
          * 
+         * Doesn't do anything.
+         * This is handled internally by concrete local layer.
+         * 
          * @param req Request message
          * @return true Message delivery successful
          * @return false Message delivery failed
          */
-        bool processProbeRes(const LocalMessage req);
+        bool processProbeRes(const LocalMessage req) { return true; }
 
         /**
          * @brief Processes PUB message
