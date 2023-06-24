@@ -95,6 +95,9 @@ namespace SPSP
 
     void WiFi::initNetIf()
     {
+        // Don't do anything if SSID is empty
+        if (m_ssid.length() == 0) return;
+
         ESP_ERROR_CHECK(esp_netif_init());
 
         // Create net interface
@@ -185,6 +188,22 @@ namespace SPSP
 
         ESP_ERROR_CHECK(esp_wifi_set_channel(ch, WIFI_SECOND_CHAN_NONE));
         SPSP_LOGI("Set channel %d", ch);
+    }
+
+    void WiFi::setCountryRestrictions(const char cc[3], uint8_t lowCh, uint8_t highCh)
+    {
+        // Mutex
+        const std::lock_guard lock(m_mutex);
+
+        wifi_country_t c;
+        memcpy(c.cc, cc, 3);
+        c.schan = lowCh;
+        c.nchan = highCh - lowCh + 1;
+
+        ESP_ERROR_CHECK(esp_wifi_set_country(&c));
+
+        SPSP_LOGI("Set country restrictions: %c%c (channels %d - %d)",
+                  cc[0], cc[1], lowCh, highCh);
     }
     
     void WiFi::eventHandlerWiFi(void* ctx, esp_event_base_t, int32_t eventId, void* eventData)

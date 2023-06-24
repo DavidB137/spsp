@@ -95,6 +95,17 @@ namespace SPSP
          */
         void setChannel(uint8_t ch);
 
+        /**
+         * @brief Sets country restrictions
+         * 
+         * Calling this method is not needed on bridge node.
+         * 
+         * @param cc Country code
+         * @param lowCh Lowest allowed channel
+         * @param highCh Highest allowed channel
+         */
+        void setCountryRestrictions(const char cc[3], uint8_t lowCh, uint8_t highCh);
+
     private:
         /**
          * @brief Initializes NVS
@@ -123,11 +134,6 @@ namespace SPSP
          * Called from `init()`.
          */
         void initWiFiConfig();
-
-        /**
-         * @brief Event handler for WiFi
-         * 
-         */
 
         /**
          * @brief Event handler for WiFi
