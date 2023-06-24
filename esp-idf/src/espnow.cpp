@@ -35,8 +35,19 @@ namespace SPSP::LocalLayers::ESPNOW
     // Wrapper for C receive callback
     void _receiveCallback(const esp_now_recv_info_t* espnowInfo, const uint8_t* data, int dataLen)
     {
-        espnowInstance->receiveCallback(espnowInfo->src_addr,
-            const_cast<uint8_t*>(data), dataLen, espnowInfo->rx_ctrl->rssi);
+        // Create new thread for receive handler
+        // Otherwise (apparently) creates deadlock, because receive callback
+        // tries to send response, but ESP-NOW's internal mutex is still held
+        // by this unfinished callback.
+        std::thread t([espnowInfo, data, dataLen] {
+            espnowInstance->receiveCallback(espnowInfo->src_addr,
+                                            const_cast<uint8_t*>(data),
+                                            dataLen,
+                                            espnowInfo->rx_ctrl->rssi);
+        });
+
+        // Run independently
+        t.detach();
     }
 
     // Wrapper for C send callback
@@ -70,6 +81,24 @@ namespace SPSP::LocalLayers::ESPNOW
 
     bool Layer::send(const LocalMessage msg)
     {
+        SPSP_LOGD("Send: %s", msg.toString().c_str());
+
+        LocalAddr dst = msg.addr;
+
+        // Process empty destination address
+        if (dst.empty()) {
+            // Client: check discovered bridge
+            // Bridge: `dst` shouldn't be ever empty
+
+            if (!m_bestBridgeAddr.empty()) {
+                dst = m_bestBridgeAddr;
+                SPSP_LOGD("Send: rewriting destination MAC to %s", dst.str.c_str());
+            } else {
+                SPSP_LOGE("Send fail: destination address is empty and no bridge connected");
+                return false;
+            }
+        }
+
         unsigned dataLen = sizeof(Packet) + msg.topic.length() + msg.payload.length();
 
         if (!this->validateMessage(msg)) return false;
@@ -77,10 +106,8 @@ namespace SPSP::LocalLayers::ESPNOW
         uint8_t* data = new uint8_t[dataLen];
         this->preparePacket(msg, data);
 
-        SPSP_LOGD("Sending %u bytes to %s", dataLen, msg.addr.str.c_str());
-
         // Promise/mutex bucket
-        auto bucketId = this->getBucketIdFromLocalAddr(msg.addr);
+        auto bucketId = this->getBucketIdFromLocalAddr(dst);
 
         // Lock both `m_mutex` and MAC's `m_sendingMutexes` entry without
         // deadlock
@@ -89,14 +116,18 @@ namespace SPSP::LocalLayers::ESPNOW
         auto future = m_sendingPromises[bucketId].get_future();
 
         // Send
-        this->sendRaw(msg.addr, data, dataLen);
+        this->sendRaw(dst, data, dataLen);
 
         m_mutex.unlock();
 
         // Free memory
         delete[] data;
+
+        SPSP_LOGD("Send: waiting for %s (bucket %d) callback",
+                  dst.empty() ? "." : dst.str.c_str(), bucketId);
  
         // Wait for callback to finish
+        // Note: this doesn't work for empty (NULL) destination MAC address
         bool delivered = future.get();
 
         // Reset promise
@@ -104,7 +135,8 @@ namespace SPSP::LocalLayers::ESPNOW
 
         m_sendingMutexes[bucketId].unlock();
 
-        SPSP_LOGD("Sent %u bytes to %s: %s", dataLen, msg.addr.str.c_str(),
+        SPSP_LOGD("Send: %u bytes to %s: %s", dataLen,
+                  dst.empty() ? "." : dst.str.c_str(),
                   delivered ? "success" : "fail");
 
         return delivered;
@@ -112,24 +144,29 @@ namespace SPSP::LocalLayers::ESPNOW
 
     void Layer::sendRaw(const LocalAddr& dst, const uint8_t* data, size_t dataLen)
     {
-        bool isBroadcast = dst == this->broadcastAddr();
+        if (dst.empty()) {
+            // Don't register peer, just send data
+            SPSP_LOGD("Send raw: %u bytes to %s", dataLen, ".");
+
+            auto ret = esp_now_send(nullptr, data, dataLen);
+            if (ret != ESP_ERR_ESPNOW_NOT_FOUND) ESP_ERROR_CHECK(ret);
+
+            return;
+        }
 
         // Register peer
-        if (!isBroadcast) {
-            this->registerPeer(dst);
-        }
+        this->registerPeer(dst);
 
         // Get MAC address
-        esp_now_peer_info_t peerInfo = {};
-        this->localAddrToMac(dst, peerInfo.peer_addr);
+        uint8_t peerMAC[ESP_NOW_ETH_ALEN];
+        this->localAddrToMac(dst, peerMAC);
 
         // Send
-        ESP_ERROR_CHECK(esp_now_send(peerInfo.peer_addr, data, dataLen));
+        SPSP_LOGD("Send raw: %u bytes to %s", dataLen, dst.str.c_str());
+        ESP_ERROR_CHECK(esp_now_send(peerMAC, data, dataLen));
 
         // Unregister peer
-        if (!isBroadcast) {
-            this->registerPeer(dst);
-        }
+        this->unregisterPeer(dst);
     }
 
     bool Layer::validateMessage(const LocalMessage msg) const
@@ -181,19 +218,19 @@ namespace SPSP::LocalLayers::ESPNOW
 
     void Layer::registerPeer(const LocalAddr& addr)
     {
+        SPSP_LOGD("Register peer: %s", addr.str.c_str());
+
         // Get MAC address
         esp_now_peer_info_t peerInfo = {};
         this->localAddrToMac(addr, peerInfo.peer_addr);
 
-        // Allow duplicate registrations
-        auto ret = esp_now_add_peer(&peerInfo);
-        if (ret != ESP_ERR_ESPNOW_EXIST) {
-            ESP_ERROR_CHECK(ret);
-        }
+        ESP_ERROR_CHECK(esp_now_add_peer(&peerInfo));
     }
 
     void Layer::unregisterPeer(const LocalAddr& addr)
     {
+        SPSP_LOGD("Unregister peer: %s", addr.str.c_str());
+
         // Get MAC address
         esp_now_peer_info_t peerInfo = {};
         this->localAddrToMac(addr, peerInfo.peer_addr);
@@ -301,6 +338,10 @@ namespace SPSP::LocalLayers::ESPNOW
         // Promise/mutex bucket
         auto bucketId = this->getBucketIdFromLocalAddr(this->macTolocalAddr(dst));
 
+        SPSP_LOGD("Send callback: %s (bucket %d): %s",
+                  this->macTolocalAddr(dst).str.c_str(), bucketId,
+                  delivered ? "delivered" : "not delivered");
+
         m_sendingPromises[bucketId].set_value(delivered);
     }
 
@@ -314,9 +355,12 @@ namespace SPSP::LocalLayers::ESPNOW
             return false;
         }
 
+        SPSP_LOGD("Connect to bridge: connecting...");
+
         // Unregister old bridge (if present)
         if (!m_bestBridgeAddr.empty()) {
             this->unregisterPeer(m_bestBridgeAddr);
+            SPSP_LOGD("Connect to bridge: unregistered old bridge");
         }
 
         WiFi& wifi = SPSP::WiFi::getInstance();
@@ -327,8 +371,8 @@ namespace SPSP::LocalLayers::ESPNOW
         uint8_t lowCh = wifiCountry.schan;
         uint8_t highCh = lowCh + wifiCountry.nchan;
 
-        SPSP_LOGI("Connect to bridge: country %s, channels %u - %u",
-                 wifiCountry.cc, lowCh, highCh - 1);
+        SPSP_LOGI("Connect to bridge: country %c%c, channels %u - %u",
+                 wifiCountry.cc[0], wifiCountry.cc[1], lowCh, highCh - 1);
 
         // Clear previous results
         m_bestBridgeSignal = SIGNAL_MIN;
@@ -343,23 +387,37 @@ namespace SPSP::LocalLayers::ESPNOW
         uint8_t* data = new uint8_t[dataLen];
         this->preparePacket(msg, data);
 
+        // Promise/mutex bucket
+        auto bucketId = this->getBucketIdFromLocalAddr(msg.addr);
+
         // Probe all channels
         for (uint8_t ch = lowCh; ch < highCh; ch++) {
+            auto future = m_sendingPromises[bucketId].get_future();
+
             wifi.setChannel(ch);
             this->sendRaw(msg.addr, data, dataLen);
+
+            SPSP_LOGD("Connect to bridge: waiting for %s (bucket %d) callback",
+                      msg.addr.str.c_str(), bucketId);
+
+            // Wait for callback to finish
+            future.get();
+
+            // Reset promise
+            m_sendingPromises[bucketId] = std::promise<bool>{};
 
             // Sleep
             std::this_thread::sleep_for(std::chrono::milliseconds(100));
         }
+
+        // Free memory
+        delete[] data;
 
         // No response
         if (m_bestBridgeSignal == SIGNAL_MIN) {
             SPSP_LOGE("Connect to bridge: no response from bridge");
             return false;
         }
-
-        // Register the bridge
-        this->registerPeer(m_bestBridgeAddr);
 
         if (br != nullptr) {
             *br = m_bestBridgeAddr;
