@@ -80,7 +80,8 @@ namespace SPSP
         // Send to local layer
         bool delivered = m_ll->send(msg);
 
-        SPSP_LOGD("Message not delivered: %s", msg.toString().c_str());
+        SPSP_LOGD("Message %s: %s", delivered ? "delivered" : "not delivered",
+                  msg.toString().c_str());
 
         return delivered;
     }
