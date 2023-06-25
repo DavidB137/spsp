@@ -72,7 +72,8 @@ namespace SPSP
          * @param ssid Service-set identifier
          * @param password Password for given SSID
          */
-        void init(const std::string ssid = "", const std::string password = "");
+        void init(const std::string ssid = "",
+                  const std::string password = "");
 
         /**
          * @brief Deinitializes WiFi
@@ -104,7 +105,8 @@ namespace SPSP
          * @param lowCh Lowest allowed channel
          * @param highCh Highest allowed channel
          */
-        void setCountryRestrictions(const char cc[3], uint8_t lowCh, uint8_t highCh);
+        void setCountryRestrictions(const char cc[3], uint8_t lowCh,
+                                    uint8_t highCh);
 
     private:
         /**
@@ -143,7 +145,8 @@ namespace SPSP
          * @param eventId Event ID
          * @param eventData Data of that event
          */
-        static void eventHandlerWiFi(void* ctx, esp_event_base_t eventBase, int32_t eventId, void* eventData);
+        static void eventHandlerWiFi(void* ctx, esp_event_base_t eventBase,
+                                     int32_t eventId, void* eventData);
 
         /**
          * @brief Event handler for IP
@@ -153,6 +156,7 @@ namespace SPSP
          * @param eventId Event ID
          * @param eventData Data of that event
          */
-        static void eventHandlerIP(void* ctx, esp_event_base_t eventBase, int32_t eventId, void* eventData);
+        static void eventHandlerIP(void* ctx, esp_event_base_t eventBase,
+                                   int32_t eventId, void* eventData);
     };
 } // namespace SPSP
