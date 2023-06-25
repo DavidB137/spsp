@@ -28,8 +28,15 @@ namespace SPSP::Nodes
     Bridge::Bridge()
     {
         // Create timer for subDBTick()
-        xTimerCreate("Bridge::subDBTick", pdMS_TO_TICKS(60*1000), pdTRUE, this,
-                     _bridge_subdb_tick);
+        TimerHandle_t subDBTickTimer = xTimerCreate("Bridge::subDBTick",
+                                                    pdMS_TO_TICKS(60*1000),
+                                                    pdTRUE, this,
+                                                    _bridge_subdb_tick);
+        if (subDBTickTimer == nullptr) {
+            SPSP_LOGE("Can't create FreeRTOS timer");
+        } else if (xTimerStart(subDBTickTimer, 0) == pdFAIL) {
+            SPSP_LOGE("Can't start FreeRTOS timer");
+        }
 
         SPSP_LOGI("Initialized");
     }
@@ -168,7 +175,10 @@ namespace SPSP::Nodes
         m_mutex.lock();
 
         auto entry = m_subDB[topic][src];
-        m_subDB[topic].erase(src);
+        SPSP_LOGD("Sub DB: remove src %s from topic %s",
+                  src.str.c_str(), topic.c_str());
+        // TODO
+        //m_subDB[topic].erase(src);
 
         // Noone is subscribed to this topic anymore
         if (m_subDB[topic].size() == 0) {
@@ -195,7 +205,9 @@ namespace SPSP::Nodes
                 return false;
             }
 
-            m_subDB.erase(topic);
+            SPSP_LOGD("Sub DB: remove topic %s", topic.c_str());
+            // TODO
+            //m_subDB.erase(topic);
         }
 
         m_mutex.unlock();
@@ -205,6 +217,8 @@ namespace SPSP::Nodes
 
     void Bridge::subDBTick()
     {
+        SPSP_LOGD("Sub DB: tick running");
+
         for (auto const& [topic, topicEntry] : m_subDB) {
             for (auto const& [src, subEntry] : topicEntry) {
                 // Don't decrement entries with infinite lifetime

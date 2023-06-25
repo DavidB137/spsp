@@ -28,8 +28,15 @@ namespace SPSP::Nodes
     Client::Client()
     {
         // Create timer for subDBTick()
-        xTimerCreate("Client::subDBTick", pdMS_TO_TICKS(60*1000), pdTRUE, this,
-                     _client_subdb_tick);
+        TimerHandle_t subDBTickTimer = xTimerCreate("Client::subDBTick",
+                                                    pdMS_TO_TICKS(60*1000),
+                                                    pdTRUE, this,
+                                                    _client_subdb_tick);
+        if (subDBTickTimer == nullptr) {
+            SPSP_LOGE("Can't create FreeRTOS timer");
+        } else if (xTimerStart(subDBTickTimer, 0) == pdFAIL) {
+            SPSP_LOGE("Can't start FreeRTOS timer");
+        }
 
         SPSP_LOGI("Initialized");
     }
@@ -58,7 +65,7 @@ namespace SPSP::Nodes
 
         LocalMessage msg = {};
         // msg.addr is empty => send to the bridge node
-        msg.type = LocalMessageType::PUB;
+        msg.type = LocalMessageType::SUB_REQ;
         msg.topic = topic;
         // msg.payload is empty
 
@@ -95,13 +102,17 @@ namespace SPSP::Nodes
     {
         const std::lock_guard lock(m_mutex);
 
+        SPSP_LOGD("Sub DB: tick running");
+
         for (auto const& [topic, subEntry] : m_subDB) {
             m_subDB[topic].lifetime--;
 
             // Expired -> remove it
             if (subEntry.lifetime == 0) {
-                m_subDB.erase(topic);
                 SPSP_LOGD("Sub DB: topic %s expired", topic.c_str());
+                // TODO: renew it and add unsubscribe() method
+                // and use erase_if() C++20
+                //m_subDB.erase(topic);
             }
         }
     }
