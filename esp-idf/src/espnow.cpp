@@ -258,7 +258,7 @@ namespace SPSP::LocalLayers::ESPNOW
         const char* topicAndPayload = reinterpret_cast<const char*>(p->payload.topicAndPayload);
 
         // Construct message
-        LocalMessage msg;
+        LocalMessage msg = {};
         msg.type = p->payload.type;
         msg.addr = this->macTolocalAddr(src);
         msg.topic = std::string{topicAndPayload, p->payload.topicLen};
@@ -378,7 +378,7 @@ namespace SPSP::LocalLayers::ESPNOW
         m_bestBridgeSignal = SIGNAL_MIN;
 
         // Prepare message
-        LocalMessage msg;
+        LocalMessage msg = {};
         msg.addr = this->broadcastAddr();
         msg.type = LocalMessageType::PROBE_REQ;
 

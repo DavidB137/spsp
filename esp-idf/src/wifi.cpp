@@ -175,6 +175,9 @@ namespace SPSP
 
     uint8_t WiFi::getChannel()
     {
+        // Mutex
+        const std::lock_guard lock(m_mutex);
+
         uint8_t ch;
         wifi_second_chan_t sec;
         ESP_ERROR_CHECK(esp_wifi_get_channel(&ch, &sec));
@@ -195,7 +198,7 @@ namespace SPSP
         // Mutex
         const std::lock_guard lock(m_mutex);
 
-        wifi_country_t c;
+        wifi_country_t c = {};
         memcpy(c.cc, cc, 3);
         c.schan = lowCh;
         c.nchan = highCh - lowCh + 1;

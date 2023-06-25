@@ -10,8 +10,8 @@
 #include "freertos/FreeRTOS.h"
 #include "freertos/timers.h"
 
-#include "spsp_logger.hpp"
 #include "spsp_bridge.hpp"
+#include "spsp_logger.hpp"
 
 // Log tag
 static const char* SPSP_LOG_TAG = "SPSP/Bridge";
@@ -125,7 +125,7 @@ namespace SPSP::Nodes
         m_mutex.lock();
 
         // Create sub entry
-        BridgeSubEntry subEntry;
+        BridgeSubEntry subEntry = {};
         subEntry.lifetime = lifetime;
         subEntry.cb = cb;
 

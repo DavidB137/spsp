@@ -43,7 +43,7 @@ namespace SPSP::Nodes
     {
         SPSP_LOGD("Publishing: %s %s", topic.c_str(), payload.c_str());
 
-        LocalMessage msg;
+        LocalMessage msg = {};
         // msg.addr is empty => send to the bridge node
         msg.type = LocalMessageType::PUB;
         msg.topic = topic;
@@ -56,7 +56,7 @@ namespace SPSP::Nodes
     {
         SPSP_LOGD("Subscribing to %s", topic.c_str());
 
-        LocalMessage msg;
+        LocalMessage msg = {};
         // msg.addr is empty => send to the bridge node
         msg.type = LocalMessageType::PUB;
         msg.topic = topic;
