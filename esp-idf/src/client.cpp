@@ -68,7 +68,8 @@ namespace SPSP::Nodes
     }
 
     bool Client::processSubData(const LocalMessage req)
-    {   
-        return m_subDB.callCb(req.topic, req.payload);
+    {
+        m_subDB.callCb(req.topic, req.payload);
+        return true;
     }
 } // namespace SPSP

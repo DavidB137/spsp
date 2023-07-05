@@ -54,17 +54,17 @@ namespace SPSP::Nodes
         SPSP_LOGD("Deinitialized");
     }
 
-    void ClientSubDB::insert(std::string topic, SPSP::SubscribeCb cb)
+    void ClientSubDB::insert(const std::string topic, SPSP::SubscribeCb cb)
     {
         const std::lock_guard lock(m_mutex);
 
         m_db[topic] = {.cb = cb};
 
-        SPSP_LOGD("Inserted topic %s with callback %p (renews in %d minutes)",
+        SPSP_LOGD("Inserted topic %s with callback %p (renews in %d min)",
                   topic.c_str(), cb, m_db[topic].lifetime);
     }
 
-    void ClientSubDB::remove(std::string topic)
+    void ClientSubDB::remove(const std::string topic)
     {
         const std::lock_guard lock(m_mutex);
 
@@ -73,7 +73,7 @@ namespace SPSP::Nodes
         SPSP_LOGD("Removed topic %s", topic.c_str());
     }
 
-    bool ClientSubDB::callCb(std::string topic, std::string payload)
+    void ClientSubDB::callCb(const std::string topic, const std::string payload)
     {
         m_mutex.lock();
 
@@ -88,19 +88,18 @@ namespace SPSP::Nodes
             // Call user's callback
             cb(topic, payload);
 
-            return true;
+            return;
         }
 
         m_mutex.unlock();
 
         SPSP_LOGD("No entry (callback) for topic %s", topic.c_str());
-        return false;
+        return;
     }
     
     void ClientSubDB::tick()
     {
         m_mutex.lock();
-
         SPSP_LOGD("Tick running");
 
         for (auto const& [topic, entry] : m_db) {
@@ -124,7 +123,6 @@ namespace SPSP::Nodes
         }
 
         m_mutex.unlock();
-
         SPSP_LOGD("Tick done");
     }
 } // namespace SPSP

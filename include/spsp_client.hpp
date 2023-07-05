@@ -64,24 +64,22 @@ namespace SPSP::Nodes
          * @param topic Topic
          * @param cb Callback for incoming data
          */
-        void insert(std::string topic, SPSP::SubscribeCb cb);
+        void insert(const std::string topic, SPSP::SubscribeCb cb);
 
         /**
          * @brief Removes entry from database
          * 
          * @param topic Topic
          */
-        void remove(std::string topic);
+        void remove(const std::string topic);
 
         /**
          * @brief Calls callbacks for incoming data
          * 
          * @param topic Topic
          * @param payload Data
-         * @return true Callback called
-         * @return false No callback available
          */
-        bool callCb(std::string topic, std::string payload);
+        void callCb(const std::string topic, const std::string payload);
 
         /**
          * @brief Time tick callback
