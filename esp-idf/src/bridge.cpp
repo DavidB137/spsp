@@ -18,26 +18,8 @@ static const char* SPSP_LOG_TAG = "SPSP/Bridge";
 
 namespace SPSP::Nodes
 {
-    // Wrapper for C timer callback
-    void _bridge_subdb_tick(TimerHandle_t xTimer)
+    Bridge::Bridge() : m_subDB{this}
     {
-        Bridge* b = static_cast<Bridge*>(pvTimerGetTimerID(xTimer));
-        b->subDBTick();
-    }
-
-    Bridge::Bridge()
-    {
-        // Create timer for subDBTick()
-        TimerHandle_t subDBTickTimer = xTimerCreate("Bridge::subDBTick",
-                                                    pdMS_TO_TICKS(60*1000),
-                                                    pdTRUE, this,
-                                                    _bridge_subdb_tick);
-        if (subDBTickTimer == nullptr) {
-            SPSP_LOGE("Can't create FreeRTOS timer");
-        } else if (xTimerStart(subDBTickTimer, 0) == pdFAIL) {
-            SPSP_LOGE("Can't start FreeRTOS timer");
-        }
-
         SPSP_LOGI("Initialized");
     }
 
@@ -59,6 +41,8 @@ namespace SPSP::Nodes
         m_fl = fl;
         m_fl->setNode(this);
 
+        // TODO: subscribe to all topics
+
         SPSP_LOGD("Set far layer");
     }
 
@@ -78,6 +62,7 @@ namespace SPSP::Nodes
     {
         SPSP_LOGD("Received far msg: %s %s", topic.c_str(), payload.c_str());
 
+        m_subDB.callCbs(topic, payload);
         return true;
     }
 
@@ -97,12 +82,14 @@ namespace SPSP::Nodes
     {
         SPSP_LOGD("Subscribing locally to %s", topic.c_str());
 
-        return this->subDBInsert(topic, LocalAddr{}, BRIDGE_SUB_NO_EXPIRE, cb);
+        return m_subDB.insert(topic, LocalAddr{}, cb);
     }
 
     bool Bridge::unsubscribe(const std::string topic)
     {
-        // TODO
+        SPSP_LOGD("Unsubscribing locally from %s", topic.c_str());
+
+        m_subDB.remove(topic, LocalAddr{});
         return true;
     }
 
@@ -127,143 +114,43 @@ namespace SPSP::Nodes
 
     bool Bridge::processSubReq(const LocalMessage req)
     {
+        return m_subDB.insert(req.topic, req.addr);
+    }
+
+    bool Bridge::publishSubData(const LocalAddr addr, const std::string topic,
+                                const std::string payload)
+    {
+        SPSP_LOGD("Sending SUB_DATA to %s: %s %s",
+                  addr.str.c_str(), topic.c_str(), payload.c_str());
+
+        LocalMessage msg = {};
+        msg.addr = addr;
+        msg.type = LocalMessageType::SUB_DATA;
+        msg.topic = topic;
+        msg.payload = payload;
+
+        return this->sendLocal(msg);
+    }
+
+    bool Bridge::subscribeFar(const std::string topic)
+    {
         // Far layer is not connected - can't deliver
         if (!this->farLayerConnected()) {
-            SPSP_LOGE("Can't publish - far layer is not connected");
+            SPSP_LOGE("Can't subscribe - far layer is not connected");
             return false;
         }
 
-        return this->subDBInsert(req.topic, req.addr);
+        return m_fl->subscribe(topic);
     }
 
-    bool Bridge::subDBInsert(const std::string topic, const LocalAddr src,
-                             uint8_t lifetime, SubscribeCb cb)
+    bool Bridge::unsubscribeFar(const std::string topic)
     {
-        m_mutex.lock();
-
-        // Create sub entry
-        BridgeSubEntry subEntry = {};
-        subEntry.lifetime = lifetime;
-        subEntry.cb = cb;
-
-        bool newTopic = m_subDB.find(topic) == m_subDB.end();
-
-        // Subscribe
-        if (newTopic) {
-            if (!this->farLayerConnected()) {
-                SPSP_LOGE("Sub DB: far layer is not connected");
-                m_mutex.unlock();
-                return false;
-            }
-
-            m_mutex.unlock();
-
-            bool subSuccess = m_fl->subscribe(topic);
-
-            SPSP_LOGD("Subscribe to topic %s: %s", topic.c_str(),
-                      subSuccess ? "success" : "fail");
-
-            if (!subSuccess) return false;
-
-            m_mutex.lock();
+        // Far layer is not connected - can't deliver
+        if (!this->farLayerConnected()) {
+            SPSP_LOGE("Can't unsubscribe - far layer is not connected");
+            return false;
         }
 
-        // Add/update the entry
-        m_subDB[topic][src] = subEntry;
-
-        m_mutex.unlock();
-
-        SPSP_LOGD("Sub DB: inserted entry: %s@%s (expires in %d min)",
-                  (src.empty() ? "." : src.str.c_str()), topic.c_str(),
-                  lifetime);
-
-        return true;
-    }
-
-    void Bridge::subDBTick()
-    {
-        SPSP_LOGD("Sub DB: tick running");
-
-        // Decrement lifetimes
-        this->subDBDecrementLifetimes();
-
-        // Remove expired sub entries
-        this->subDBRemoveExpiredSubEntries();
-
-        // Unsubscribe from unused topics
-        this->subDBRemoveUnusedTopics();
-    }
-
-    void Bridge::subDBDecrementLifetimes()
-    {
-        const std::lock_guard lock(m_mutex);
-
-        for (auto const& [topic, topicEntry] : m_subDB) {
-            for (auto const& [src, subEntry] : topicEntry) {
-                // Don't decrement entries with infinite lifetime
-                if (subEntry.lifetime != BRIDGE_SUB_NO_EXPIRE) {
-                    m_subDB[topic][src].lifetime--;
-                }
-            }
-        }
-    }
-
-    void Bridge::subDBRemoveExpiredSubEntries()
-    {
-        const std::lock_guard lock(m_mutex);
-
-        for (auto const& [topic, topicEntry] : m_subDB) {
-            auto subEntryIt = topicEntry.begin();
-            while (subEntryIt != topicEntry.end()) {
-                auto src = subEntryIt->first;
-
-                if (subEntryIt->second.lifetime == 0) {
-                    SPSP_LOGD("Sub DB: remove src %s from topic %s",
-                             src.str.c_str(), topic.c_str());
-                    subEntryIt = m_subDB[topic].erase(subEntryIt);
-                } else {
-                    subEntryIt++;
-                }
-            }
-        }
-    }
-
-    void Bridge::subDBRemoveUnusedTopics()
-    {
-        m_mutex.lock();
-
-        auto topicEntryIt = m_subDB.begin();
-        while (topicEntryIt != m_subDB.end()) {
-            auto topic = topicEntryIt->first;
-
-            // If unused
-            if (topicEntryIt->second.empty()) {
-                if (!this->farLayerConnected()) {
-                    SPSP_LOGE("Sub DB: far layer is not connected");
-                    m_mutex.unlock();
-                    return;
-                }
-
-                m_mutex.unlock();
-
-                // Unsubscribe
-                bool unsubSuccess = m_fl->unsubscribe(topic);
-
-                SPSP_LOGD("Sub DB: unsubscribe from topic %s: %s",
-                          topic.c_str(), unsubSuccess ? "success" : "fail");
-
-                if (!unsubSuccess) return;
-
-                m_mutex.lock();
-
-                SPSP_LOGD("Sub DB: remove topic %s", topic.c_str());
-
-                topicEntryIt = m_subDB.erase(topicEntryIt);
-            } else {
-                topicEntryIt++;
-            }
-        }
-
-        m_mutex.unlock();
+        return m_fl->unsubscribe(topic);
     }
 } // namespace SPSP

@@ -21,20 +21,113 @@ namespace SPSP::Nodes
     static const uint8_t BRIDGE_SUB_LIFETIME  = 15;         //!< Default subscribe lifetime
     static const uint8_t BRIDGE_SUB_NO_EXPIRE = UINT8_MAX;  //!< Subscribe lifetime for no expire
 
-    /**
-     * @brief Bridge subscribe entry
-     * 
-     * Single entry in subscribe database of a bridge.
-     * 
-     * Empty addresses are treated as local to this node.
-     */
-    struct BridgeSubEntry
-    {
-        uint8_t lifetime = BRIDGE_SUB_LIFETIME;  //!< Lifetime in minutes
-        SPSP::SubscribeCb cb = nullptr;          //!< Callback for incoming data
-    };
+    // Forward declaration
+    class Bridge;
 
-    using BridgeSubDB = std::unordered_map<std::string, std::unordered_map<LocalAddr, BridgeSubEntry>>;
+    /**
+     * @brief Container for subscribe database of bridge
+     * 
+     */
+    class BridgeSubDB
+    {
+        /**
+         * @brief Bridge subscribe entry
+         * 
+         * Single entry in subscribe database of a bridge.
+         * 
+         * Empty addresses are treated as local to this node.
+         */
+        struct Entry
+        {
+            uint8_t lifetime = BRIDGE_SUB_LIFETIME;  //!< Lifetime in minutes
+            SPSP::SubscribeCb cb = nullptr;          //!< Callback for incoming data
+        };
+
+        Bridge* m_bridge;                         //!< Pointer to bridge (owner)
+        std::mutex m_mutex;                       //!< Mutex to prevent race conditions
+        void* m_timer;                            //!< Timer handle pointer (platform dependent)
+        std::unordered_map<
+            std::string,
+            std::unordered_map<LocalAddr, Entry>
+        > m_db;                                   //!< Database
+    
+    public:
+        /**
+         * @brief Construct a new bridge sub DB
+         * 
+         * @param bridge Pointer to bridge node (owner)
+         */
+        BridgeSubDB(Bridge* bridge);
+
+        /**
+         * @brief Destroys the bridge sub DB
+         */
+        ~BridgeSubDB();
+
+        /**
+         * @brief Inserts entry into database
+         * 
+         * Doesn't subscribe on far layer (this is caller's responsibility).
+         * 
+         * @param topic Topic
+         * @param addr Node address
+         * @param cb Callback for incoming data (only for local subscriptions)
+         * @return true New topic
+         * @return false Someone else has already been subscribed to this topic
+         */
+        bool insert(const std::string topic, const LocalAddr addr,
+                    const SubscribeCb cb = nullptr);
+
+        /**
+         * @brief Removes entry from database
+         * 
+         * Calls `removeUnusedTopics()`.
+         * 
+         * @param topic Topic
+         * @param addr Node address
+         */
+        void remove(const std::string topic, const LocalAddr addr);
+
+        /**
+         * @brief Calls callbacks for incoming data
+         * 
+         * For non-local addresses calls `Bridge::publishSubData()`.
+         * 
+         * @param topic Topic
+         * @param payload Data
+         */
+        void callCbs(const std::string topic, const std::string payload);
+
+        /**
+         * @brief Time tick callback
+         * 
+         * Decrements subscribe database lifetimes.
+         * If any entry expires, removes it and if it was the last one for
+         * given topic, unsubscribes from it.
+         * In case of unsubscribe calls `Bridge::unsubscribeFar()`.
+         */
+        void tick();
+    
+    protected:
+        /**
+         * @brief Decrements lifetimes of entries
+         * 
+         */
+        void decrementLifetimes();
+
+        /**
+         * @brief Removes expired entries
+         * 
+         */
+        void removeExpiredSubEntries();
+
+        /**
+         * @brief Removes and unsubscribes from unused topics
+         * 
+         * In case of unsubscribe calls `Bridge::unsubscribeFar()`.
+         */
+        void removeUnusedTopics();
+    };
 
     /**
      * @brief Bridge node
@@ -42,6 +135,9 @@ namespace SPSP::Nodes
      */
     class Bridge : public SPSP::INode
     {
+        // Subscribe DB can access private members
+        friend class BridgeSubDB;
+
     protected:
         SPSP::IFarLayer* m_fl = nullptr;
         BridgeSubDB m_subDB;
@@ -141,15 +237,6 @@ namespace SPSP::Nodes
          */
         inline bool isBridge() { return true; }
 
-        /**
-         * @brief Time tick callback for subscribe DB
-         * 
-         * Decrements subscribe database lifetimes.
-         * If any item completely expires, removes it from DB and if it was
-         * the last one for given topic, unsubscribes from it.
-         */
-        void subDBTick();
-
     protected:
         /**
          * @brief Processes PROBE_REQ message
@@ -201,36 +288,33 @@ namespace SPSP::Nodes
         bool processSubData(const LocalMessage req) { return true; }
 
         /**
-         * @brief Inserts entry into subscribe database and subscribes to given
-         *        topic (if needed).
+         * @brief Publishes received subscription data to local layer node
+         * 
+         * @param addr Node address
+         * @param topic Topic
+         * @param payload Payload
+         * @return true Message delivery successful
+         * @return false Message delivery failed
+         */
+        bool publishSubData(const LocalAddr addr, const std::string topic,
+                            const std::string payload);
+
+        /**
+         * @brief Subscribes to topic on far layer (if connected)
          * 
          * @param topic Topic
-         * @param src Source node
-         * @param lifetime Lifetime of subscribe in minutes
-         * @param cb Subscribe callback (only for local subscribes)
-         * @return true Insert successful
-         * @return false Insert failed
+         * @return true Subscription successful
+         * @return false Subscription failed
          */
-        bool subDBInsert(const std::string topic, const LocalAddr src,
-                         uint8_t lifetime = BRIDGE_SUB_LIFETIME,
-                         SubscribeCb cb = nullptr);
+        bool subscribeFar(const std::string topic);
 
         /**
-         * @brief Decrements lifetimes of sub DB entries
+         * @brief Unsubscribes from topic on far layer (if connected)
          * 
+         * @param topic Topic
+         * @return true Unsubscription successful
+         * @return false Unsubscription failed
          */
-        void subDBDecrementLifetimes();
-
-        /**
-         * @brief Removes expired sub DB entries
-         * 
-         */
-        void subDBRemoveExpiredSubEntries();
-
-        /**
-         * @brief Removes and unsubscribes from unused topics in sub DB
-         * 
-         */
-        void subDBRemoveUnusedTopics();
+        bool unsubscribeFar(const std::string topic);
     };
 } // namespace SPSP::Nodes
