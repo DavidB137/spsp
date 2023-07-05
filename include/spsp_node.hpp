@@ -93,8 +93,21 @@ namespace SPSP
          * 
          * @param topic Topic
          * @param cb Callback function
+         * @return true Subscribe successful
+         * @return false Subscribe failed
          */
         virtual bool subscribe(const std::string topic, SubscribeCb cb) = 0;
+
+        /**
+         * @brief Unsubscribes from topic
+         * 
+         * This is primary endpoint for unsubscribing locally on all node types.
+         * 
+         * @param topic Topic
+         * @return true Unsubscribe successful
+         * @return false Unsubscribe failed
+         */
+        virtual bool unsubscribe(const std::string topic) = 0;
 
         /**
          * @brief Predicate whether this node is a bridge

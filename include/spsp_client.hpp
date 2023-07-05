@@ -70,11 +70,26 @@ namespace SPSP::Nodes
          * 
          * This is primary endpoint for subscribing locally on this node.
          * Directly forwards incoming data from local layer to given callback.
+         * Subscribe request is sent to the bridge and extended automatically
+         * until `unsubscribe()` is called.
          * 
          * @param topic Topic
          * @param cb Callback function
+         * @return true Subscribe successful
+         * @return false Subscribe failed
          */
         bool subscribe(const std::string topic, SubscribeCb cb);
+
+        /**
+         * @brief Unsubscribes from topic
+         * 
+         * This is primary endpoint for unsubscribing locally on this node.
+         * 
+         * @param topic Topic
+         * @return true Unsubscribe successful
+         * @return false Unsubscribe failed
+         */
+        bool unsubscribe(const std::string topic);
 
         /**
          * @brief Predicate whether this node is a bridge

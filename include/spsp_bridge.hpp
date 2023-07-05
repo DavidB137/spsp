@@ -117,8 +117,21 @@ namespace SPSP::Nodes
          * 
          * @param topic Topic
          * @param cb Callback function
+         * @return true Subscribe successful
+         * @return false Subscribe failed
          */
         bool subscribe(const std::string topic, SubscribeCb cb);
+
+        /**
+         * @brief Unsubscribes from topic
+         * 
+         * This is primary endpoint for unsubscribing locally on this node.
+         * 
+         * @param topic Topic
+         * @return true Unsubscribe successful
+         * @return false Unsubscribe failed
+         */
+        bool unsubscribe(const std::string topic);
 
         /**
          * @brief Predicate whether this node is a bridge
@@ -203,14 +216,21 @@ namespace SPSP::Nodes
                          SubscribeCb cb = nullptr);
 
         /**
-         * @brief Removes entry from subscribe database and unsubscribes from
-         *        given topic (if needed).
+         * @brief Decrements lifetimes of sub DB entries
          * 
-         * @param topic Topic
-         * @param src Source node
-         * @return true Removal successful
-         * @return false Removal failed
          */
-        bool subDBRemove(const std::string topic, const LocalAddr src);
+        void subDBDecrementLifetimes();
+
+        /**
+         * @brief Removes expired sub DB entries
+         * 
+         */
+        void subDBRemoveExpiredSubEntries();
+
+        /**
+         * @brief Removes and unsubscribes from unused topics in sub DB
+         * 
+         */
+        void subDBRemoveUnusedTopics();
     };
 } // namespace SPSP::Nodes

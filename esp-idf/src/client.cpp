@@ -77,6 +77,16 @@ namespace SPSP::Nodes
         return this->sendLocal(msg);
     }
 
+    bool Client::unsubscribe(const std::string topic)
+    {
+        const std::lock_guard lock(m_mutex);
+
+        SPSP_LOGD("Unsubscribing from %s", topic.c_str());
+
+        // Remove from sub DB
+        return m_subDB.erase(topic) == 1;
+    }
+
     bool Client::processSubData(const LocalMessage req)
     {
         m_mutex.lock();
@@ -84,7 +94,7 @@ namespace SPSP::Nodes
         if (m_subDB.find(req.topic) != m_subDB.end()) {
             auto cb = m_subDB[req.topic].cb;
 
-            SPSP_LOGD("SUB DATA: calling user callback (%p) for topic %s",
+            SPSP_LOGD("SUB_DATA: calling user callback (%p) for topic %s",
                       cb, req.topic.c_str());
 
             m_mutex.unlock();
@@ -100,20 +110,25 @@ namespace SPSP::Nodes
 
     void Client::subDBTick()
     {
-        const std::lock_guard lock(m_mutex);
-
         SPSP_LOGD("Sub DB: tick running");
+
+        m_mutex.lock();
 
         for (auto const& [topic, subEntry] : m_subDB) {
             m_subDB[topic].lifetime--;
 
-            // Expired -> remove it
+            // Expired -> renew it
             if (subEntry.lifetime == 0) {
-                SPSP_LOGD("Sub DB: topic %s expired", topic.c_str());
-                // TODO: renew it and add unsubscribe() method
-                // and use erase_if() C++20
-                //m_subDB.erase(topic);
+                SPSP_LOGD("Sub DB: topic %s expired (renewing)", topic.c_str());
+
+                m_mutex.unlock();
+                if (!this->subscribe(topic, subEntry.cb)) {
+                    SPSP_LOGE("Sub DB: topic %s can't be extended", topic.c_str());
+                }
+                m_mutex.lock();
             }
         }
+
+        m_mutex.unlock();
     }
 } // namespace SPSP

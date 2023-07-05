@@ -100,6 +100,12 @@ namespace SPSP::Nodes
         return this->subDBInsert(topic, LocalAddr{}, BRIDGE_SUB_NO_EXPIRE, cb);
     }
 
+    bool Bridge::unsubscribe(const std::string topic)
+    {
+        // TODO
+        return true;
+    }
+
     bool Bridge::processProbeReq(const LocalMessage req)
     {
         LocalMessage res = req;
@@ -174,54 +180,23 @@ namespace SPSP::Nodes
         return true;
     }
 
-    bool Bridge::subDBRemove(const std::string topic, const LocalAddr src)
-    {
-        m_mutex.lock();
-
-        auto entry = m_subDB[topic][src];
-        SPSP_LOGD("Sub DB: remove src %s from topic %s",
-                  src.str.c_str(), topic.c_str());
-        // TODO
-        //m_subDB[topic].erase(src);
-
-        // Noone is subscribed to this topic anymore
-        if (m_subDB[topic].size() == 0) {
-            if (!this->farLayerConnected()) {
-                SPSP_LOGE("Sub DB: far layer is not connected");
-                m_mutex.unlock();
-                return false;
-            }
-
-            m_mutex.unlock();
-
-            // Unsubscribe
-            bool unsubSuccess = m_fl->unsubscribe(topic);
-
-            SPSP_LOGD("Unsubscribe from topic %s: %s", topic.c_str(),
-                      unsubSuccess ? "success" : "fail");
-
-            m_mutex.lock();
-
-            if (!unsubSuccess) {
-                // Restore original state
-                m_subDB[topic][src] = entry;
-                m_mutex.unlock();
-                return false;
-            }
-
-            SPSP_LOGD("Sub DB: remove topic %s", topic.c_str());
-            // TODO
-            //m_subDB.erase(topic);
-        }
-
-        m_mutex.unlock();
-
-        return true;
-    }
-
     void Bridge::subDBTick()
     {
         SPSP_LOGD("Sub DB: tick running");
+
+        // Decrement lifetimes
+        this->subDBDecrementLifetimes();
+
+        // Remove expired sub entries
+        this->subDBRemoveExpiredSubEntries();
+
+        // Unsubscribe from unused topics
+        this->subDBRemoveUnusedTopics();
+    }
+
+    void Bridge::subDBDecrementLifetimes()
+    {
+        const std::lock_guard lock(m_mutex);
 
         for (auto const& [topic, topicEntry] : m_subDB) {
             for (auto const& [src, subEntry] : topicEntry) {
@@ -229,12 +204,66 @@ namespace SPSP::Nodes
                 if (subEntry.lifetime != BRIDGE_SUB_NO_EXPIRE) {
                     m_subDB[topic][src].lifetime--;
                 }
+            }
+        }
+    }
 
-                // Expired -> remove it
-                if (subEntry.lifetime == 0) {
-                    this->subDBRemove(topic, src);
+    void Bridge::subDBRemoveExpiredSubEntries()
+    {
+        const std::lock_guard lock(m_mutex);
+
+        for (auto const& [topic, topicEntry] : m_subDB) {
+            auto subEntryIt = topicEntry.begin();
+            while (subEntryIt != topicEntry.end()) {
+                auto src = subEntryIt->first;
+
+                if (subEntryIt->second.lifetime == 0) {
+                    SPSP_LOGD("Sub DB: remove src %s from topic %s",
+                             src.str.c_str(), topic.c_str());
+                    subEntryIt = m_subDB[topic].erase(subEntryIt);
+                } else {
+                    subEntryIt++;
                 }
             }
         }
+    }
+
+    void Bridge::subDBRemoveUnusedTopics()
+    {
+        m_mutex.lock();
+
+        auto topicEntryIt = m_subDB.begin();
+        while (topicEntryIt != m_subDB.end()) {
+            auto topic = topicEntryIt->first;
+
+            // If unused
+            if (topicEntryIt->second.empty()) {
+                if (!this->farLayerConnected()) {
+                    SPSP_LOGE("Sub DB: far layer is not connected");
+                    m_mutex.unlock();
+                    return;
+                }
+
+                m_mutex.unlock();
+
+                // Unsubscribe
+                bool unsubSuccess = m_fl->unsubscribe(topic);
+
+                SPSP_LOGD("Sub DB: unsubscribe from topic %s: %s",
+                          topic.c_str(), unsubSuccess ? "success" : "fail");
+
+                if (!unsubSuccess) return;
+
+                m_mutex.lock();
+
+                SPSP_LOGD("Sub DB: remove topic %s", topic.c_str());
+
+                topicEntryIt = m_subDB.erase(topicEntryIt);
+            } else {
+                topicEntryIt++;
+            }
+        }
+
+        m_mutex.unlock();
     }
 } // namespace SPSP
