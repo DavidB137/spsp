@@ -24,6 +24,8 @@ namespace SPSP
 
         m_ll = ll;
         m_ll->setNode(this);
+
+        SPSP_LOGD("Set far layer");
     }
 
     void INode::unsetLocalLayer()
@@ -34,14 +36,16 @@ namespace SPSP
             m_ll->unsetNode();
             m_ll = nullptr;
         }
+
+        SPSP_LOGD("Unset far layer");
     }
 
     bool INode::receiveLocal(const LocalMessage msg, int rssi)
     {
         if (rssi < INT_MAX) {
-            SPSP_LOGD("Received local msg: %s (%d dBm)", msg.toString().c_str(), rssi);
+            SPSP_LOGI("Received local msg: %s (%d dBm)", msg.toString().c_str(), rssi);
         } else {
-            SPSP_LOGD("Received local msg: %s", msg.toString().c_str());
+            SPSP_LOGI("Received local msg: %s", msg.toString().c_str());
         }
 
         bool delivered = true;
@@ -75,12 +79,12 @@ namespace SPSP
             return false;
         }
 
-        SPSP_LOGD("Sending local msg: %s", msg.toString().c_str());
+        SPSP_LOGI("Sending local msg: %s", msg.toString().c_str());
 
         // Send to local layer
         bool delivered = m_ll->send(msg);
 
-        SPSP_LOGD("Message %s: %s", delivered ? "delivered" : "not delivered",
+        SPSP_LOGI("Message %s: %s", delivered ? "delivered" : "not delivered",
                   msg.toString().c_str());
 
         return delivered;

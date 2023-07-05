@@ -58,6 +58,8 @@ namespace SPSP::Nodes
 
         m_fl = fl;
         m_fl->setNode(this);
+
+        SPSP_LOGD("Set far layer");
     }
 
     void Bridge::unsetFarLayer()
@@ -68,6 +70,8 @@ namespace SPSP::Nodes
             m_fl->unsetNode();
             m_fl = nullptr;
         }
+
+        SPSP_LOGD("Unset far layer");
     }
 
     bool Bridge::receiveFar(const std::string topic, const std::string payload)
@@ -164,7 +168,7 @@ namespace SPSP::Nodes
         m_mutex.unlock();
 
         SPSP_LOGD("Sub DB: inserted entry: %s@%s (expires in %d min)",
-                  (src.empty() ? src.str.c_str() : "."), topic.c_str(),
+                  (src.empty() ? "." : src.str.c_str()), topic.c_str(),
                   lifetime);
 
         return true;
