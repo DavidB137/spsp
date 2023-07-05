@@ -18,26 +18,8 @@ static const char* SPSP_LOG_TAG = "SPSP/Client";
 
 namespace SPSP::Nodes
 {
-    // Wrapper for C timer callback
-    void _client_subdb_tick(TimerHandle_t xTimer)
+    Client::Client() : m_subDB{this}
     {
-        Client* c = static_cast<Client*>(pvTimerGetTimerID(xTimer));
-        c->subDBTick();
-    }
-
-    Client::Client()
-    {
-        // Create timer for subDBTick()
-        TimerHandle_t subDBTickTimer = xTimerCreate("Client::subDBTick",
-                                                    pdMS_TO_TICKS(60*1000),
-                                                    pdTRUE, this,
-                                                    _client_subdb_tick);
-        if (subDBTickTimer == nullptr) {
-            SPSP_LOGE("Can't create FreeRTOS timer");
-        } else if (xTimerStart(subDBTickTimer, 0) == pdFAIL) {
-            SPSP_LOGE("Can't start FreeRTOS timer");
-        }
-
         SPSP_LOGI("Initialized");
     }
 
@@ -70,65 +52,23 @@ namespace SPSP::Nodes
         // msg.payload is empty
 
         // Add to sub DB
-        m_mutex.lock();
-        m_subDB[topic] = {.cb = cb};
-        m_mutex.unlock();
+        m_subDB.insert(topic, cb);
 
         return this->sendLocal(msg);
     }
 
     bool Client::unsubscribe(const std::string topic)
     {
-        const std::lock_guard lock(m_mutex);
-
         SPSP_LOGD("Unsubscribing from %s", topic.c_str());
 
         // Remove from sub DB
-        return m_subDB.erase(topic) == 1;
+        m_subDB.remove(topic);
+
+        return true;
     }
 
     bool Client::processSubData(const LocalMessage req)
-    {
-        m_mutex.lock();
-
-        if (m_subDB.find(req.topic) != m_subDB.end()) {
-            auto cb = m_subDB[req.topic].cb;
-
-            SPSP_LOGD("SUB_DATA: calling user callback (%p) for topic %s",
-                      cb, req.topic.c_str());
-
-            m_mutex.unlock();
-
-            // Call user's callback
-            cb(req.topic, req.payload);
-            return true;
-        }
-
-        m_mutex.unlock();
-        return false;
-    }
-
-    void Client::subDBTick()
-    {
-        SPSP_LOGD("Sub DB: tick running");
-
-        m_mutex.lock();
-
-        for (auto const& [topic, subEntry] : m_subDB) {
-            m_subDB[topic].lifetime--;
-
-            // Expired -> renew it
-            if (subEntry.lifetime == 0) {
-                SPSP_LOGD("Sub DB: topic %s expired (renewing)", topic.c_str());
-
-                m_mutex.unlock();
-                if (!this->subscribe(topic, subEntry.cb)) {
-                    SPSP_LOGE("Sub DB: topic %s can't be extended", topic.c_str());
-                }
-                m_mutex.lock();
-            }
-        }
-
-        m_mutex.unlock();
+    {   
+        return m_subDB.callCb(req.topic, req.payload);
     }
 } // namespace SPSP

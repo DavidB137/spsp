@@ -9,6 +9,8 @@
 
 #pragma once
 
+#include <mutex>
+#include <thread>
 #include <unordered_map>
 
 #include "spsp_layers.hpp"
@@ -18,18 +20,77 @@ namespace SPSP::Nodes
 {
     static const uint8_t CLIENT_SUB_LIFETIME = 10;  //!< Default subscribe lifetime
 
-    /**
-     * @brief Client subscribe entry
-     * 
-     * Single entry in subscribe database of a client.
-     */
-    struct ClientSubEntry
-    {
-        uint8_t lifetime = CLIENT_SUB_LIFETIME;  //!< Lifetime in minutes
-        SPSP::SubscribeCb cb = nullptr;          //!< Callback for incoming data
-    };
+    // Forward declaration
+    class Client;
 
-    using ClientSubDB = std::unordered_map<std::string, ClientSubEntry>;
+    /**
+     * @brief Container for subscribe database of client
+     * 
+     */
+    class ClientSubDB
+    {
+        /**
+         * @brief Client subscribe entry
+         * 
+         * Single entry in subscribe database of a client.
+         */
+        struct Entry
+        {
+            uint8_t lifetime = CLIENT_SUB_LIFETIME;  //!< Lifetime in minutes
+            SPSP::SubscribeCb cb = nullptr;          //!< Callback for incoming data
+        };
+
+        Client* m_client;                             //!< Pointer to client (owner)
+        std::mutex m_mutex;                           //!< Mutex to prevent race conditions
+        void* m_timer;                                //!< Timer handle pointer (platform dependent)
+        std::unordered_map<std::string, Entry> m_db;  //!< Database
+
+    public:
+        /**
+         * @brief Construct a new client sub DB
+         * 
+         * @param client Pointer to client node (owner)
+         */
+        ClientSubDB(Client* client);
+
+        /**
+         * @brief Destroys the client sub DB
+         */
+        ~ClientSubDB();
+
+        /**
+         * @brief Inserts entry into database
+         * 
+         * @param topic Topic
+         * @param cb Callback for incoming data
+         */
+        void insert(std::string topic, SPSP::SubscribeCb cb);
+
+        /**
+         * @brief Removes entry from database
+         * 
+         * @param topic Topic
+         */
+        void remove(std::string topic);
+
+        /**
+         * @brief Calls callbacks for incoming data
+         * 
+         * @param topic Topic
+         * @param payload Data
+         * @return true Callback called
+         * @return false No callback available
+         */
+        bool callCb(std::string topic, std::string payload);
+
+        /**
+         * @brief Time tick callback
+         * 
+         * Decrements subscribe database lifetimes.
+         * If any item expires, renews it.
+         */
+        void tick();
+    };
 
     /**
      * @brief Client node
@@ -37,6 +98,9 @@ namespace SPSP::Nodes
      */
     class Client : public SPSP::INode
     {
+        // Subscribe DB can access private members
+        friend class ClientSubDB;
+
         ClientSubDB m_subDB;
 
     public:
@@ -98,14 +162,6 @@ namespace SPSP::Nodes
          * @return false This is not a bridge
          */
         inline bool isBridge() { return false; }
-
-        /**
-         * @brief Time tick callback for subscribe DB
-         * 
-         * Decrements subscribe database lifetimes.
-         * If any item completely expires, removes it from DB.
-         */
-        void subDBTick();
 
     protected:
         /**
