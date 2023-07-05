@@ -78,6 +78,8 @@ namespace SPSP::Nodes
             SPSP_LOGD("Inserted %s@%s (expires in %d min)",
                       addr.str.c_str(), topic.c_str(), subEntry.lifetime);
         }
+
+        return newTopic;
     }
 
     void BridgeSubDB::remove(const std::string topic, const LocalAddr addr)
@@ -123,7 +125,6 @@ namespace SPSP::Nodes
     
     void BridgeSubDB::tick()
     {
-        const std::lock_guard lock(m_mutex);
         SPSP_LOGD("Tick running");
 
         this->decrementLifetimes();
@@ -183,6 +184,7 @@ namespace SPSP::Nodes
 
                 if (unsubSuccess) {
                     topicEntryIt = m_db.erase(topicEntryIt);
+                    SPSP_LOGD("Removed unused topic %s", topic.c_str());
                 } else {
                     SPSP_LOGE("Topic %s can't be unsubscribed. Will try again in next tick.",
                               topic.c_str());
