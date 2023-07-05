@@ -65,7 +65,7 @@ namespace SPSP
         }
 
         if (!delivered) {
-            SPSP_LOGE("Message not delivered: %s", msg.toString().c_str());
+            SPSP_LOGE("Message not processed: %s", msg.toString().c_str());
         }
 
         return delivered;
