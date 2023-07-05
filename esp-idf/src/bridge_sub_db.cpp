@@ -68,6 +68,15 @@ namespace SPSP::Nodes
 
         bool newTopic = m_db.find(topic) == m_db.end();
 
+        if (newTopic) {
+            // Subscribe to the topic
+            if (!m_bridge->subscribeFar(topic)) {
+                SPSP_LOGE("Insert: subscribe to topic %s failed - not inserting anything",
+                          topic.c_str());
+                return false;
+            }
+        }
+
         // Add/update the entry
         m_db[topic][addr] = subEntry;
 
@@ -79,7 +88,7 @@ namespace SPSP::Nodes
                       addr.str.c_str(), topic.c_str(), subEntry.lifetime);
         }
 
-        return newTopic;
+        return true;
     }
 
     void BridgeSubDB::remove(const std::string topic, const LocalAddr addr)

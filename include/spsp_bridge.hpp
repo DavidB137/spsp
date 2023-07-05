@@ -68,13 +68,13 @@ namespace SPSP::Nodes
         /**
          * @brief Inserts entry into database
          * 
-         * Doesn't subscribe on far layer (this is caller's responsibility).
+         * Internally subscribes on far layer if needed.
          * 
          * @param topic Topic
          * @param addr Node address
          * @param cb Callback for incoming data (only for local subscriptions)
-         * @return true New topic
-         * @return false Someone else has already been subscribed to this topic
+         * @return true Insert (including subscribe) successful
+         * @return false Insert failed
          */
         bool insert(const std::string topic, const LocalAddr addr,
                     const SubscribeCb cb = nullptr);
