@@ -14,6 +14,7 @@
 #include <unordered_map>
 
 #include "spsp_layers.hpp"
+#include "spsp_local_addr.hpp"
 #include "spsp_node.hpp"
 
 namespace SPSP::Nodes
