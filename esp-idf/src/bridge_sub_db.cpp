@@ -107,6 +107,19 @@ namespace SPSP::Nodes
         this->removeUnusedTopics();
     }
 
+    void BridgeSubDB::resubscribeAll()
+    {
+        const std::lock_guard lock(m_mutex);
+
+        for (auto const& [topic, topicEntry] : m_db) {
+            if (!m_bridge->subscribeFar(topic)) {
+                SPSP_LOGW("Resubscribe to topic %s failed", topic.c_str());
+            }
+        }
+
+        SPSP_LOGD("Resubscribed to %d topics", m_db.size());
+    }
+
     void BridgeSubDB::callCbs(const std::string topic, const std::string payload)
     {
         m_mutex.lock();

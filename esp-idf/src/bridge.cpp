@@ -41,9 +41,10 @@ namespace SPSP::Nodes
         m_fl = fl;
         m_fl->setNode(this);
 
-        // TODO: subscribe to all topics
-
         SPSP_LOGD("Set far layer");
+
+        // Subscribe to all topics
+        m_subDB.resubscribeAll();
     }
 
     void Bridge::unsetFarLayer()

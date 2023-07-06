@@ -90,6 +90,12 @@ namespace SPSP::Nodes
         void remove(const std::string topic, const LocalAddr addr);
 
         /**
+         * @brief Resubscribes to all topics
+         * 
+         */
+        void resubscribeAll();
+
+        /**
          * @brief Calls callbacks for incoming data
          * 
          * For non-local addresses calls `Bridge::publishSubData()`.
