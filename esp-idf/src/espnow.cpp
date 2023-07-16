@@ -94,7 +94,7 @@ namespace SPSP::LocalLayers::ESPNOW
                 dst = m_bestBridgeAddr;
                 SPSP_LOGD("Send: rewriting destination MAC to %s", dst.str.c_str());
             } else {
-                SPSP_LOGE("Send fail: destination address is empty and no bridge connected");
+                SPSP_LOGE("Send fail: destination address is empty and no bridge is connected");
                 return false;
             }
         }
