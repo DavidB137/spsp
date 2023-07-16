@@ -216,5 +216,14 @@ namespace SPSP::Nodes
          * @return false Message delivery failed
          */
         bool processSubData(const LocalMessage req);
+
+        /**
+         * @brief Processes UNSUB message
+         * 
+         * @param req Request message
+         * @return true Message delivery successful
+         * @return false Message delivery failed
+         */
+        bool processUnsub(const LocalMessage req) { return true; }
     };
 } // namespace SPSP::Nodes

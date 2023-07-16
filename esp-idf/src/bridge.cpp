@@ -118,6 +118,12 @@ namespace SPSP::Nodes
         return m_subDB.insert(req.topic, req.addr);
     }
 
+    bool Bridge::processUnsub(const LocalMessage req)
+    {
+        m_subDB.remove(req.topic, req.addr);
+        return true;
+    }
+
     bool Bridge::publishSubData(const LocalAddr addr, const std::string topic,
                                 const std::string payload)
     {

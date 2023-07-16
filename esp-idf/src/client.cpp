@@ -61,10 +61,16 @@ namespace SPSP::Nodes
     {
         SPSP_LOGD("Unsubscribing from %s", topic.c_str());
 
+        LocalMessage msg = {};
+        // msg.addr is empty => send to the bridge node
+        msg.type = LocalMessageType::UNSUB;
+        msg.topic = topic;
+        // msg.payload is empty
+
         // Remove from sub DB
         m_subDB.remove(topic);
 
-        return true;
+        return this->sendLocal(msg);
     }
 
     bool Client::processSubData(const LocalMessage req)

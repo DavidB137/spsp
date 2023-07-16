@@ -295,6 +295,15 @@ namespace SPSP::Nodes
         bool processSubData(const LocalMessage req) { return true; }
 
         /**
+         * @brief Processes UNSUB message
+         * 
+         * @param req Request message
+         * @return true Message delivery successful
+         * @return false Message delivery failed
+         */
+        bool processUnsub(const LocalMessage req);
+
+        /**
          * @brief Publishes received subscription data to local layer node
          * 
          * @param addr Node address

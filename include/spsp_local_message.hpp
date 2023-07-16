@@ -29,6 +29,7 @@ namespace SPSP
         PUB        = 20,
         SUB_REQ    = 30,
         SUB_DATA   = 31,
+        UNSUB      = 32,
     };
 
     /**
@@ -49,6 +50,7 @@ namespace SPSP
             case LocalMessageType::PUB: return "PUB";
             case LocalMessageType::SUB_REQ: return "SUB_REQ";
             case LocalMessageType::SUB_DATA: return "SUB_DATA";
+            case LocalMessageType::UNSUB: return "UNSUB";
             default: return "???";
         }
     }

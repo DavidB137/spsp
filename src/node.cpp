@@ -57,6 +57,7 @@ namespace SPSP
         case LocalMessageType::PUB: delivered = processPub(msg); break;
         case LocalMessageType::SUB_REQ: delivered = processSubReq(msg); break;
         case LocalMessageType::SUB_DATA: delivered = processSubData(msg); break;
+        case LocalMessageType::UNSUB: delivered = processUnsub(msg); break;
         default:
             SPSP_LOGW("Unprocessable message type %s (%d)",
                       localMessageTypeToStr(msg.type),

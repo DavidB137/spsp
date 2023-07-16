@@ -171,5 +171,14 @@ namespace SPSP
          * @return false Message delivery failed
          */
         virtual bool processSubData(const LocalMessage req) = 0;
+
+        /**
+         * @brief Processes UNSUB message
+         * 
+         * @param req Request message
+         * @return true Message delivery successful
+         * @return false Message delivery failed
+         */
+        virtual bool processUnsub(const LocalMessage req) = 0;
     };
 } // namespace SPSP
