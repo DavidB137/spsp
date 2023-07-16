@@ -155,12 +155,12 @@ namespace SPSP::Nodes
         bool unsubscribe(const std::string topic);
 
         /**
-         * @brief Predicate whether this node is a bridge
+         * @brief Predicate whether this node is a client
          * 
-         * @return true This is a bridge
-         * @return false This is not a bridge
+         * @return true This is a client
+         * @return false This is not a client
          */
-        inline bool isBridge() { return false; }
+        inline bool isClient() { return true; }
 
     protected:
         /**

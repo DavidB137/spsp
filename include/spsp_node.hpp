@@ -110,12 +110,12 @@ namespace SPSP
         virtual bool unsubscribe(const std::string topic) = 0;
 
         /**
-         * @brief Predicate whether this node is a bridge
+         * @brief Predicate whether this node is a client
          * 
-         * @return true This is a bridge
-         * @return false This is not a bridge
+         * @return true This is a client
+         * @return false This is not a client
          */
-        virtual bool isBridge() = 0;
+        virtual bool isClient() = 0;
 
     protected:
         /**

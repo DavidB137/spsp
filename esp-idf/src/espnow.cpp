@@ -350,7 +350,7 @@ namespace SPSP::LocalLayers::ESPNOW
         // Mutex
         const std::lock_guard lock(m_mutex);
 
-        if (this->getNode()->isBridge()) {
+        if (!this->getNode()->isClient()) {
             SPSP_LOGE("Connect to bridge: this node is a bridge");
             return false;
         }
