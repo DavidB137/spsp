@@ -68,6 +68,20 @@ namespace SPSP::LocalLayers::ESPNOW
     static_assert(sizeof(Packet) == 18);
 
     /**
+     * @brief Bridge connection info
+     * 
+     * Needed for reconnection to the same bridge (i.e. after deep-sleep).
+     */
+    struct BridgeConnInfo
+    {
+        uint8_t addr[6];  //!< Address
+        uint8_t ch;       //!< Wireless channel
+    };
+
+    // Assert sizes
+    static_assert(sizeof(BridgeConnInfo) == 7);
+
+    /**
      * @brief ESP-NOW local layer
      * 
      */
@@ -137,14 +151,27 @@ namespace SPSP::LocalLayers::ESPNOW
         /**
          * @brief Connects to the bridge
          * 
-         * Probes all wireless channels (available in the currently configured
-         * country) and selects bridge with the best signal.
+         * If `rtndBr` is not `nullptr`, uses it's address, returns
+         * `true` immediately, does no scan whatsoever and `connBr = rtndBr`.
+         * Otherwise probes all wireless channels (available in the currently
+         * configured country) and selects bridge with the best signal.
          * 
-         * @param br Bridge peer address storage (if connection successful and `br` != nullptr)
+         * You can use `retainedBridge` and `connectedBridge` parameters to
+         * implement custom logic around deep-sleep reconnection without scans.
+         * 
+         * Required size of memory under `rtndBr` and `connBr` is 7 bytes
+         * (`sizeof(SPSP::LocalLayers::ESPNOW::BridgeConnInfo)`).
+         * 
+         * `rtndBr` and `connBr` may be the same pointers.
+         * 
+         * @param rtndBr Retained bridge peer info (for reconnection)
+         * @param connBr Connected bridge peer info storage (if connection
+         *               successful and `connBr` != nullptr)
          * @return true Connection successful
          * @return false Connection failed
          */
-        bool connectToBridge(LocalAddr* br = nullptr);
+        bool connectToBridge(void* rtndBr = nullptr,
+                             void* connBr = nullptr);
 
         /**
          * @brief Receive callback for underlaying ESP-NOW C functions.

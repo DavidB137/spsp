@@ -345,7 +345,7 @@ namespace SPSP::LocalLayers::ESPNOW
         m_sendingPromises[bucketId].set_value(delivered);
     }
 
-    bool Layer::connectToBridge(LocalAddr* br)
+    bool Layer::connectToBridge(void* rtndBr, void* connBr)
     {
         // Mutex
         const std::lock_guard lock(m_mutex);
@@ -355,6 +355,26 @@ namespace SPSP::LocalLayers::ESPNOW
             return false;
         }
 
+        auto* rtndBrStruct = reinterpret_cast<BridgeConnInfo*>(rtndBr);
+        auto* connBrStruct = reinterpret_cast<BridgeConnInfo*>(connBr);
+
+        WiFi& wifi = SPSP::WiFi::getInstance();
+
+        if (rtndBrStruct != nullptr) {
+            // Reconnect to retained bridge
+            m_bestBridgeAddr = this->macTolocalAddr(rtndBrStruct->addr);
+            wifi.setChannel(rtndBrStruct->ch);
+
+            if (connBr != nullptr) {
+                *connBrStruct = *rtndBrStruct;
+            }
+
+            SPSP_LOGI("Reconnected to bridge: %s",
+                      m_bestBridgeAddr.str.c_str());
+
+            return true;
+        }
+
         SPSP_LOGD("Connect to bridge: connecting...");
 
         // Unregister old bridge (if present)
@@ -362,8 +382,6 @@ namespace SPSP::LocalLayers::ESPNOW
             this->unregisterPeer(m_bestBridgeAddr);
             SPSP_LOGD("Connect to bridge: unregistered old bridge");
         }
-
-        WiFi& wifi = SPSP::WiFi::getInstance();
 
         // Get country restrictions
         wifi_country_t wifiCountry;
@@ -419,8 +437,12 @@ namespace SPSP::LocalLayers::ESPNOW
             return false;
         }
 
-        if (br != nullptr) {
-            *br = m_bestBridgeAddr;
+        SPSP_LOGI("Connected to bridge: %s (%d dBm)",
+                  m_bestBridgeAddr.str.c_str(), m_bestBridgeSignal);
+
+        if (connBrStruct != nullptr) {
+            this->localAddrToMac(m_bestBridgeAddr, connBrStruct->addr);
+            connBrStruct->ch = wifi.getChannel();
         }
 
         return true;
