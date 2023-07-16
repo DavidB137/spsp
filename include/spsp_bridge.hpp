@@ -263,7 +263,7 @@ namespace SPSP::Nodes
          * @return true Message delivery successful
          * @return false Message delivery failed
          */
-        bool processProbeRes(const LocalMessage req) { return true; }
+        bool processProbeRes(const LocalMessage req) { return false; }
 
         /**
          * @brief Processes PUB message
@@ -292,7 +292,7 @@ namespace SPSP::Nodes
          * @return true Message delivery successful
          * @return false Message delivery failed
          */
-        bool processSubData(const LocalMessage req) { return true; }
+        bool processSubData(const LocalMessage req) { return false; }
 
         /**
          * @brief Processes UNSUB message
