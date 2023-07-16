@@ -184,7 +184,7 @@ namespace SPSP::Nodes
          * @return true Message delivery successful
          * @return false Message delivery failed
          */
-        bool processProbeRes(const LocalMessage req) { return false; }
+        bool processProbeRes(const LocalMessage req) { return true; }
 
         /**
          * @brief Processes PUB message
