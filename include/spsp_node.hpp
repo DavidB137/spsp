@@ -73,6 +73,22 @@ namespace SPSP
         void receiveLocal(const LocalMessage msg, int rssi = INT_MAX);
 
         /**
+         * @brief Receives the message from far layer
+         * 
+         * Acts as a callback for far layer receiver.
+         * On client node: throws error.
+         * 
+         * This is defined here just because MQTT's `getNode()->receiveFar()`.
+         * TODO: think of better solution
+         * 
+         * @param topic Topic
+         * @param payload Payload (data)
+         * @return true Message delivery successful
+         * @return false Message delivery failed
+         */
+        virtual bool receiveFar(const std::string topic, const std::string payload) = 0;
+
+        /**
          * @brief Publishes payload to topic
          * 
          * This is primary endpoint for publishing data locally on all node types.

@@ -9,6 +9,7 @@
 
 #pragma once
 
+#include <exception>
 #include <mutex>
 #include <thread>
 #include <unordered_map>
@@ -114,6 +115,21 @@ namespace SPSP::Nodes
          * 
          */
         ~Client();
+
+        /**
+         * @brief Receives the message from far layer
+         * 
+         * This should not be used!
+         * 
+         * @param topic Topic
+         * @param payload Payload (data)
+         * @return true Message delivery successful
+         * @return false Message delivery failed
+         */
+        bool receiveFar(const std::string topic, const std::string payload)
+        {
+            throw std::logic_error("You must not use far layer on client node!");
+        }
 
         /**
          * @brief Publishes payload to topic
