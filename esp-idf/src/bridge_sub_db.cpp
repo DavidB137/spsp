@@ -93,15 +93,17 @@ namespace SPSP::Nodes
 
     void BridgeSubDB::remove(const std::string topic, const LocalAddr addr)
     {
-        const std::lock_guard lock(m_mutex);
+        {
+            const std::scoped_lock lock(m_mutex);
 
-        // Topic doesn't exist
-        if (m_db.find(topic) == m_db.end()) return;
+            // Topic doesn't exist
+            if (m_db.find(topic) == m_db.end()) return;
 
-        m_db[topic].erase(addr);
+            m_db[topic].erase(addr);
 
-        SPSP_LOGD("Removed addr %s on topic %s",
-                  addr.empty() ? "." : addr.str.c_str(), topic.c_str());
+            SPSP_LOGD("Removed addr %s on topic %s",
+                    addr.empty() ? "." : addr.str.c_str(), topic.c_str());
+        }
 
         // Unsubscribe if not needed anymore
         this->removeUnusedTopics();
