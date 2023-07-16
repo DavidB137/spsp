@@ -172,7 +172,7 @@ namespace SPSP::Nodes
          * @return true Message delivery successful
          * @return false Message delivery failed
          */
-        bool processProbeReq(const LocalMessage req) { return true; }
+        bool processProbeReq(const LocalMessage req) { return false; }
 
         /**
          * @brief Processes PROBE_RES message
@@ -184,7 +184,7 @@ namespace SPSP::Nodes
          * @return true Message delivery successful
          * @return false Message delivery failed
          */
-        bool processProbeRes(const LocalMessage req) { return true; }
+        bool processProbeRes(const LocalMessage req) { return false; }
 
         /**
          * @brief Processes PUB message
@@ -195,7 +195,7 @@ namespace SPSP::Nodes
          * @return true Message delivery successful
          * @return false Message delivery failed
          */
-        bool processPub(const LocalMessage req) { return true; }
+        bool processPub(const LocalMessage req) { return false; }
 
         /**
          * @brief Processes SUB_REQ message
@@ -206,7 +206,7 @@ namespace SPSP::Nodes
          * @return true Message delivery successful
          * @return false Message delivery failed
          */
-        bool processSubReq(const LocalMessage req) { return true; }
+        bool processSubReq(const LocalMessage req) { return false; }
 
         /**
          * @brief Processes SUB_DATA message
@@ -224,6 +224,6 @@ namespace SPSP::Nodes
          * @return true Message delivery successful
          * @return false Message delivery failed
          */
-        bool processUnsub(const LocalMessage req) { return true; }
+        bool processUnsub(const LocalMessage req) { return false; }
     };
 } // namespace SPSP::Nodes
