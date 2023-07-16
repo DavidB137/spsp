@@ -70,6 +70,7 @@ namespace SPSP::LocalLayers::ESPNOW
         ESP_ERROR_CHECK(esp_now_register_recv_cb(_receiveCallback));
         ESP_ERROR_CHECK(esp_now_register_send_cb(_sendCallback));
 
+        SPSP_LOGI("Protocol version: %d", PROTO_VERSION);
         SPSP_LOGI("Initialized");
     }
 
