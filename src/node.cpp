@@ -48,7 +48,7 @@ namespace SPSP
             SPSP_LOGI("Received local msg: %s", msg.toString().c_str());
         }
 
-        bool processed = true;
+        bool processed = false;
 
         // Call responsible handler
         switch (msg.type) {
@@ -65,7 +65,9 @@ namespace SPSP
             break;
         }
 
-        if (!processed) {
+        if (processed) {
+            SPSP_LOGI("Message processed: %s", msg.toString().c_str());
+        } else {
             SPSP_LOGE("Message not processed: %s", msg.toString().c_str());
         }
     }
@@ -83,8 +85,11 @@ namespace SPSP
         // Send to local layer
         bool delivered = m_ll->send(msg);
 
-        SPSP_LOGI("Message %s: %s", delivered ? "delivered" : "not delivered",
-                  msg.toString().c_str());
+        if (delivered) {
+            SPSP_LOGI("Message delivered: %s", msg.toString().c_str());
+        } else {
+            SPSP_LOGE("Message not delivered: %s", msg.toString().c_str());
+        }
 
         return delivered;
     }
