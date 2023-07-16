@@ -69,10 +69,8 @@ namespace SPSP
          * 
          * @param msg Received message
          * @param rssi Received signal strength indicator (in dBm)
-         * @return true Message delivery successful
-         * @return false Message delivery failed
          */
-        bool receiveLocal(const LocalMessage msg, int rssi = INT_MAX);
+        void receiveLocal(const LocalMessage msg, int rssi = INT_MAX);
 
         /**
          * @brief Publishes payload to topic

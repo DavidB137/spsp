@@ -40,7 +40,7 @@ namespace SPSP
         SPSP_LOGD("Unset far layer");
     }
 
-    bool INode::receiveLocal(const LocalMessage msg, int rssi)
+    void INode::receiveLocal(const LocalMessage msg, int rssi)
     {
         if (rssi < INT_MAX) {
             SPSP_LOGI("Received local msg: %s (%d dBm)", msg.toString().c_str(), rssi);
@@ -48,16 +48,16 @@ namespace SPSP
             SPSP_LOGI("Received local msg: %s", msg.toString().c_str());
         }
 
-        bool delivered = true;
+        bool processed = true;
 
         // Call responsible handler
         switch (msg.type) {
-        case LocalMessageType::PROBE_REQ: delivered = processProbeReq(msg); break;
-        case LocalMessageType::PROBE_RES: delivered = processProbeRes(msg); break;
-        case LocalMessageType::PUB: delivered = processPub(msg); break;
-        case LocalMessageType::SUB_REQ: delivered = processSubReq(msg); break;
-        case LocalMessageType::SUB_DATA: delivered = processSubData(msg); break;
-        case LocalMessageType::UNSUB: delivered = processUnsub(msg); break;
+        case LocalMessageType::PROBE_REQ: processed = processProbeReq(msg); break;
+        case LocalMessageType::PROBE_RES: processed = processProbeRes(msg); break;
+        case LocalMessageType::PUB: processed = processPub(msg); break;
+        case LocalMessageType::SUB_REQ: processed = processSubReq(msg); break;
+        case LocalMessageType::SUB_DATA: processed = processSubData(msg); break;
+        case LocalMessageType::UNSUB: processed = processUnsub(msg); break;
         default:
             SPSP_LOGW("Unprocessable message type %s (%d)",
                       localMessageTypeToStr(msg.type),
@@ -65,11 +65,9 @@ namespace SPSP
             break;
         }
 
-        if (!delivered) {
+        if (!processed) {
             SPSP_LOGE("Message not processed: %s", msg.toString().c_str());
         }
-
-        return delivered;
     }
 
     bool INode::sendLocal(const LocalMessage msg)
