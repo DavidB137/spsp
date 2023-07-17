@@ -30,7 +30,8 @@ namespace SPSP::Nodes
 
     bool Client::publish(const std::string topic, const std::string payload)
     {
-        SPSP_LOGD("Publishing: %s %s", topic.c_str(), payload.c_str());
+        SPSP_LOGD("Publishing: topic '%s', payload '%s'",
+                  topic.c_str(), payload.c_str());
 
         LocalMessage msg = {};
         // msg.addr is empty => send to the bridge node
@@ -43,7 +44,7 @@ namespace SPSP::Nodes
 
     bool Client::subscribe(const std::string topic, SubscribeCb cb)
     {
-        SPSP_LOGD("Subscribing to %s", topic.c_str());
+        SPSP_LOGD("Subscribing to topic '%s'", topic.c_str());
 
         LocalMessage msg = {};
         // msg.addr is empty => send to the bridge node
@@ -59,7 +60,7 @@ namespace SPSP::Nodes
 
     bool Client::unsubscribe(const std::string topic)
     {
-        SPSP_LOGD("Unsubscribing from %s", topic.c_str());
+        SPSP_LOGD("Unsubscribing from topic '%s'", topic.c_str());
 
         LocalMessage msg = {};
         // msg.addr is empty => send to the bridge node

@@ -71,7 +71,7 @@ namespace SPSP::Nodes
         if (newTopic) {
             // Subscribe to the topic
             if (!m_bridge->subscribeFar(topic)) {
-                SPSP_LOGE("Insert: subscribe to topic %s failed - not inserting anything",
+                SPSP_LOGE("Insert: subscribe to topic '%s' failed - not inserting anything",
                           topic.c_str());
                 return false;
             }
@@ -81,10 +81,10 @@ namespace SPSP::Nodes
         m_db[topic][addr] = subEntry;
 
         if (addr.empty()) {
-            SPSP_LOGD("Inserted local entry for topic %s with callback %p (no expiration)",
+            SPSP_LOGD("Inserted local entry for topic '%s' with callback %p (no expiration)",
                       topic.c_str(), subEntry.cb);
         } else {
-            SPSP_LOGD("Inserted %s@%s (expires in %d min)",
+            SPSP_LOGD("Inserted '%s@%s' (expires in %d min)",
                       addr.str.c_str(), topic.c_str(), subEntry.lifetime);
         }
 
@@ -101,7 +101,7 @@ namespace SPSP::Nodes
 
             m_db[topic].erase(addr);
 
-            SPSP_LOGD("Removed addr %s on topic %s",
+            SPSP_LOGD("Removed addr %s on topic '%s'",
                     addr.empty() ? "." : addr.str.c_str(), topic.c_str());
         }
 
@@ -132,7 +132,7 @@ namespace SPSP::Nodes
 
                 if (addr.empty()) {
                     // This node's subscription - call callback
-                    SPSP_LOGD("Calling user callback (%p) for topic %s",
+                    SPSP_LOGD("Calling user callback (%p) for topic '%s'",
                               subEntry.cb, topic.c_str());
                     subEntry.cb(topic, payload);
                 } else {
@@ -184,7 +184,7 @@ namespace SPSP::Nodes
                 if (subEntryIt->second.lifetime == 0) {
                     // Expired
                     subEntryIt = m_db[topic].erase(subEntryIt);
-                    SPSP_LOGD("Removed src %s from topic %s",
+                    SPSP_LOGD("Removed src %s from topic '%s'",
                               src.str.c_str(), topic.c_str());
                 } else {
                     // Continue
@@ -208,9 +208,9 @@ namespace SPSP::Nodes
 
                 if (unsubSuccess) {
                     topicEntryIt = m_db.erase(topicEntryIt);
-                    SPSP_LOGD("Removed unused topic %s", topic.c_str());
+                    SPSP_LOGD("Removed unused topic '%s'", topic.c_str());
                 } else {
-                    SPSP_LOGE("Topic %s can't be unsubscribed. Will try again in next tick.",
+                    SPSP_LOGE("Topic '%s' can't be unsubscribed. Will try again in next tick.",
                               topic.c_str());
                 }
             } else {

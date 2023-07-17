@@ -61,7 +61,8 @@ namespace SPSP::Nodes
 
     bool Bridge::receiveFar(const std::string topic, const std::string payload)
     {
-        SPSP_LOGD("Received far msg: %s %s", topic.c_str(), payload.c_str());
+        SPSP_LOGD("Received far msg: topic '%s', payload '%s'",
+                  topic.c_str(), payload.c_str());
 
         m_subDB.callCbs(topic, payload);
         return true;
@@ -69,7 +70,8 @@ namespace SPSP::Nodes
 
     bool Bridge::publish(const std::string topic, const std::string payload)
     {
-        SPSP_LOGD("Publishing locally: %s %s", topic.c_str(), payload.c_str());
+        SPSP_LOGD("Publishing locally: topic '%s', payload '%s'",
+                  topic.c_str(), payload.c_str());
 
         if (!this->farLayerConnected()) {
             SPSP_LOGE("Publish: far layer is not connected");
@@ -81,14 +83,14 @@ namespace SPSP::Nodes
 
     bool Bridge::subscribe(const std::string topic, SubscribeCb cb)
     {
-        SPSP_LOGD("Subscribing locally to %s", topic.c_str());
+        SPSP_LOGD("Subscribing locally to topic '%s'", topic.c_str());
 
         return m_subDB.insert(topic, LocalAddr{}, cb);
     }
 
     bool Bridge::unsubscribe(const std::string topic)
     {
-        SPSP_LOGD("Unsubscribing locally from %s", topic.c_str());
+        SPSP_LOGD("Unsubscribing locally from topic '%s'", topic.c_str());
 
         m_subDB.remove(topic, LocalAddr{});
         return true;
@@ -127,7 +129,7 @@ namespace SPSP::Nodes
     bool Bridge::publishSubData(const LocalAddr addr, const std::string topic,
                                 const std::string payload)
     {
-        SPSP_LOGD("Sending SUB_DATA to %s: %s %s",
+        SPSP_LOGD("Sending SUB_DATA to %s: topic '%s', payload '%s'",
                   addr.str.c_str(), topic.c_str(), payload.c_str());
 
         LocalMessage msg = {};

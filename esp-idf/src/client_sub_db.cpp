@@ -60,7 +60,7 @@ namespace SPSP::Nodes
 
         m_db[topic] = {.cb = cb};
 
-        SPSP_LOGD("Inserted topic %s with callback %p (renews in %d min)",
+        SPSP_LOGD("Inserted topic '%s' with callback %p (renews in %d min)",
                   topic.c_str(), cb, m_db[topic].lifetime);
     }
 
@@ -70,7 +70,7 @@ namespace SPSP::Nodes
 
         m_db.erase(topic);
 
-        SPSP_LOGD("Removed topic %s", topic.c_str());
+        SPSP_LOGD("Removed topic '%s'", topic.c_str());
     }
 
     void ClientSubDB::callCb(const std::string topic, const std::string payload)
@@ -82,7 +82,7 @@ namespace SPSP::Nodes
 
             m_mutex.unlock();
 
-            SPSP_LOGD("Calling user callback (%p) for topic %s",
+            SPSP_LOGD("Calling user callback (%p) for topic '%s'",
                       cb, topic.c_str());
 
             // Call user's callback
@@ -93,7 +93,7 @@ namespace SPSP::Nodes
 
         m_mutex.unlock();
 
-        SPSP_LOGD("No entry (callback) for topic %s", topic.c_str());
+        SPSP_LOGD("No entry (callback) for topic '%s'", topic.c_str());
         return;
     }
     
@@ -107,14 +107,14 @@ namespace SPSP::Nodes
 
             // Expired -> renew it
             if (entry.lifetime == 0) {
-                SPSP_LOGD("Topic %s expired (renewing)", topic.c_str());
+                SPSP_LOGD("Topic '%s' expired (renewing)", topic.c_str());
 
                 m_mutex.unlock();
                 bool extended = m_client->subscribe(topic, entry.cb);
                 m_mutex.lock();
 
                 if (!extended) {
-                    SPSP_LOGE("Topic %s can't be extended. Will try again in next tick.",
+                    SPSP_LOGE("Topic '%s' can't be extended. Will try again in next tick.",
                               topic.c_str());
 
                     m_db[topic].lifetime++;
