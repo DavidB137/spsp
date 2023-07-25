@@ -237,7 +237,9 @@ namespace SPSP
             SPSP_LOGI("Got IP: " IPSTR, IP2STR(&event_got_ip4->ip_info.ip));
 
             // Resolve promise
-            inst->m_connectingPromise.set_value();
+            if (!inst->m_initialized) {
+                inst->m_connectingPromise.set_value();
+            }
 
             break;
         
@@ -247,7 +249,9 @@ namespace SPSP
             SPSP_LOGI("Got IPv6: " IPV6STR, IPV62STR(event_got_ip6->ip6_info.ip));
 
             // Resolve promise
-            inst->m_connectingPromise.set_value();
+            if (!inst->m_initialized) {
+                inst->m_connectingPromise.set_value();
+            }
 
             break;
         
