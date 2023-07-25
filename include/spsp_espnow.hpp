@@ -48,7 +48,7 @@ namespace SPSP::LocalLayers::ESPNOW
     struct PacketPayload
     {
         LocalMessageType type;      //!< Message type
-        uint8_t _reserved;          //!< Reserved for future use
+        uint8_t _reserved[3];       //!< Reserved for future use
         uint8_t checksum;           //!< Simple checksum of `PacketPayload` to validate decrypted packet
         uint8_t topicLen;           //!< Length of topic
         uint8_t payloadLen;         //!< Length of payload (data)
@@ -64,8 +64,8 @@ namespace SPSP::LocalLayers::ESPNOW
 
     // Assert sizes
     static_assert(sizeof(PacketHeader) == 13);
-    static_assert(sizeof(PacketPayload) == 5);
-    static_assert(sizeof(Packet) == 18);
+    static_assert(sizeof(PacketPayload) == 7);
+    static_assert(sizeof(Packet) == 20);
 
     /**
      * @brief Bridge connection info
