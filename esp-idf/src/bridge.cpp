@@ -12,6 +12,7 @@
 
 #include "spsp_bridge.hpp"
 #include "spsp_logger.hpp"
+#include "spsp_version.hpp"
 
 // Log tag
 static const char* SPSP_LOG_TAG = "SPSP/Bridge";
@@ -20,6 +21,7 @@ namespace SPSP::Nodes
 {
     Bridge::Bridge() : m_subDB{this}
     {
+        SPSP_LOGI("SPSP version: %s", SPSP::VERSION);
         SPSP_LOGI("Initialized");
     }
 
