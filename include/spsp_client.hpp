@@ -160,6 +160,13 @@ namespace SPSP::Nodes
         bool subscribe(const std::string topic, SubscribeCb cb);
 
         /**
+         * @brief Resubscribes to all topics
+         * 
+         * Doesn't do anything.
+         */
+        void resubscribeAll() {}
+
+        /**
          * @brief Unsubscribes from topic
          * 
          * This is primary endpoint for unsubscribing locally on this node.

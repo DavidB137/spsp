@@ -113,6 +113,12 @@ namespace SPSP
         virtual bool subscribe(const std::string topic, SubscribeCb cb) = 0;
 
         /**
+         * @brief Resubscribes to all topics
+         * 
+         */
+        virtual void resubscribeAll() = 0;
+
+        /**
          * @brief Unsubscribes from topic
          * 
          * This is primary endpoint for unsubscribing locally on all node types.

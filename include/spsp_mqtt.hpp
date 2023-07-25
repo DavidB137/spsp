@@ -79,6 +79,7 @@ namespace SPSP::FarLayers::MQTT
         std::string m_pubTopicPrefix;            //!< Topic prefix (see `ClientConfig`)
         int m_qos = 0;                           //!< QoS for sent messages
         bool m_retain = false;                   //!< Retain flag for sent messages
+        bool m_initializing = true;              //!< Whether we are currently in initializing phase
         std::promise<void> m_connectingPromise;  //!< Promise to block until successful connection is made
 
     public:
@@ -104,14 +105,7 @@ namespace SPSP::FarLayers::MQTT
          * @brief Signalizes successful initial connection to broker
          * 
          */
-        void connected() { m_connectingPromise.set_value(); }
-
-        /**
-         * @brief Reconnects to broker
-         * 
-         * This is for event handler.
-         */
-        void reconnect();
+        void connected();
 
     protected:
         /**

@@ -7,6 +7,7 @@
  * 
  */
 
+#include <chrono>
 #include <thread>
 
 #include "esp_mac.h"
@@ -23,6 +24,8 @@ namespace SPSP::FarLayers::MQTT
 {
     void _eventHandler(void *ctx, esp_event_base_t, int32_t eventId, void *eventData)
     {
+        using namespace std::chrono_literals;
+
         auto mqtt = static_cast<Layer*>(ctx);
         auto event = static_cast<esp_mqtt_event_handle_t>(eventData);
 
@@ -36,8 +39,7 @@ namespace SPSP::FarLayers::MQTT
             break;
 
         case MQTT_EVENT_DISCONNECTED:
-            SPSP_LOGD("Disconnected, reconnecting...");
-            mqtt->reconnect();
+            SPSP_LOGD("Disconnected, MQTT will reconnect automatically...");
             break;
 
         case MQTT_EVENT_DATA:
@@ -70,6 +72,8 @@ namespace SPSP::FarLayers::MQTT
         : m_pubTopicPrefix{config.pubTopicPrefix}, m_qos{config.connection.qos},
           m_retain{config.connection.retain}
     {
+        m_initializing = true;
+
         // Client ID
         std::string clientId;
 
@@ -136,6 +140,8 @@ namespace SPSP::FarLayers::MQTT
             throw MQTTConnectionError();
         }
 
+        m_initializing = false;
+
         SPSP_LOGI("Initialized");
     }
 
@@ -149,10 +155,17 @@ namespace SPSP::FarLayers::MQTT
         SPSP_LOGI("Deinitialized");
     }
 
-    void Layer::reconnect()
+    void Layer::connected()
     {
-        auto mqtt = static_cast<esp_mqtt_client_handle_t>(m_mqtt);
-        ESP_ERROR_CHECK(esp_mqtt_client_reconnect(mqtt));
+        if (m_initializing) {
+            m_connectingPromise.set_value();
+        } else {
+            // Successful reconnection
+            // Resubscribe to all topics
+            if (this->nodeConnected()) {
+                this->getNode()->resubscribeAll();
+            }
+        }
     }
 
     bool Layer::publish(const std::string src, const std::string topic,
