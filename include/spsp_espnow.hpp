@@ -92,6 +92,7 @@ namespace SPSP::LocalLayers::ESPNOW
         std::string m_password;                //!< Password for packet payload encryption
         LocalAddr m_bestBridgeAddr = {};       //!< Address of bridge with the best signal
         int m_bestBridgeSignal = SIGNAL_MIN;   //!< Signal RSSI of bridge with the best signal
+        uint8_t m_bestBridgeCh = 0;            //!< Channel of bridge with the best signal
         std::mutex m_mutex;                    //!< Mutex to prevent race conditions
         std::mutex m_bestBridgeMutex;          //!< Mutex for modifying m_bestBridge* attributes
 

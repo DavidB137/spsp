@@ -278,6 +278,7 @@ namespace SPSP::LocalLayers::ESPNOW
             if (m_bestBridgeSignal < rssi) {
                 m_bestBridgeSignal = rssi;
                 m_bestBridgeAddr = msg.addr;
+                m_bestBridgeCh = WiFi::getInstance().getChannel();
             }
 
             m_bestBridgeMutex.unlock();
@@ -365,7 +366,8 @@ namespace SPSP::LocalLayers::ESPNOW
         if (rtndBrStruct != nullptr) {
             // Reconnect to retained bridge
             m_bestBridgeAddr = this->macTolocalAddr(rtndBrStruct->addr);
-            wifi.setChannel(rtndBrStruct->ch);
+            m_bestBridgeCh = rtndBrStruct->ch;
+            wifi.setChannel(m_bestBridgeCh);
 
             if (connBr != nullptr) {
                 *connBrStruct = *rtndBrStruct;
@@ -378,12 +380,6 @@ namespace SPSP::LocalLayers::ESPNOW
         }
 
         SPSP_LOGD("Connect to bridge: connecting...");
-
-        // Unregister old bridge (if present)
-        if (!m_bestBridgeAddr.empty()) {
-            this->unregisterPeer(m_bestBridgeAddr);
-            SPSP_LOGD("Connect to bridge: unregistered old bridge");
-        }
 
         // Get country restrictions
         wifi_country_t wifiCountry;
@@ -418,8 +414,7 @@ namespace SPSP::LocalLayers::ESPNOW
             wifi.setChannel(ch);
             this->sendRaw(msg.addr, data, dataLen);
 
-            SPSP_LOGD("Connect to bridge: waiting for %s (bucket %d) callback",
-                      msg.addr.str.c_str(), bucketId);
+            SPSP_LOGD("Connect to bridge: waiting for callback");
 
             // Wait for callback to finish
             future.get();
@@ -437,8 +432,12 @@ namespace SPSP::LocalLayers::ESPNOW
             return false;
         }
 
-        SPSP_LOGI("Connected to bridge: %s (%d dBm)",
-                  m_bestBridgeAddr.str.c_str(), m_bestBridgeSignal);
+        // New best bridge is available - switch to it's channel
+        wifi.setChannel(m_bestBridgeCh);
+
+        SPSP_LOGI("Connected to bridge: %s on channel %u (%d dBm)",
+                  m_bestBridgeAddr.str.c_str(), m_bestBridgeCh,
+                  m_bestBridgeSignal);
 
         if (connBrStruct != nullptr) {
             this->localAddrToMac(m_bestBridgeAddr, connBrStruct->addr);
