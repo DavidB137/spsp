@@ -24,6 +24,12 @@ namespace SPSP
     using SubscribeCb = void (*)(const std::string topic, const std::string payload);
 
     /**
+     * @brief Local receive or send callback type
+     * 
+     */
+    using LocalRecvSendCb = void (*)(const LocalMessage& msg);
+
+    /**
      * @brief Generic node of SPSP
      * 
      * Implements common functionality for client and bridge node types.
@@ -35,6 +41,7 @@ namespace SPSP
     protected:
         ILocalLayer* m_ll = nullptr;
         std::mutex m_mutex;  //!< Mutex to prevent race conditions
+        LocalRecvSendCb m_localRecvSendCb = nullptr;
 
     public:
         /**
@@ -71,6 +78,19 @@ namespace SPSP
          * @param rssi Received signal strength indicator (in dBm)
          */
         void receiveLocal(const LocalMessage msg, int rssi = INT_MAX);
+
+        /**
+         * @brief Sets local receive/send callback function
+         * 
+         * May be used to blink LEDs, compute statistics, etc.
+         * 
+         * Don't do any long action inside the callback!
+         * If you need to perform long blocking operation, spawn yourself
+         * a new thread.
+         * 
+         * @param cb Callback (if `nullptr`, unsets the callback)
+         */
+        void setLocalRecvSendCb(LocalRecvSendCb cb) { m_localRecvSendCb = cb; }
 
         /**
          * @brief Receives the message from far layer

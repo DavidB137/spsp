@@ -48,6 +48,12 @@ namespace SPSP
             SPSP_LOGI("Received local msg: %s", msg.toString().c_str());
         }
 
+        // Call receive/send callback
+        if (m_localRecvSendCb != nullptr) {
+            SPSP_LOGD("Calling receive/send callback %p", m_localRecvSendCb);
+            m_localRecvSendCb(msg);
+        }
+
         bool processed = false;
 
         // Call responsible handler
@@ -89,6 +95,12 @@ namespace SPSP
             SPSP_LOGI("Message delivered: %s", msg.toString().c_str());
         } else {
             SPSP_LOGE("Message not delivered: %s", msg.toString().c_str());
+        }
+
+        // Call receive/send callback
+        if (m_localRecvSendCb != nullptr) {
+            SPSP_LOGD("Calling receive/send callback %p", m_localRecvSendCb);
+            m_localRecvSendCb(msg);
         }
 
         return delivered;
