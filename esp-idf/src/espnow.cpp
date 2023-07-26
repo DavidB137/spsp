@@ -405,7 +405,7 @@ namespace SPSP::LocalLayers::ESPNOW
 
         // Convert to raw data
         size_t dataLen = sizeof(Packet);
-        uint8_t* data = new uint8_t[dataLen];
+        uint8_t data[ESP_NOW_MAX_DATA_LEN];
         this->preparePacket(msg, data);
 
         // Promise/mutex bucket
@@ -430,9 +430,6 @@ namespace SPSP::LocalLayers::ESPNOW
             // Sleep
             std::this_thread::sleep_for(std::chrono::milliseconds(100));
         }
-
-        // Free memory
-        delete[] data;
 
         // No response
         if (m_bestBridgeSignal == SIGNAL_MIN) {
