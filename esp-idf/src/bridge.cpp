@@ -102,6 +102,7 @@ namespace SPSP::Nodes
     {
         LocalMessage res = req;
         res.type = LocalMessageType::PROBE_RES;
+        res.payload = SPSP::VERSION;
         return this->sendLocal(res);
     }
 
