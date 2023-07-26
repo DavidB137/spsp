@@ -20,6 +20,7 @@
 #include "spsp_espnow.hpp"
 #include "spsp_logger.hpp"
 #include "spsp_node.hpp"
+#include "spsp_version.hpp"
 #include "spsp_wifi.hpp"
 
 // Log tag
@@ -400,6 +401,7 @@ namespace SPSP::LocalLayers::ESPNOW
         LocalMessage msg = {};
         msg.addr = this->broadcastAddr();
         msg.type = LocalMessageType::PROBE_REQ;
+        msg.payload = SPSP::VERSION;
 
         // Convert to raw data
         size_t dataLen = sizeof(Packet);
