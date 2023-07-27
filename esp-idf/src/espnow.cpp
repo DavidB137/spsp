@@ -336,7 +336,7 @@ namespace SPSP::LocalLayers::ESPNOW
         unsigned payloadTotalLen = sizeof(PacketPayload) + p->payload.topicLen
                                  + p->payload.payloadLen;
         if (payloadTotalLen != dataLen) {
-            SPSP_LOGD("Receive fail: invalid total length (%u != %u bytes)",
+            SPSP_LOGD("Receive fail: invalid total length without header (%u != %u bytes)",
                       payloadTotalLen, dataLen);
             return false;
         }
