@@ -176,7 +176,8 @@ namespace SPSP::LocalLayers::ESPNOW
         unsigned dataLen = sizeof(Packet) + msg.topic.length() + msg.payload.length();
 
         if (dataLen > ESP_NOW_MAX_DATA_LEN) {
-            SPSP_LOGE("Send fail: packet too big");
+            SPSP_LOGE("Send fail: packet too big (%u > %u bytes)",
+                      dataLen, ESP_NOW_MAX_DATA_LEN);
             return false;
         }
 
@@ -246,7 +247,8 @@ namespace SPSP::LocalLayers::ESPNOW
 
         // Check packet length
         if (dataLen < sizeof(Packet)) {
-            SPSP_LOGD("Receive fail: packet too short");
+            SPSP_LOGD("Receive fail: packet too short (%u < %u bytes)",
+                      dataLen, sizeof(Packet));
             return;
         }
 
@@ -294,13 +296,15 @@ namespace SPSP::LocalLayers::ESPNOW
     {
         // Check SSID
         if (p->header.ssid != m_ssid) {
-            SPSP_LOGD("Receive fail: different SSID");
+            SPSP_LOGD("Receive fail: different SSID (0x%lx != 0x%lx)",
+                      p->header.ssid, m_ssid);
             return false;
         }
 
         // Check version
         if (p->header.version != PROTO_VERSION) {
-            SPSP_LOGD("Receive fail: different protocol version");
+            SPSP_LOGD("Receive fail: different protocol version (%u != %u)",
+                      p->header.version, PROTO_VERSION);
             return false;
         }
 
@@ -322,14 +326,18 @@ namespace SPSP::LocalLayers::ESPNOW
         // Check checksum
         uint8_t checksum = this->checksumRaw(data, dataLen, p->payload.checksum);
 
-        if (checksum != p->payload.checksum) {
-            SPSP_LOGD("Receive fail: invalid checksum");
+        if (p->payload.checksum != checksum) {
+            SPSP_LOGD("Receive fail: invalid checksum (%u != %u)",
+                      p->payload.checksum, checksum);
             return false;
         }
 
         // Assert valid payload length
-        if (sizeof(PacketPayload) + p->payload.topicLen + p->payload.payloadLen != dataLen) {
-            SPSP_LOGD("Receive fail: invalid total length");
+        unsigned payloadTotalLen = sizeof(PacketPayload) + p->payload.topicLen
+                                 + p->payload.payloadLen;
+        if (payloadTotalLen != dataLen) {
+            SPSP_LOGD("Receive fail: invalid total length (%u != %u bytes)",
+                      payloadTotalLen, dataLen);
             return false;
         }
 
