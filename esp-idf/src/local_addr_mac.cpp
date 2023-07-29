@@ -7,6 +7,8 @@
  * 
  */
 
+#include <cstring>
+
 #include "esp_mac.h"
 
 #include "spsp_local_addr_mac.hpp"
