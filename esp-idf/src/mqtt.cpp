@@ -95,14 +95,11 @@ namespace SPSP::FarLayers::MQTT
 
         espConfig.broker.address.uri = config.connection.uri.c_str();
         espConfig.broker.verification.certificate = this->stringToCOrNull(config.connection.verifyCrt);
-        espConfig.broker.verification.certificate_len = config.connection.verifyCrt.length();
         espConfig.credentials.username = config.auth.username.c_str();
         espConfig.credentials.client_id = clientId.c_str();
         espConfig.credentials.authentication.password = this->stringToCOrNull(config.auth.password);
         espConfig.credentials.authentication.certificate = this->stringToCOrNull(config.auth.crt);
-        espConfig.credentials.authentication.certificate_len = config.auth.crt.length();
         espConfig.credentials.authentication.key = this->stringToCOrNull(config.auth.crtKey);
-        espConfig.credentials.authentication.key_len = config.auth.crtKey.length();
         espConfig.session.last_will.topic = this->stringToCOrNull(config.lastWill.topic);
         espConfig.session.last_will.msg = this->stringToCOrNull(config.lastWill.msg);
         espConfig.session.last_will.qos = config.lastWill.qos;
