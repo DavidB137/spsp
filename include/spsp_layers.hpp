@@ -9,45 +9,47 @@
 
 #pragma once
 
-#include "spsp_local_addr.hpp"
 #include "spsp_local_message.hpp"
 
 namespace SPSP
 {
     // Forward declaration
-    class INode;
+    template <typename TLocalLayer> class ILocalNode;
+    template <typename TFarLayer> class IFarNode;
 
     /**
-     * @brief Generic interface for local or far layer
+     * @brief Interface for local layer
      * 
-     * Has a pointer to owner node (to directly call `INode::receive*()` method).
-     * When node is not set, it does nothing.
+     * @tparam TLocalMessage Type of local message
      */
-    class ILocalOrFarLayer
+    template <typename TLocalMessage>
+    class ILocalLayer
     {
-    private:
-        INode* m_node = nullptr;
+        void* m_node = nullptr;
 
     public:
+        using LocalAddrT = TLocalMessage::LocalAddrT;
+        using LocalMessageT = TLocalMessage;
+
         /**
          * @brief Sets pointer to the owner node.
          * 
          * @param n Owner node
          */
-        void setNode(INode* n) { m_node = n; }
-
-        /**
-         * @brief Unsets pointer to the owner node.
-         * 
-         */
-        void unsetNode() { m_node = nullptr; }
+        void setNode(void* n)
+        {
+            m_node = n;
+        }
 
         /**
          * @brief Gets the node object
          * 
          * @return Node pointer
          */
-        inline INode* getNode() const { return m_node; }
+        inline ILocalNode<ILocalLayer>* getNode() const
+        {
+            return static_cast<ILocalNode<ILocalLayer>*>(m_node);
+        }
 
         /**
          * @brief Checks whether the owner node is connected
@@ -55,16 +57,10 @@ namespace SPSP
          * @return true Node is connected
          * @return false Node is disconnected
          */
-        inline bool nodeConnected() const { return m_node != nullptr; }
-    };
+        inline bool nodeConnected() const {
+            return m_node != nullptr;
+        }
 
-    /**
-     * @brief Interface for local layer
-     * 
-     */
-    class ILocalLayer : public ILocalOrFarLayer
-    {
-    public:
         /**
          * @brief Sends the message to given node
          * 
@@ -76,7 +72,7 @@ namespace SPSP
          * @return true Delivery successful
          * @return false Delivery failed
          */
-        virtual bool send(const LocalMessage<LocalAddr> msg) = 0;
+        virtual bool send(const TLocalMessage msg) = 0;
 
         /**
          * @brief Connects to bridge
@@ -101,9 +97,41 @@ namespace SPSP
      * @brief Interface for far layer
      * 
      */
-    class IFarLayer : public ILocalOrFarLayer
+    class IFarLayer
     {
+        void* m_node = nullptr;
+
     public:
+        /**
+         * @brief Sets pointer to the owner node.
+         * 
+         * @param n Owner node
+         */
+        void setNode(void* n)
+        {
+            m_node = n;
+        }
+
+        /**
+         * @brief Gets the node object
+         * 
+         * @return Node pointer
+         */
+        inline IFarNode<IFarLayer>* getNode() const
+        {
+            return static_cast<IFarNode<IFarLayer>*>(m_node);
+        }
+
+        /**
+         * @brief Checks whether the owner node is connected
+         * 
+         * @return true Node is connected
+         * @return false Node is disconnected
+         */
+        inline bool nodeConnected() const {
+            return m_node != nullptr;
+        }
+
         /**
          * @brief Publishes message coming from node
          * 

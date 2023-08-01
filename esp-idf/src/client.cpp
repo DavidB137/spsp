@@ -19,7 +19,7 @@ static const char* SPSP_LOG_TAG = "SPSP/Client";
 
 namespace SPSP::Nodes
 {
-    Client::Client() : m_subDB{this}
+    Client::Client() : ILocalNode{{}}, m_subDB{this}
     {
         SPSP_LOGI("SPSP version: %s", SPSP::VERSION);
         SPSP_LOGI("Initialized");

@@ -10,6 +10,7 @@
 #pragma once
 
 #include <array>
+#include <climits>
 #include <future>
 #include <mutex>
 #include <string>
@@ -85,7 +86,7 @@ namespace SPSP::LocalLayers::ESPNOW
      * @brief ESP-NOW local layer
      * 
      */
-    class Layer : public SPSP::ILocalLayer
+    class Layer : public ILocalLayer<LocalMessage<LocalAddr>>
     {
     private:
         uint32_t m_ssid;                       //!< Numeric SSID
@@ -128,7 +129,7 @@ namespace SPSP::LocalLayers::ESPNOW
          * @param ssid Service-set identifier
          * @param password Encryption password for communication (32 bytes)
          */
-        Layer(uint32_t ssid, const std::string password);
+        Layer(/* TODO uint32_t ssid, const std::string password*/);
 
         /**
          * @brief Destroys ESP-NOW layer object

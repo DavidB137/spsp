@@ -31,6 +31,12 @@ namespace SPSP
     struct LocalAddrMAC : public LocalAddr
     {
         /**
+         * @brief Construct a new empty object
+         * 
+         */
+        LocalAddrMAC() {};
+
+        /**
          * @brief Constructs a new object
          * 
          * @param mac MAC address

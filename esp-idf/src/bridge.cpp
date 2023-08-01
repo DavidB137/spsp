@@ -19,7 +19,7 @@ static const char* SPSP_LOG_TAG = "SPSP/Bridge";
 
 namespace SPSP::Nodes
 {
-    Bridge::Bridge() : m_subDB{this}
+    Bridge::Bridge() : ILocalAndFarNode{{}, {}}, m_subDB{this}
     {
         SPSP_LOGI("SPSP version: %s", SPSP::VERSION);
         SPSP_LOGI("Initialized");
@@ -54,7 +54,7 @@ namespace SPSP::Nodes
         const std::lock_guard lock(m_mutex);
 
         if (m_fl != nullptr) {
-            m_fl->unsetNode();
+            //m_fl->unsetNode();
             m_fl = nullptr;
         }
 

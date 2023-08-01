@@ -73,7 +73,7 @@ namespace SPSP::FarLayers::MQTT
      * @brief MQTT far layer
      * 
      */
-    class Layer : public SPSP::IFarLayer
+    class Layer : public IFarLayer
     {
         void* m_mqtt;                            //!< MQTT client handle
         std::string m_pubTopicPrefix;            //!< Topic prefix (see `ClientConfig`)
@@ -93,7 +93,7 @@ namespace SPSP::FarLayers::MQTT
          * 
          * @param config Configuration
          */
-        Layer(const ClientConfig config);
+        Layer(/* TODO const ClientConfig config */);
 
         /**
          * @brief Destroys MQTT layer object

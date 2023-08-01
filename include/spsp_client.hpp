@@ -14,6 +14,7 @@
 #include <thread>
 #include <unordered_map>
 
+#include "spsp_espnow.hpp"
 #include "spsp_layers.hpp"
 #include "spsp_local_addr.hpp"
 #include "spsp_node.hpp"
@@ -96,12 +97,13 @@ namespace SPSP::Nodes
      * @brief Client node
      * 
      */
-    class Client : public SPSP::INode
+    class Client : public SPSP::ILocalNode<LocalLayers::ESPNOW::Layer>
     {
         // Subscribe DB can access private members
         friend class ClientSubDB;
 
         ClientSubDB m_subDB;
+        std::mutex m_mutex;  //!< Mutex to prevent race conditions
 
     public:
         /**

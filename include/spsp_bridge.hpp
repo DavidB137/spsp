@@ -13,8 +13,10 @@
 #include <thread>
 #include <unordered_map>
 
+#include "spsp_espnow.hpp"
 #include "spsp_layers.hpp"
 #include "spsp_local_addr.hpp"
+#include "spsp_mqtt.hpp"
 #include "spsp_node.hpp"
 
 namespace SPSP::Nodes
@@ -140,7 +142,7 @@ namespace SPSP::Nodes
      * @brief Bridge node
      * 
      */
-    class Bridge : public SPSP::INode
+    class Bridge : public SPSP::ILocalAndFarNode<LocalLayers::ESPNOW::Layer, FarLayers::MQTT::Layer>
     {
         // Subscribe DB can access private members
         friend class BridgeSubDB;
@@ -148,6 +150,7 @@ namespace SPSP::Nodes
     protected:
         SPSP::IFarLayer* m_fl = nullptr;
         BridgeSubDB m_subDB;
+        std::mutex m_mutex;  //!< Mutex to prevent race conditions
 
     public:
         /**

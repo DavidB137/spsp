@@ -57,8 +57,9 @@ namespace SPSP::LocalLayers::ESPNOW
         espnowInstance->sendCallback(dst, status == ESP_NOW_SEND_SUCCESS);
     }
 
-    Layer::Layer(uint32_t ssid, const std::string password)
-        : m_ssid{ssid}, m_password{password}
+    Layer::Layer(/*uint32_t ssid, const std::string password*/)
+        //: m_ssid{ssid}, m_password{password}
+        : m_ssid{}, m_password{}
     {
         // Store pointer to this instance
         // See above
@@ -360,11 +361,6 @@ namespace SPSP::LocalLayers::ESPNOW
     {
         // Mutex
         const std::lock_guard lock(m_mutex);
-
-        if (!this->getNode()->isClient()) {
-            SPSP_LOGE("Connect to bridge: this node is a bridge");
-            return false;
-        }
 
         auto* rtndBrStruct = reinterpret_cast<BridgeConnInfo*>(rtndBr);
         auto* connBrStruct = reinterpret_cast<BridgeConnInfo*>(connBr);
