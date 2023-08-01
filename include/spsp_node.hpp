@@ -284,10 +284,6 @@ namespace SPSP
          * @brief Receives the message from far layer
          * 
          * Acts as a callback for far layer receiver.
-         * On client node: throws error.
-         * 
-         * This is defined here just because MQTT's `getNode()->receiveFar()`.
-         * TODO: think of better solution
          * 
          * @param topic Topic
          * @param payload Payload (data)
@@ -308,7 +304,10 @@ namespace SPSP
          * 
          * @return Far layer object
          */
-        inline TFarLayer* getFarLayer() const { return m_fl; }
+        inline TFarLayer* getFarLayer() const
+        {
+            return m_fl;
+        }
     };
 
     /**
