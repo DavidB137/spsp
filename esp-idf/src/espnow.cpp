@@ -57,8 +57,8 @@ namespace SPSP::LocalLayers::ESPNOW
         espnowInstance->sendCallback(dst, status == ESP_NOW_SEND_SUCCESS);
     }
 
-    Layer::Layer(uint32_t ssid, const std::string password)
-        : m_ssid{ssid}, m_password{password}
+    Layer::Layer(const ConfigT config)
+        : m_ssid{config.ssid}, m_password{config.password}
     {
         // Store pointer to this instance
         // See above
@@ -81,7 +81,7 @@ namespace SPSP::LocalLayers::ESPNOW
         SPSP_LOGI("Deinitialized");
     }
 
-    bool Layer::send(const LocalMessage<LocalAddr> msg)
+    bool Layer::send(const LocalMessageT msg)
     {
         SPSP_LOGD("Send: %s", msg.toString().c_str());
 
@@ -144,7 +144,7 @@ namespace SPSP::LocalLayers::ESPNOW
         return delivered;
     }
 
-    void Layer::sendRaw(const LocalAddr& dst, const uint8_t* data, size_t dataLen)
+    void Layer::sendRaw(const LocalAddrT& dst, const uint8_t* data, size_t dataLen)
     {
         if (dst.empty()) {
             // Don't register peer, just send data
@@ -171,7 +171,7 @@ namespace SPSP::LocalLayers::ESPNOW
         this->unregisterPeer(dst);
     }
 
-    bool Layer::validateMessage(const LocalMessage<LocalAddr> msg) const
+    bool Layer::validateMessage(const LocalMessageT msg) const
     {
         unsigned dataLen = sizeof(Packet) + msg.topic.length() + msg.payload.length();
 
@@ -184,7 +184,7 @@ namespace SPSP::LocalLayers::ESPNOW
         return true;
     }
 
-    void Layer::preparePacket(const LocalMessage<LocalAddr> msg, uint8_t* data) const
+    void Layer::preparePacket(const LocalMessageT msg, uint8_t* data) const
     {
         uint8_t topicLen = msg.topic.length();
         uint8_t payloadLen = msg.payload.length();
@@ -219,7 +219,7 @@ namespace SPSP::LocalLayers::ESPNOW
         this->encryptRaw(data, dataLen, p->header.nonce);
     }
 
-    void Layer::registerPeer(const LocalAddr& addr)
+    void Layer::registerPeer(const LocalAddrT& addr)
     {
         SPSP_LOGD("Register peer: %s", addr.str.c_str());
 
@@ -230,7 +230,7 @@ namespace SPSP::LocalLayers::ESPNOW
         ESP_ERROR_CHECK(esp_now_add_peer(&peerInfo));
     }
 
-    void Layer::unregisterPeer(const LocalAddr& addr)
+    void Layer::unregisterPeer(const LocalAddrT& addr)
     {
         SPSP_LOGD("Unregister peer: %s", addr.str.c_str());
 
@@ -262,7 +262,7 @@ namespace SPSP::LocalLayers::ESPNOW
         const char* topicAndPayload = reinterpret_cast<const char*>(p->payload.topicAndPayload);
 
         // Construct message
-        LocalMessage<LocalAddr> msg = {};
+        LocalMessageT msg = {};
         msg.type = p->payload.type;
         msg.addr = this->macTolocalAddr(src);
         msg.topic = std::string{topicAndPayload, p->payload.topicLen};
@@ -397,7 +397,7 @@ namespace SPSP::LocalLayers::ESPNOW
         m_bestBridgeSignal = SIGNAL_MIN;
 
         // Prepare message
-        LocalMessage<LocalAddr> msg = {};
+        LocalMessageT msg = {};
         msg.addr = this->broadcastAddr();
         msg.type = LocalMessageType::PROBE_REQ;
         msg.payload = SPSP::VERSION;
@@ -450,9 +450,9 @@ namespace SPSP::LocalLayers::ESPNOW
         return true;
     }
 
-    const LocalAddr Layer::macTolocalAddr(const uint8_t* mac)
+    const SPSP::LocalLayers::ESPNOW::Layer::LocalAddrT Layer::macTolocalAddr(const uint8_t* mac)
     {
-        LocalAddr la;
+        SPSP::LocalLayers::ESPNOW::Layer::LocalAddrT la;
 
         // Internal representation
         la.addr = std::vector<uint8_t>(mac, mac + ESP_NOW_ETH_ALEN);
@@ -465,7 +465,7 @@ namespace SPSP::LocalLayers::ESPNOW
         return la;
     }
 
-    void Layer::localAddrToMac(const LocalAddr& la, uint8_t* mac)
+    void Layer::localAddrToMac(const LocalAddrT& la, uint8_t* mac)
     {
         for (unsigned i = 0; i < la.addr.size(); i++) {
             mac[i] = la.addr[i];
@@ -493,12 +493,12 @@ namespace SPSP::LocalLayers::ESPNOW
         return checksum - existingChecksum;
     }
 
-    uint8_t Layer::getBucketIdFromLocalAddr(const LocalAddr& addr) const
+    uint8_t Layer::getBucketIdFromLocalAddr(const LocalAddrT& addr) const
     {
-        return std::hash<LocalAddr>{}(addr) % this->m_sendingPromises.size();
+        return std::hash<LocalAddrT>{}(addr) % this->m_sendingPromises.size();
     }
 
-    const LocalAddr Layer::broadcastAddr()
+    const SPSP::LocalLayers::ESPNOW::Layer::LocalAddrT Layer::broadcastAddr()
     {
         uint8_t bcst[ESP_NOW_ETH_ALEN];
         memset(bcst, 0xFF, ESP_NOW_ETH_ALEN);

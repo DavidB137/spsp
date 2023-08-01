@@ -83,15 +83,30 @@ namespace SPSP::LocalLayers::ESPNOW
     static_assert(sizeof(BridgeConnInfo) == 7);
 
     /**
+     * @brief ESP-NOW configuration
+     * 
+     */
+    struct Config
+    {
+        uint32_t ssid;         //!< Numeric SSID
+        std::string password;  //!< Password for packet payload encryption
+    };
+
+    /**
      * @brief ESP-NOW local layer
      * 
      */
     class Layer : public ILocalLayer<LocalMessage<LocalAddr>>
     {
-    private:
+    public:
+        using ConfigT = typename SPSP::LocalLayers::ESPNOW::Config;
+        using LocalAddrT = typename SPSP::LocalAddr;
+        using LocalMessageT = typename SPSP::LocalMessage<SPSP::LocalAddr>;
+
+    protected:
         uint32_t m_ssid;                       //!< Numeric SSID
         std::string m_password;                //!< Password for packet payload encryption
-        LocalAddr m_bestBridgeAddr = {};       //!< Address of bridge with the best signal
+        LocalAddrT m_bestBridgeAddr = {};      //!< Address of bridge with the best signal
         int m_bestBridgeSignal = SIGNAL_MIN;   //!< Signal RSSI of bridge with the best signal
         uint8_t m_bestBridgeCh = 0;            //!< Channel of bridge with the best signal
         std::mutex m_mutex;                    //!< Mutex to prevent race conditions
@@ -126,10 +141,9 @@ namespace SPSP::LocalLayers::ESPNOW
          * 
          * Only one instance may exist at the same time.
          * 
-         * @param ssid Service-set identifier
-         * @param password Encryption password for communication (32 bytes)
+         * @param config Configuration
          */
-        Layer(uint32_t ssid, const std::string password);
+        Layer(const ConfigT config);
 
         /**
          * @brief Destroys ESP-NOW layer object
@@ -148,7 +162,7 @@ namespace SPSP::LocalLayers::ESPNOW
          * @return true Delivery successful
          * @return false Delivery failed
          */
-        bool send(const LocalMessage<LocalAddr> msg);
+        bool send(const LocalMessageT msg);
 
         /**
          * @brief Connects to the bridge
@@ -203,7 +217,7 @@ namespace SPSP::LocalLayers::ESPNOW
          * @param mac MAC address pointer
          * @return `LocalAddr` instance
          */
-        static const LocalAddr macTolocalAddr(const uint8_t* mac);
+        static const LocalAddrT macTolocalAddr(const uint8_t* mac);
 
         /**
          * @brief Converts `LocalAddr` instance to MAC address
@@ -212,7 +226,7 @@ namespace SPSP::LocalLayers::ESPNOW
          * @param mac MAC address pointer (modified in-place)
          * @return MAC address pointer
          */
-        static void localAddrToMac(const LocalAddr& la, uint8_t* mac);
+        static void localAddrToMac(const LocalAddrT& la, uint8_t* mac);
 
     protected:
         /**
@@ -226,7 +240,7 @@ namespace SPSP::LocalLayers::ESPNOW
          * @param data Raw data
          * @param dataLen Length of data
          */
-        void sendRaw(const LocalAddr& dst, const uint8_t* data, size_t dataLen);
+        void sendRaw(const LocalAddrT& dst, const uint8_t* data, size_t dataLen);
         
         /**
          * @brief Encryption provider for raw data (bytes)
@@ -267,7 +281,7 @@ namespace SPSP::LocalLayers::ESPNOW
          * @return true Message can be sent
          * @return false Message can't be sent
          */
-        bool validateMessage(const LocalMessage<LocalAddr> msg) const;
+        bool validateMessage(const LocalMessageT msg) const;
 
         /**
          * @brief Prepares packet to be sent
@@ -277,7 +291,7 @@ namespace SPSP::LocalLayers::ESPNOW
          * @param msg Message
          * @param data Raw memory for Packet
          */
-        void preparePacket(const LocalMessage<LocalAddr> msg, uint8_t* data) const;
+        void preparePacket(const LocalMessageT msg, uint8_t* data) const;
 
         /**
          * @brief Registers given peer
@@ -286,7 +300,7 @@ namespace SPSP::LocalLayers::ESPNOW
          * 
          * @param addr Address of the peer
          */
-        void registerPeer(const LocalAddr& addr);
+        void registerPeer(const LocalAddrT& addr);
 
         /**
          * @brief Unregisters given peer
@@ -295,7 +309,7 @@ namespace SPSP::LocalLayers::ESPNOW
          * 
          * @param addr Address of the peer
          */
-        void unregisterPeer(const LocalAddr& addr);
+        void unregisterPeer(const LocalAddrT& addr);
 
         /**
          * @brief Checksums the given raw data (bytes)
@@ -317,13 +331,13 @@ namespace SPSP::LocalLayers::ESPNOW
          * @param addr Address of the peer
          * @return Bucket id
          */
-        uint8_t getBucketIdFromLocalAddr(const LocalAddr& addr) const;
+        uint8_t getBucketIdFromLocalAddr(const LocalAddrT& addr) const;
 
         /**
          * @brief Returns broadcast address
          * 
          * @return Broadcast address
          */
-        static const LocalAddr broadcastAddr();
+        static const LocalAddrT broadcastAddr();
     };
 } // namespace SPSP::LocalLayers::ESPNOW
