@@ -93,7 +93,7 @@ namespace SPSP::FarLayers::MQTT
          * 
          * @param config Configuration
          */
-        Layer(/* TODO const ClientConfig config */);
+        Layer(const ClientConfig config);
 
         /**
          * @brief Destroys MQTT layer object

@@ -68,15 +68,11 @@ namespace SPSP::FarLayers::MQTT
         }
     }
 
-    Layer::Layer(/*const ClientConfig config*/)
-        //: m_pubTopicPrefix{config.pubTopicPrefix}, m_qos{config.connection.qos},
-        //  m_retain{config.connection.retain}
-        : m_pubTopicPrefix{""}, m_qos{0}, m_retain{false}
+    Layer::Layer(const ClientConfig config)
+        : m_pubTopicPrefix{config.pubTopicPrefix}, m_qos{config.connection.qos},
+          m_retain{config.connection.retain}
     {
         m_initializing = true;
-
-        // TODO
-        ClientConfig config = {};
 
         // Client ID
         std::string clientId;
