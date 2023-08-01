@@ -40,7 +40,7 @@ namespace SPSP
         SPSP_LOGD("Unset far layer");
     }
 
-    void INode::receiveLocal(const LocalMessage msg, int rssi)
+    void INode::receiveLocal(const LocalMessage<LocalAddr> msg, int rssi)
     {
         if (rssi < INT_MAX) {
             SPSP_LOGI("Received local msg: %s (%d dBm)", msg.toString().c_str(), rssi);
@@ -78,7 +78,7 @@ namespace SPSP
         }
     }
 
-    bool INode::sendLocal(const LocalMessage msg)
+    bool INode::sendLocal(const LocalMessage<LocalAddr> msg)
     {
         // Local layer is not connected - can't deliver
         if (!this->localLayerConnected()) {

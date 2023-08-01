@@ -195,7 +195,7 @@ namespace SPSP::Nodes
          * @return true Message delivery successful
          * @return false Message delivery failed
          */
-        bool processProbeReq(const LocalMessage req) { return false; }
+        bool processProbeReq(const LocalMessage<LocalAddr> req) { return false; }
 
         /**
          * @brief Processes PROBE_RES message
@@ -207,7 +207,7 @@ namespace SPSP::Nodes
          * @return true Message delivery successful
          * @return false Message delivery failed
          */
-        bool processProbeRes(const LocalMessage req) { return true; }
+        bool processProbeRes(const LocalMessage<LocalAddr> req) { return true; }
 
         /**
          * @brief Processes PUB message
@@ -218,7 +218,7 @@ namespace SPSP::Nodes
          * @return true Message delivery successful
          * @return false Message delivery failed
          */
-        bool processPub(const LocalMessage req) { return false; }
+        bool processPub(const LocalMessage<LocalAddr> req) { return false; }
 
         /**
          * @brief Processes SUB_REQ message
@@ -229,7 +229,7 @@ namespace SPSP::Nodes
          * @return true Message delivery successful
          * @return false Message delivery failed
          */
-        bool processSubReq(const LocalMessage req) { return false; }
+        bool processSubReq(const LocalMessage<LocalAddr> req) { return false; }
 
         /**
          * @brief Processes SUB_DATA message
@@ -238,7 +238,7 @@ namespace SPSP::Nodes
          * @return true Message delivery successful
          * @return false Message delivery failed
          */
-        bool processSubData(const LocalMessage req);
+        bool processSubData(const LocalMessage<LocalAddr> req);
 
         /**
          * @brief Processes UNSUB message
@@ -247,6 +247,6 @@ namespace SPSP::Nodes
          * @return true Message delivery successful
          * @return false Message delivery failed
          */
-        bool processUnsub(const LocalMessage req) { return false; }
+        bool processUnsub(const LocalMessage<LocalAddr> req) { return false; }
     };
 } // namespace SPSP::Nodes

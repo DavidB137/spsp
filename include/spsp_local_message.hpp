@@ -60,11 +60,15 @@ namespace SPSP
      * 
      * Used primarily for communication between `LocalLayer` and `Node` classes.
      * 
+     * @tparam TLocalAddr Type of local address
      */
+    template<typename TLocalAddr>
     struct LocalMessage
     {
+        using LocalAddrT = TLocalAddr;
+
         LocalMessageType type;     //!< Type of message
-        LocalAddr addr = {};       //!< Source/destination address
+        TLocalAddr addr = {};      //!< Source/destination address
         std::string topic = "";    //!< Topic of message
         std::string payload = "";  //!< Payload of message
 

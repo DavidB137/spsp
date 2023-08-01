@@ -9,6 +9,7 @@
 
 #pragma once
 
+#include "spsp_local_addr.hpp"
 #include "spsp_local_message.hpp"
 
 namespace SPSP
@@ -75,7 +76,7 @@ namespace SPSP
          * @return true Delivery successful
          * @return false Delivery failed
          */
-        virtual bool send(const LocalMessage msg) = 0;
+        virtual bool send(const LocalMessage<LocalAddr> msg) = 0;
 
         /**
          * @brief Connects to bridge

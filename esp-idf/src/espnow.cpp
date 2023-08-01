@@ -81,7 +81,7 @@ namespace SPSP::LocalLayers::ESPNOW
         SPSP_LOGI("Deinitialized");
     }
 
-    bool Layer::send(const LocalMessage msg)
+    bool Layer::send(const LocalMessage<LocalAddr> msg)
     {
         SPSP_LOGD("Send: %s", msg.toString().c_str());
 
@@ -171,7 +171,7 @@ namespace SPSP::LocalLayers::ESPNOW
         this->unregisterPeer(dst);
     }
 
-    bool Layer::validateMessage(const LocalMessage msg) const
+    bool Layer::validateMessage(const LocalMessage<LocalAddr> msg) const
     {
         unsigned dataLen = sizeof(Packet) + msg.topic.length() + msg.payload.length();
 
@@ -184,7 +184,7 @@ namespace SPSP::LocalLayers::ESPNOW
         return true;
     }
 
-    void Layer::preparePacket(const LocalMessage msg, uint8_t* data) const
+    void Layer::preparePacket(const LocalMessage<LocalAddr> msg, uint8_t* data) const
     {
         uint8_t topicLen = msg.topic.length();
         uint8_t payloadLen = msg.payload.length();
@@ -262,7 +262,7 @@ namespace SPSP::LocalLayers::ESPNOW
         const char* topicAndPayload = reinterpret_cast<const char*>(p->payload.topicAndPayload);
 
         // Construct message
-        LocalMessage msg = {};
+        LocalMessage<LocalAddr> msg = {};
         msg.type = p->payload.type;
         msg.addr = this->macTolocalAddr(src);
         msg.topic = std::string{topicAndPayload, p->payload.topicLen};
@@ -402,7 +402,7 @@ namespace SPSP::LocalLayers::ESPNOW
         m_bestBridgeSignal = SIGNAL_MIN;
 
         // Prepare message
-        LocalMessage msg = {};
+        LocalMessage<LocalAddr> msg = {};
         msg.addr = this->broadcastAddr();
         msg.type = LocalMessageType::PROBE_REQ;
         msg.payload = SPSP::VERSION;

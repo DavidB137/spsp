@@ -98,7 +98,7 @@ namespace SPSP::Nodes
         return true;
     }
 
-    bool Bridge::processProbeReq(const LocalMessage req)
+    bool Bridge::processProbeReq(const LocalMessage<LocalAddr> req)
     {
         LocalMessage res = req;
         res.type = LocalMessageType::PROBE_RES;
@@ -106,7 +106,7 @@ namespace SPSP::Nodes
         return this->sendLocal(res);
     }
 
-    bool Bridge::processPub(const LocalMessage req)
+    bool Bridge::processPub(const LocalMessage<LocalAddr> req)
     {
         // Far layer is not connected - can't deliver
         if (!this->farLayerConnected()) {
@@ -118,12 +118,12 @@ namespace SPSP::Nodes
         return m_fl->publish(req.addr.str, req.topic, req.payload);
     }
 
-    bool Bridge::processSubReq(const LocalMessage req)
+    bool Bridge::processSubReq(const LocalMessage<LocalAddr> req)
     {
         return m_subDB.insert(req.topic, req.addr);
     }
 
-    bool Bridge::processUnsub(const LocalMessage req)
+    bool Bridge::processUnsub(const LocalMessage<LocalAddr> req)
     {
         m_subDB.remove(req.topic, req.addr);
         return true;
@@ -135,7 +135,7 @@ namespace SPSP::Nodes
         SPSP_LOGD("Sending SUB_DATA to %s: topic '%s', payload '%s'",
                   addr.str.c_str(), topic.c_str(), payload.c_str());
 
-        LocalMessage msg = {};
+        LocalMessage<LocalAddr> msg = {};
         msg.addr = addr;
         msg.type = LocalMessageType::SUB_DATA;
         msg.topic = topic;

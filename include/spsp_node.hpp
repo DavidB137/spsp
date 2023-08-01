@@ -13,6 +13,7 @@
 #include <mutex>
 
 #include "spsp_layers.hpp"
+#include "spsp_local_addr.hpp"
 #include "spsp_local_message.hpp"
 
 namespace SPSP
@@ -27,7 +28,7 @@ namespace SPSP
      * @brief Local receive or send callback type
      * 
      */
-    using LocalRecvSendCb = void (*)(const LocalMessage& msg);
+    using LocalRecvSendCb = void (*)(const LocalMessage<LocalAddr>& msg);
 
     /**
      * @brief Generic node of SPSP
@@ -77,7 +78,7 @@ namespace SPSP
          * @param msg Received message
          * @param rssi Received signal strength indicator (in dBm)
          */
-        void receiveLocal(const LocalMessage msg, int rssi = INT_MAX);
+        void receiveLocal(const LocalMessage<LocalAddr> msg, int rssi = INT_MAX);
 
         /**
          * @brief Sets local receive/send callback function
@@ -165,7 +166,7 @@ namespace SPSP
          * @return true Message delivery successful
          * @return false Message delivery failed
          */
-        bool sendLocal(const LocalMessage msg);
+        bool sendLocal(const LocalMessage<LocalAddr> msg);
 
         /**
          * @brief Processes PROBE_REQ message
@@ -174,7 +175,7 @@ namespace SPSP
          * @return true Message delivery successful
          * @return false Message delivery failed
          */
-        virtual bool processProbeReq(const LocalMessage req) = 0;
+        virtual bool processProbeReq(const LocalMessage<LocalAddr> req) = 0;
 
         /**
          * @brief Processes PROBE_RES message
@@ -183,7 +184,7 @@ namespace SPSP
          * @return true Message delivery successful
          * @return false Message delivery failed
          */
-        virtual bool processProbeRes(const LocalMessage req) = 0;
+        virtual bool processProbeRes(const LocalMessage<LocalAddr> req) = 0;
 
         /**
          * @brief Processes PUB message
@@ -192,7 +193,7 @@ namespace SPSP
          * @return true Message delivery successful
          * @return false Message delivery failed
          */
-        virtual bool processPub(const LocalMessage req) = 0;
+        virtual bool processPub(const LocalMessage<LocalAddr> req) = 0;
 
         /**
          * @brief Processes SUB_REQ message
@@ -201,7 +202,7 @@ namespace SPSP
          * @return true Message delivery successful
          * @return false Message delivery failed
          */
-        virtual bool processSubReq(const LocalMessage req) = 0;
+        virtual bool processSubReq(const LocalMessage<LocalAddr> req) = 0;
 
         /**
          * @brief Processes SUB_DATA message
@@ -210,7 +211,7 @@ namespace SPSP
          * @return true Message delivery successful
          * @return false Message delivery failed
          */
-        virtual bool processSubData(const LocalMessage req) = 0;
+        virtual bool processSubData(const LocalMessage<LocalAddr> req) = 0;
 
         /**
          * @brief Processes UNSUB message
@@ -219,6 +220,6 @@ namespace SPSP
          * @return true Message delivery successful
          * @return false Message delivery failed
          */
-        virtual bool processUnsub(const LocalMessage req) = 0;
+        virtual bool processUnsub(const LocalMessage<LocalAddr> req) = 0;
     };
 } // namespace SPSP

@@ -35,7 +35,7 @@ namespace SPSP::Nodes
         SPSP_LOGD("Publishing: topic '%s', payload '%s'",
                   topic.c_str(), payload.c_str());
 
-        LocalMessage msg = {};
+        LocalMessage<LocalAddr> msg = {};
         // msg.addr is empty => send to the bridge node
         msg.type = LocalMessageType::PUB;
         msg.topic = topic;
@@ -48,7 +48,7 @@ namespace SPSP::Nodes
     {
         SPSP_LOGD("Subscribing to topic '%s'", topic.c_str());
 
-        LocalMessage msg = {};
+        LocalMessage<LocalAddr> msg = {};
         // msg.addr is empty => send to the bridge node
         msg.type = LocalMessageType::SUB_REQ;
         msg.topic = topic;
@@ -64,7 +64,7 @@ namespace SPSP::Nodes
     {
         SPSP_LOGD("Unsubscribing from topic '%s'", topic.c_str());
 
-        LocalMessage msg = {};
+        LocalMessage<LocalAddr> msg = {};
         // msg.addr is empty => send to the bridge node
         msg.type = LocalMessageType::UNSUB;
         msg.topic = topic;
@@ -76,7 +76,7 @@ namespace SPSP::Nodes
         return this->sendLocal(msg);
     }
 
-    bool Client::processSubData(const LocalMessage req)
+    bool Client::processSubData(const LocalMessage<LocalAddr> req)
     {
         m_subDB.callCb(req.topic, req.payload);
         return true;

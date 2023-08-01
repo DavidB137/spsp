@@ -147,7 +147,7 @@ namespace SPSP::LocalLayers::ESPNOW
          * @return true Delivery successful
          * @return false Delivery failed
          */
-        bool send(const LocalMessage msg);
+        bool send(const LocalMessage<LocalAddr> msg);
 
         /**
          * @brief Connects to the bridge
@@ -266,7 +266,7 @@ namespace SPSP::LocalLayers::ESPNOW
          * @return true Message can be sent
          * @return false Message can't be sent
          */
-        bool validateMessage(const LocalMessage msg) const;
+        bool validateMessage(const LocalMessage<LocalAddr> msg) const;
 
         /**
          * @brief Prepares packet to be sent
@@ -276,7 +276,7 @@ namespace SPSP::LocalLayers::ESPNOW
          * @param msg Message
          * @param data Raw memory for Packet
          */
-        void preparePacket(const LocalMessage msg, uint8_t* data) const;
+        void preparePacket(const LocalMessage<LocalAddr> msg, uint8_t* data) const;
 
         /**
          * @brief Registers given peer
