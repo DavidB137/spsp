@@ -62,7 +62,7 @@ namespace SPSP
      * 
      * @tparam TLocalAddr Type of local address
      */
-    template<typename TLocalAddr>
+    template <typename TLocalAddr>
     struct LocalMessage
     {
         using LocalAddrT = TLocalAddr;
