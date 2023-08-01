@@ -68,7 +68,7 @@ namespace SPSP::FarLayers::MQTT
         }
     }
 
-    Layer::Layer(const ClientConfig config)
+    Layer::Layer(const ConfigT config)
         : m_pubTopicPrefix{config.pubTopicPrefix}, m_qos{config.connection.qos},
           m_retain{config.connection.retain}
     {

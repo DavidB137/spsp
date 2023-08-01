@@ -83,6 +83,8 @@ namespace SPSP::FarLayers::MQTT
         std::promise<void> m_connectingPromise;  //!< Promise to block until successful connection is made
 
     public:
+        using ConfigT = typename SPSP::FarLayers::MQTT::ClientConfig;
+
         /**
          * @brief Constructs a new MQTT layer object
          * 
@@ -93,7 +95,7 @@ namespace SPSP::FarLayers::MQTT
          * 
          * @param config Configuration
          */
-        Layer(const ClientConfig config);
+        Layer(const ConfigT config);
 
         /**
          * @brief Destroys MQTT layer object
