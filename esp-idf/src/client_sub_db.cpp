@@ -10,7 +10,7 @@
 #include "freertos/FreeRTOS.h"
 #include "freertos/timers.h"
 
-#include "spsp_client.hpp"
+#include "spsp_client_sub_db.hpp"
 #include "spsp_logger.hpp"
 
 // Log tag
