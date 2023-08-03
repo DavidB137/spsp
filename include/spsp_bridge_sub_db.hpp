@@ -189,12 +189,10 @@ namespace SPSP::Nodes
                     m_mutex.unlock();
 
                     if (addr.empty()) {
-                        if (subEntry.cb != nullptr) {
-                            // This node's subscription - call callback
-                            SPSP_LOGD("Calling user callback for topic '%s'",
-                                      topic.c_str());
-                            subEntry.cb(topic, payload);
-                        }
+                        // This node's subscription - call callback
+                        SPSP_LOGD("Calling user callback for topic '%s'",
+                                    topic.c_str());
+                        subEntry.cb(topic, payload);
                     } else {
                         // Local layer subscription
                         m_bridge->publishSubData(addr, topic, payload);

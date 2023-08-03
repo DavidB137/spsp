@@ -112,7 +112,7 @@ namespace SPSP::Nodes
         {
             SPSP_LOGD("Subscribing locally to topic '%s'", topic.c_str());
 
-            return m_subDB.insert(topic, LocalAddr{}, cb);
+            return m_subDB.insert(topic, LocalAddrT{}, cb);
         }
 
         /**
@@ -186,7 +186,7 @@ namespace SPSP::Nodes
          */
         bool processSubReq(const LocalMessageT req)
         {
-            return m_subDB.insert(req.topic, req.addr);
+            return m_subDB.insert(req.topic, req.addr, nullptr);
         }
 
         /**
