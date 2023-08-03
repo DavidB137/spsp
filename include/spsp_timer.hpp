@@ -58,7 +58,8 @@ namespace SPSP
         /**
          * @brief Calls stored callback
          * 
+         * A new thread is spawned for this call.
          */
-        void callCb() { m_cb(); }
+        void callCb();
     };
 } // namespace SPSP

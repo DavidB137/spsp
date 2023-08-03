@@ -7,6 +7,8 @@
  * 
  */
 
+#include <thread>
+
 #include "freertos/FreeRTOS.h"
 #include "freertos/timers.h"
 
@@ -43,5 +45,11 @@ namespace SPSP
         TimerHandle_t timer = static_cast<TimerHandle_t>(m_timer);
         xTimerStop(timer, 0);
         xTimerDelete(timer, 0);
+    }
+
+    void Timer::callCb()
+    {
+        std::thread t(m_cb);
+        t.detach();
     }
 }
