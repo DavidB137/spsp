@@ -16,6 +16,7 @@
 #include "spsp_layers.hpp"
 #include "spsp_local_message.hpp"
 #include "spsp_logger.hpp"
+#include "spsp_version.hpp"
 
 // Log tag
 #define SPSP_LOG_TAG "SPSP/Node"
@@ -37,6 +38,15 @@ namespace SPSP
     class INode
     {
     public:
+        /**
+         * @brief Constructs a new generic node
+         * 
+         */
+        INode()
+        {
+            SPSP_LOGI("SPSP version: %s", SPSP::VERSION);
+        }
+
         /**
          * @brief Publishes payload to topic
          * 
