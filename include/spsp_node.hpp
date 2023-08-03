@@ -10,6 +10,7 @@
 #pragma once
 
 #include <climits>
+#include <functional>
 #include <memory>
 #include <mutex>
 
@@ -27,8 +28,8 @@ namespace SPSP
      * @brief Subscribe callback type
      * 
      */
-    using SubscribeCb = void (*)(const std::string topic,
-                                 const std::string payload);
+    using SubscribeCb = std::function<void(const std::string topic,
+                                           const std::string payload)>;
 
     /**
      * @brief Most generic node type of SPSP

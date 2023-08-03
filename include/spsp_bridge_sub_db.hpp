@@ -93,7 +93,7 @@ namespace SPSP::Nodes
          * @return false Insert failed
          */
         bool insert(const std::string topic, const BridgeT::LocalAddrT addr,
-                    const SubscribeCb cb = nullptr)
+                    SPSP::SubscribeCb cb)
         {
             const std::lock_guard lock(m_mutex);
 
@@ -119,8 +119,8 @@ namespace SPSP::Nodes
             m_db[topic][addr] = subEntry;
 
             if (addr.empty()) {
-                SPSP_LOGD("Inserted local entry for topic '%s' with callback %p (no expiration)",
-                          topic.c_str(), subEntry.cb);
+                SPSP_LOGD("Inserted local entry for topic '%s' with%s callback (no expiration)",
+                          topic.c_str(), (cb == nullptr ? "out" : ""));
             } else {
                 SPSP_LOGD("Inserted '%s@%s' (expires in %d min)",
                           addr.str.c_str(), topic.c_str(), subEntry.lifetime);
@@ -189,10 +189,12 @@ namespace SPSP::Nodes
                     m_mutex.unlock();
 
                     if (addr.empty()) {
-                        // This node's subscription - call callback
-                        SPSP_LOGD("Calling user callback (%p) for topic '%s'",
-                                subEntry.cb, topic.c_str());
-                        subEntry.cb(topic, payload);
+                        if (subEntry.cb != nullptr) {
+                            // This node's subscription - call callback
+                            SPSP_LOGD("Calling user callback for topic '%s'",
+                                      topic.c_str());
+                            subEntry.cb(topic, payload);
+                        }
                     } else {
                         // Local layer subscription
                         m_bridge->publishSubData(addr, topic, payload);

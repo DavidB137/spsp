@@ -86,8 +86,8 @@ namespace SPSP::Nodes
 
             m_db[topic] = {.cb = cb};
 
-            SPSP_LOGD("Inserted topic '%s' with callback %p (renews in %d min)",
-                      topic.c_str(), cb, m_db[topic].lifetime);
+            SPSP_LOGD("Inserted topic '%s' with callback (renews in %d min)",
+                      topic.c_str(), m_db[topic].lifetime);
         }
 
         /**
@@ -119,8 +119,8 @@ namespace SPSP::Nodes
 
                 m_mutex.unlock();
 
-                SPSP_LOGD("Calling user callback (%p) for topic '%s'",
-                        cb, topic.c_str());
+                SPSP_LOGD("Calling user callback for topic '%s'",
+                          topic.c_str());
 
                 // Call user's callback
                 cb(topic, payload);
