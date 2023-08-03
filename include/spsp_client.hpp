@@ -12,51 +12,50 @@
 #include <mutex>
 
 #include "spsp_client_sub_db.hpp"
-#include "spsp_espnow.hpp"
-#include "spsp_layers.hpp"
-#include "spsp_local_addr.hpp"
+#include "spsp_logger.hpp"
 #include "spsp_node.hpp"
+
+// Log tag
+#define SPSP_LOG_TAG "SPSP/Client"
 
 namespace SPSP::Nodes
 {
     /**
      * @brief Client node
      * 
+     * @tparam TLocalLayer Type of local layer
      */
-    class Client : public SPSP::ILocalNode<LocalLayers::ESPNOW::Layer>
+    template <typename TLocalLayer>
+    class Client : public ILocalNode<TLocalLayer>
     {
         // Subscribe DB can access private members
-        friend class ClientSubDB;
+        friend class ClientSubDB<TLocalLayer>;
 
-        ClientSubDB m_subDB;
+    protected:
+        ClientSubDB<TLocalLayer> m_subDB;
         std::mutex m_mutex;  //!< Mutex to prevent race conditions
 
     public:
+        using LocalAddrT = TLocalLayer::LocalAddrT;
+        using LocalMessageT = TLocalLayer::LocalMessageT;
+
         /**
          * @brief Constructs a new client node
          * 
+         * @param ll Local layer
          */
-        Client();
+        Client(TLocalLayer* ll) : ILocalNode<TLocalLayer>{ll}, m_subDB{this}
+        {
+            SPSP_LOGI("Initialized");
+        }
 
         /**
          * @brief Destroys the client node
          * 
          */
-        ~Client();
-
-        /**
-         * @brief Receives the message from far layer
-         * 
-         * This should not be used!
-         * 
-         * @param topic Topic
-         * @param payload Payload (data)
-         * @return true Message delivery successful
-         * @return false Message delivery failed
-         */
-        bool receiveFar(const std::string topic, const std::string payload)
+        ~Client()
         {
-            throw std::logic_error("You must not use far layer on client node!");
+            SPSP_LOGI("Deinitialized");
         }
 
         /**
@@ -70,7 +69,19 @@ namespace SPSP::Nodes
          * @return true Delivery successful
          * @return false Delivery failed
          */
-        bool publish(const std::string topic, const std::string payload);
+        bool publish(const std::string topic, const std::string payload)
+        {
+            SPSP_LOGD("Publishing: topic '%s', payload '%s'",
+                      topic.c_str(), payload.c_str());
+
+            LocalMessageT msg = {};
+            // msg.addr is empty => send to the bridge node
+            msg.type = LocalMessageType::PUB;
+            msg.topic = topic;
+            msg.payload = payload;
+
+            return this->sendLocal(msg);
+        }
 
         /**
          * @brief Subscribes to topic
@@ -85,14 +96,21 @@ namespace SPSP::Nodes
          * @return true Subscribe successful
          * @return false Subscribe failed
          */
-        bool subscribe(const std::string topic, SubscribeCb cb);
+        bool subscribe(const std::string topic, SubscribeCb cb)
+        {
+            SPSP_LOGD("Subscribing to topic '%s'", topic.c_str());
 
-        /**
-         * @brief Resubscribes to all topics
-         * 
-         * Doesn't do anything.
-         */
-        void resubscribeAll() {}
+            LocalMessageT msg = {};
+            // msg.addr is empty => send to the bridge node
+            msg.type = LocalMessageType::SUB_REQ;
+            msg.topic = topic;
+            // msg.payload is empty
+
+            // Add to sub DB
+            m_subDB.insert(topic, cb);
+
+            return this->sendLocal(msg);
+        }
 
         /**
          * @brief Unsubscribes from topic
@@ -103,15 +121,21 @@ namespace SPSP::Nodes
          * @return true Unsubscribe successful
          * @return false Unsubscribe failed
          */
-        bool unsubscribe(const std::string topic);
+        bool unsubscribe(const std::string topic)
+        {
+            SPSP_LOGD("Unsubscribing from topic '%s'", topic.c_str());
 
-        /**
-         * @brief Predicate whether this node is a client
-         * 
-         * @return true This is a client
-         * @return false This is not a client
-         */
-        inline bool isClient() { return true; }
+            LocalMessageT msg = {};
+            // msg.addr is empty => send to the bridge node
+            msg.type = LocalMessageType::UNSUB;
+            msg.topic = topic;
+            // msg.payload is empty
+
+            // Remove from sub DB
+            m_subDB.remove(topic);
+
+            return this->sendLocal(msg);
+        }
 
     protected:
         /**
@@ -123,7 +147,7 @@ namespace SPSP::Nodes
          * @return true Message delivery successful
          * @return false Message delivery failed
          */
-        bool processProbeReq(const LocalMessage<LocalAddr> req) { return false; }
+        bool processProbeReq(const LocalMessageT req) { return false; }
 
         /**
          * @brief Processes PROBE_RES message
@@ -135,7 +159,7 @@ namespace SPSP::Nodes
          * @return true Message delivery successful
          * @return false Message delivery failed
          */
-        bool processProbeRes(const LocalMessage<LocalAddr> req) { return true; }
+        bool processProbeRes(const LocalMessageT req) { return true; }
 
         /**
          * @brief Processes PUB message
@@ -146,7 +170,7 @@ namespace SPSP::Nodes
          * @return true Message delivery successful
          * @return false Message delivery failed
          */
-        bool processPub(const LocalMessage<LocalAddr> req) { return false; }
+        bool processPub(const LocalMessageT req) { return false; }
 
         /**
          * @brief Processes SUB_REQ message
@@ -157,7 +181,7 @@ namespace SPSP::Nodes
          * @return true Message delivery successful
          * @return false Message delivery failed
          */
-        bool processSubReq(const LocalMessage<LocalAddr> req) { return false; }
+        bool processSubReq(const LocalMessageT req) { return false; }
 
         /**
          * @brief Processes SUB_DATA message
@@ -166,7 +190,11 @@ namespace SPSP::Nodes
          * @return true Message delivery successful
          * @return false Message delivery failed
          */
-        bool processSubData(const LocalMessage<LocalAddr> req);
+        bool processSubData(const LocalMessageT req)
+        {
+            m_subDB.callCb(req.topic, req.payload);
+            return true;
+        }
 
         /**
          * @brief Processes UNSUB message
@@ -175,6 +203,8 @@ namespace SPSP::Nodes
          * @return true Message delivery successful
          * @return false Message delivery failed
          */
-        bool processUnsub(const LocalMessage<LocalAddr> req) { return false; }
+        bool processUnsub(const LocalMessageT req) { return false; }
     };
 } // namespace SPSP::Nodes
+
+#undef SPSP_LOG_TAG
