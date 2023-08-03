@@ -12,65 +12,52 @@
 #include <mutex>
 
 #include "spsp_bridge_sub_db.hpp"
-#include "spsp_espnow.hpp"
-#include "spsp_layers.hpp"
-#include "spsp_local_addr.hpp"
-#include "spsp_mqtt.hpp"
+#include "spsp_logger.hpp"
 #include "spsp_node.hpp"
+
+// Log tag
+#define SPSP_LOG_TAG "SPSP/Bridge"
 
 namespace SPSP::Nodes
 {
     /**
      * @brief Bridge node
      * 
+     * @tparam TLocalLayer Type of local layer
+     * @tparam TFarLayer   Type of far layer
      */
-    class Bridge : public SPSP::ILocalAndFarNode<LocalLayers::ESPNOW::Layer, FarLayers::MQTT::Layer>
+    template <typename TLocalLayer, typename TFarLayer>
+    class Bridge : public ILocalAndFarNode<TLocalLayer, TFarLayer>
     {
         // Subscribe DB can access private members
-        friend class BridgeSubDB;
+        friend class BridgeSubDB<TLocalLayer, TFarLayer>;
 
     protected:
-        SPSP::IFarLayer* m_fl = nullptr;
-        BridgeSubDB m_subDB;
+        BridgeSubDB<TLocalLayer, TFarLayer> m_subDB;
         std::mutex m_mutex;  //!< Mutex to prevent race conditions
 
     public:
+        using LocalAddrT = TLocalLayer::LocalAddrT;
+        using LocalMessageT = TLocalLayer::LocalMessageT;
+
         /**
          * @brief Constructs a new bridge node
          * 
          */
-        Bridge();
+        Bridge(TLocalLayer* ll, TFarLayer* fl)
+            : ILocalAndFarNode<TLocalLayer, TFarLayer>{ll, fl}, m_subDB{this}
+        {
+            SPSP_LOGI("Initialized");
+        }
 
         /**
          * @brief Destroys the bridge node
          * 
          */
-        ~Bridge();
-
-        /**
-         * @brief Sets pointer to the far layer.
-         * 
-         * The pointer must be valid until the `Bridge` is destroyed
-         * or `unsetFarLayer` is called.
-         * Safe to call even when far layer is already set.
-         * 
-         * @param fl New far layer
-         */
-        void setFarLayer(IFarLayer* fl);
-
-        /**
-         * @brief Unsets pointer to the far layer.
-         * 
-         */
-        void unsetFarLayer();
-
-        /**
-         * @brief Checks whether the far layer is connected
-         * 
-         * @return true Far layer is connected
-         * @return false Far layer is disconnected
-         */
-        inline bool farLayerConnected() const { return m_fl != nullptr; }
+        ~Bridge()
+        {
+            SPSP_LOGI("Deinitialized");
+        }
 
         /**
          * @brief Receives the message from far layer
@@ -82,7 +69,14 @@ namespace SPSP::Nodes
          * @return true Message delivery successful
          * @return false Message delivery failed
          */
-        bool receiveFar(const std::string topic, const std::string payload);
+        bool receiveFar(const std::string topic, const std::string payload)
+        {
+            SPSP_LOGD("Received far msg: topic '%s', payload '%s'",
+                      topic.c_str(), payload.c_str());
+
+            m_subDB.callCbs(topic, payload);
+            return true;
+        }
 
         /**
          * @brief Publishes payload to topic
@@ -95,7 +89,13 @@ namespace SPSP::Nodes
          * @return true Delivery successful
          * @return false Delivery failed
          */
-        bool publish(const std::string topic, const std::string payload);
+        bool publish(const std::string topic, const std::string payload)
+        {
+            SPSP_LOGD("Publishing locally: topic '%s', payload '%s'",
+                      topic.c_str(), payload.c_str());
+
+            return m_fl->publish(LocalAddr{}.str, topic, payload);
+        }
 
         /**
          * @brief Subscribes to topic
@@ -108,7 +108,12 @@ namespace SPSP::Nodes
          * @return true Subscribe successful
          * @return false Subscribe failed
          */
-        bool subscribe(const std::string topic, SubscribeCb cb);
+        bool subscribe(const std::string topic, SubscribeCb cb)
+        {
+            SPSP_LOGD("Subscribing locally to topic '%s'", topic.c_str());
+
+            return m_subDB.insert(topic, LocalAddr{}, cb);
+        }
 
         /**
          * @brief Resubscribes to all topics
@@ -125,15 +130,13 @@ namespace SPSP::Nodes
          * @return true Unsubscribe successful
          * @return false Unsubscribe failed
          */
-        bool unsubscribe(const std::string topic);
+        bool unsubscribe(const std::string topic)
+        {
+            SPSP_LOGD("Unsubscribing locally from topic '%s'", topic.c_str());
 
-        /**
-         * @brief Predicate whether this node is a client
-         * 
-         * @return true This is a client
-         * @return false This is not a client
-         */
-        inline bool isClient() { return false; }
+            m_subDB.remove(topic, LocalAddr{});
+            return true;
+        }
 
     protected:
         /**
@@ -143,7 +146,13 @@ namespace SPSP::Nodes
          * @return true Message delivery successful
          * @return false Message delivery failed
          */
-        bool processProbeReq(const LocalMessage<LocalAddr> req);
+        bool processProbeReq(const LocalMessageT req)
+        {
+            LocalMessageT res = req;
+            res.type = LocalMessageType::PROBE_RES;
+            res.payload = SPSP::VERSION;
+            return this->sendLocal(res);
+        }
 
         /**
          * @brief Processes PROBE_RES message
@@ -154,7 +163,7 @@ namespace SPSP::Nodes
          * @return true Message delivery successful
          * @return false Message delivery failed
          */
-        bool processProbeRes(const LocalMessage<LocalAddr> req) { return false; }
+        bool processProbeRes(const LocalMessageT req) { return false; }
 
         /**
          * @brief Processes PUB message
@@ -163,7 +172,10 @@ namespace SPSP::Nodes
          * @return true Message delivery successful
          * @return false Message delivery failed
          */
-        bool processPub(const LocalMessage<LocalAddr> req);
+        bool processPub(const LocalMessageT req)
+        {
+            return m_fl->publish(req.addr.str, req.topic, req.payload);
+        }
 
         /**
          * @brief Processes SUB_REQ message
@@ -172,7 +184,10 @@ namespace SPSP::Nodes
          * @return true Message delivery successful
          * @return false Message delivery failed
          */
-        bool processSubReq(const LocalMessage<LocalAddr> req);
+        bool processSubReq(const LocalMessageT req)
+        {
+            return m_subDB.insert(req.topic, req.addr);
+        }
 
         /**
          * @brief Processes SUB_DATA message
@@ -183,7 +198,7 @@ namespace SPSP::Nodes
          * @return true Message delivery successful
          * @return false Message delivery failed
          */
-        bool processSubData(const LocalMessage<LocalAddr> req) { return false; }
+        bool processSubData(const LocalMessageT req) { return false; }
 
         /**
          * @brief Processes UNSUB message
@@ -192,7 +207,11 @@ namespace SPSP::Nodes
          * @return true Message delivery successful
          * @return false Message delivery failed
          */
-        bool processUnsub(const LocalMessage<LocalAddr> req);
+        bool processUnsub(const LocalMessageT req)
+        {
+            m_subDB.remove(req.topic, req.addr);
+            return true;
+        }
 
         /**
          * @brief Publishes received subscription data to local layer node
@@ -203,8 +222,20 @@ namespace SPSP::Nodes
          * @return true Message delivery successful
          * @return false Message delivery failed
          */
-        bool publishSubData(const LocalAddr addr, const std::string topic,
-                            const std::string payload);
+        bool publishSubData(const LocalAddrT addr, const std::string topic,
+                            const std::string payload)
+        {
+            SPSP_LOGD("Sending SUB_DATA to %s: topic '%s', payload '%s'",
+                      addr.str.c_str(), topic.c_str(), payload.c_str());
+
+            LocalMessageT msg = {};
+            msg.addr = addr;
+            msg.type = LocalMessageType::SUB_DATA;
+            msg.topic = topic;
+            msg.payload = payload;
+
+            return this->sendLocal(msg);
+        }
 
         /**
          * @brief Subscribes to topic on far layer (if connected)
@@ -213,7 +244,10 @@ namespace SPSP::Nodes
          * @return true Subscription successful
          * @return false Subscription failed
          */
-        bool subscribeFar(const std::string topic);
+        bool subscribeFar(const std::string topic)
+        {
+            return m_fl->subscribe(topic);
+        }
 
         /**
          * @brief Unsubscribes from topic on far layer (if connected)
@@ -222,6 +256,11 @@ namespace SPSP::Nodes
          * @return true Unsubscription successful
          * @return false Unsubscription failed
          */
-        bool unsubscribeFar(const std::string topic);
+        bool unsubscribeFar(const std::string topic)
+        {
+            return m_fl->unsubscribe(topic);
+        }
     };
 } // namespace SPSP::Nodes
+
+#undef SPSP_LOG_TAG
