@@ -31,10 +31,10 @@ namespace SPSP
     struct LocalAddrMAC : public LocalAddr
     {
         /**
-         * @brief Construct a new empty object
+         * @brief Construct a new object from 00:00:00:00:00:00 MAC address
          * 
          */
-        LocalAddrMAC() {};
+        LocalAddrMAC();
 
         /**
          * @brief Constructs a new object
@@ -72,3 +72,13 @@ namespace SPSP
         void toMAC(uint8_t* mac) const;
     };
 }
+
+// Define hasher function
+template<>
+struct std::hash<SPSP::LocalAddrMAC>
+{
+    std::size_t operator()(SPSP::LocalAddrMAC const& addr) const noexcept
+    {
+        return std::hash<SPSP::LocalAddr>{}(addr);
+    }
+};

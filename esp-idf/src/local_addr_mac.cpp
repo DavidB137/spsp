@@ -8,6 +8,7 @@
  */
 
 #include <cstring>
+#include <memory>
 
 #include "esp_mac.h"
 
@@ -15,6 +16,12 @@
 
 namespace SPSP
 {
+    LocalAddrMAC::LocalAddrMAC()
+    {
+        uint8_t mac[MAC_LEN];
+        memset(mac, 0x00, MAC_LEN);
+    }
+
     LocalAddrMAC::LocalAddrMAC(const uint8_t* mac)
     {
         // Internal representation
@@ -35,9 +42,7 @@ namespace SPSP
 
     LocalAddrMAC LocalAddrMAC::zeroes()
     {
-        uint8_t mac[MAC_LEN];
-        memset(mac, 0x00, MAC_LEN);
-        return LocalAddrMAC(mac);
+        return LocalAddrMAC();
     }
 
     LocalAddrMAC LocalAddrMAC::broadcast()
