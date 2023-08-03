@@ -1,7 +1,7 @@
 /**
- * @file mqtt.cpp
+ * @file timer.cpp
  * @author Dávid Benko (davidbenko@davidbenko.dev)
- * @brief MQTT far layer for SPSP
+ * @brief Timer for SPSP purposes
  * 
  * @copyright Copyright (c) 2023
  * 
