@@ -57,7 +57,7 @@ namespace SPSP::LocalLayers::ESPNOW
         espnowInstance->sendCallback(dst, status == ESP_NOW_SEND_SUCCESS);
     }
 
-    Layer::Layer(const ConfigT config)
+    Layer::Layer(const Config config)
         : m_ssid{config.ssid}, m_password{config.password}
     {
         // Store pointer to this instance
