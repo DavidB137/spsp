@@ -16,6 +16,7 @@
 #include <string>
 
 #include "spsp_layers.hpp"
+#include "spsp_local_addr_mac.hpp"
 
 namespace SPSP::LocalLayers::ESPNOW
 {
@@ -96,12 +97,12 @@ namespace SPSP::LocalLayers::ESPNOW
      * @brief ESP-NOW local layer
      * 
      */
-    class Layer : public ILocalLayer<LocalMessage<LocalAddr>>
+    class Layer : public ILocalLayer<LocalMessage<LocalAddrMAC>>
     {
     public:
         using ConfigT = typename SPSP::LocalLayers::ESPNOW::Config;
-        using LocalAddrT = typename SPSP::LocalAddr;
-        using LocalMessageT = typename SPSP::LocalMessage<SPSP::LocalAddr>;
+        using LocalAddrT = typename SPSP::LocalAddrMAC;
+        using LocalMessageT = typename SPSP::LocalMessage<SPSP::LocalAddrMAC>;
 
     protected:
         uint32_t m_ssid;                       //!< Numeric SSID
@@ -180,6 +181,8 @@ namespace SPSP::LocalLayers::ESPNOW
          * 
          * `rtndBr` and `connBr` may be the same pointers.
          * 
+         * TODO: create struct for bridge info
+         * 
          * @param rtndBr Retained bridge peer info (for reconnection)
          * @param connBr Connected bridge peer info storage (if connection
          *               successful and `connBr` != nullptr)
@@ -210,23 +213,6 @@ namespace SPSP::LocalLayers::ESPNOW
          * @param delivered Whether packet has been delivered successfully
          */
         void sendCallback(const uint8_t* dst, bool delivered);
-
-        /**
-         * @brief Converts MAC address to `LocalAddr` instance
-         * 
-         * @param mac MAC address pointer
-         * @return `LocalAddr` instance
-         */
-        static const LocalAddrT macTolocalAddr(const uint8_t* mac);
-
-        /**
-         * @brief Converts `LocalAddr` instance to MAC address
-         * 
-         * @param la `LocalAddr` instance
-         * @param mac MAC address pointer (modified in-place)
-         * @return MAC address pointer
-         */
-        static void localAddrToMac(const LocalAddrT& la, uint8_t* mac);
 
     protected:
         /**
@@ -332,12 +318,5 @@ namespace SPSP::LocalLayers::ESPNOW
          * @return Bucket id
          */
         uint8_t getBucketIdFromLocalAddr(const LocalAddrT& addr) const;
-
-        /**
-         * @brief Returns broadcast address
-         * 
-         * @return Broadcast address
-         */
-        static const LocalAddrT broadcastAddr();
     };
 } // namespace SPSP::LocalLayers::ESPNOW

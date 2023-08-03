@@ -85,7 +85,7 @@ namespace SPSP::LocalLayers::ESPNOW
     {
         SPSP_LOGD("Send: %s", msg.toString().c_str());
 
-        LocalAddr dst = msg.addr;
+        LocalAddrT dst = msg.addr;
 
         // Process empty destination address
         if (dst.empty()) {
@@ -161,7 +161,7 @@ namespace SPSP::LocalLayers::ESPNOW
 
         // Get MAC address
         uint8_t peerMAC[ESP_NOW_ETH_ALEN];
-        this->localAddrToMac(dst, peerMAC);
+        dst.toMAC(peerMAC);
 
         // Send
         SPSP_LOGD("Send raw: %u bytes to %s", dataLen, dst.str.c_str());
@@ -225,7 +225,7 @@ namespace SPSP::LocalLayers::ESPNOW
 
         // Get MAC address
         esp_now_peer_info_t peerInfo = {};
-        this->localAddrToMac(addr, peerInfo.peer_addr);
+        addr.toMAC(peerInfo.peer_addr);
 
         ESP_ERROR_CHECK(esp_now_add_peer(&peerInfo));
     }
@@ -236,14 +236,14 @@ namespace SPSP::LocalLayers::ESPNOW
 
         // Get MAC address
         esp_now_peer_info_t peerInfo = {};
-        this->localAddrToMac(addr, peerInfo.peer_addr);
+        addr.toMAC(peerInfo.peer_addr);
 
         ESP_ERROR_CHECK(esp_now_del_peer(peerInfo.peer_addr));
     }
 
     void Layer::receiveCallback(const uint8_t* src, uint8_t* data, unsigned dataLen, int rssi)
     {
-        SPSP_LOGD("Receive: packet from %s", macTolocalAddr(src).str.c_str());
+        SPSP_LOGD("Receive: packet from %s", LocalAddrT(src).str.c_str());
 
         // Check packet length
         if (dataLen < sizeof(Packet)) {
@@ -264,7 +264,7 @@ namespace SPSP::LocalLayers::ESPNOW
         // Construct message
         LocalMessageT msg = {};
         msg.type = p->payload.type;
-        msg.addr = this->macTolocalAddr(src);
+        msg.addr = src;
         msg.topic = std::string{topicAndPayload, p->payload.topicLen};
         msg.payload = std::string{topicAndPayload + p->payload.topicLen,
                               p->payload.payloadLen};
@@ -347,10 +347,10 @@ namespace SPSP::LocalLayers::ESPNOW
     void Layer::sendCallback(const uint8_t* dst, bool delivered)
     {
         // Promise/mutex bucket
-        auto bucketId = this->getBucketIdFromLocalAddr(this->macTolocalAddr(dst));
+        auto bucketId = this->getBucketIdFromLocalAddr(dst);
 
         SPSP_LOGD("Send callback: %s (bucket %d): %s",
-                  this->macTolocalAddr(dst).str.c_str(), bucketId,
+                  LocalAddrT(dst).str.c_str(), bucketId,
                   delivered ? "delivered" : "not delivered");
 
         m_sendingPromises[bucketId].set_value(delivered);
@@ -368,7 +368,7 @@ namespace SPSP::LocalLayers::ESPNOW
 
         if (rtndBrStruct != nullptr) {
             // Reconnect to retained bridge
-            m_bestBridgeAddr = this->macTolocalAddr(rtndBrStruct->addr);
+            m_bestBridgeAddr = rtndBrStruct->addr;
             m_bestBridgeCh = rtndBrStruct->ch;
             wifi.setChannel(m_bestBridgeCh);
 
@@ -398,7 +398,7 @@ namespace SPSP::LocalLayers::ESPNOW
 
         // Prepare message
         LocalMessageT msg = {};
-        msg.addr = this->broadcastAddr();
+        msg.addr = LocalAddrT::broadcast();
         msg.type = LocalMessageType::PROBE_REQ;
         msg.payload = SPSP::VERSION;
 
@@ -443,33 +443,11 @@ namespace SPSP::LocalLayers::ESPNOW
                   m_bestBridgeSignal);
 
         if (connBrStruct != nullptr) {
-            this->localAddrToMac(m_bestBridgeAddr, connBrStruct->addr);
+            m_bestBridgeAddr.toMAC(connBrStruct->addr);
             connBrStruct->ch = wifi.getChannel();
         }
 
         return true;
-    }
-
-    const SPSP::LocalLayers::ESPNOW::Layer::LocalAddrT Layer::macTolocalAddr(const uint8_t* mac)
-    {
-        SPSP::LocalLayers::ESPNOW::Layer::LocalAddrT la;
-
-        // Internal representation
-        la.addr = std::vector<uint8_t>(mac, mac + ESP_NOW_ETH_ALEN);
-
-        // Printable string
-        char macStr[16];
-        sprintf(macStr, "%02x%02x%02x%02x%02x%02x", MAC2STR(mac));
-        la.str = std::string(macStr);
-
-        return la;
-    }
-
-    void Layer::localAddrToMac(const LocalAddrT& la, uint8_t* mac)
-    {
-        for (unsigned i = 0; i < la.addr.size(); i++) {
-            mac[i] = la.addr[i];
-        }
     }
 
     void Layer::encryptRaw(uint8_t* data, unsigned dataLen, const uint8_t* nonce) const
@@ -496,12 +474,5 @@ namespace SPSP::LocalLayers::ESPNOW
     uint8_t Layer::getBucketIdFromLocalAddr(const LocalAddrT& addr) const
     {
         return std::hash<LocalAddrT>{}(addr) % this->m_sendingPromises.size();
-    }
-
-    const SPSP::LocalLayers::ESPNOW::Layer::LocalAddrT Layer::broadcastAddr()
-    {
-        uint8_t bcst[ESP_NOW_ETH_ALEN];
-        memset(bcst, 0xFF, ESP_NOW_ETH_ALEN);
-        return Layer::macTolocalAddr(bcst);
     }
 } // namespace SPSP::LocalLayers::ESPNOW
