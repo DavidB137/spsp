@@ -100,7 +100,6 @@ namespace SPSP::LocalLayers::ESPNOW
     class Layer : public ILocalLayer<LocalMessage<LocalAddrMAC>>
     {
     public:
-        using ConfigT = typename SPSP::LocalLayers::ESPNOW::Config;
         using LocalAddrT = typename SPSP::LocalAddrMAC;
         using LocalMessageT = typename SPSP::LocalMessage<SPSP::LocalAddrMAC>;
 
@@ -144,7 +143,7 @@ namespace SPSP::LocalLayers::ESPNOW
          * 
          * @param config Configuration
          */
-        Layer(const ConfigT config);
+        Layer(const Config config);
 
         /**
          * @brief Destroys ESP-NOW layer object

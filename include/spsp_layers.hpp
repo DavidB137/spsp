@@ -18,12 +18,6 @@ namespace SPSP
     template <typename TFarLayer> class IFarNode;
 
     /**
-     * @brief Dummy config for local or far layer
-     * 
-     */
-    struct DummyLocalOrFarLayerConfig {};
-
-    /**
      * @brief Interface for local layer
      * 
      * @tparam TLocalMessage Type of local message
@@ -34,7 +28,6 @@ namespace SPSP
         void* m_node = nullptr;
 
     public:
-        using ConfigT = typename SPSP::DummyLocalOrFarLayerConfig;
         using LocalAddrT = TLocalMessage::LocalAddrT;
         using LocalMessageT = TLocalMessage;
 
@@ -110,8 +103,6 @@ namespace SPSP
         void* m_node = nullptr;
 
     public:
-        using ConfigT = typename SPSP::DummyLocalOrFarLayerConfig;
-
         /**
          * @brief Sets pointer to the owner node.
          * 
