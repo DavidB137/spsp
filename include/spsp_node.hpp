@@ -94,7 +94,7 @@ namespace SPSP
     {
         using LocalAddrT = typename TLocalLayer::LocalAddrT;
         using LocalMessageT = typename TLocalLayer::LocalMessageT;
-        using LocalRecvSendCb = void (*)(const LocalMessageT&);
+        using LocalRecvSendCb = std::function<void(const LocalMessageT&)>;
 
         TLocalLayer* m_ll;
         LocalRecvSendCb m_localRecvSendCb = nullptr;
@@ -128,8 +128,7 @@ namespace SPSP
 
             // Call receive/send callback
             if (m_localRecvSendCb != nullptr) {
-                SPSP_LOGD("Calling receive/send callback %p",
-                          m_localRecvSendCb);
+                SPSP_LOGD("Calling receive/send callback");
                 m_localRecvSendCb(msg);
             }
 
@@ -206,8 +205,7 @@ namespace SPSP
 
             // Call receive/send callback
             if (m_localRecvSendCb != nullptr) {
-                SPSP_LOGD("Calling receive/send callback %p",
-                          m_localRecvSendCb);
+                SPSP_LOGD("Calling receive/send callback");
                 m_localRecvSendCb(msg);
             }
 
