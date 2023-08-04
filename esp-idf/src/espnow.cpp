@@ -92,8 +92,8 @@ namespace SPSP::LocalLayers::ESPNOW
             // Client: check discovered bridge
             // Bridge: `dst` shouldn't be ever empty
 
-            if (!m_bestBridgeAddr.empty()) {
-                dst = m_bestBridgeAddr;
+            if (!m_bestBridge.empty()) {
+                dst = m_bestBridge.addr;
                 SPSP_LOGD("Send: rewriting destination MAC to %s", dst.str.c_str());
             } else {
                 SPSP_LOGE("Send fail: destination address is empty and no bridge is connected");
@@ -267,7 +267,7 @@ namespace SPSP::LocalLayers::ESPNOW
         msg.addr = src;
         msg.topic = std::string{topicAndPayload, p->payload.topicLen};
         msg.payload = std::string{topicAndPayload + p->payload.topicLen,
-                              p->payload.payloadLen};
+                                  p->payload.payloadLen};
 
         // Process probe requests internally
         if (msg.type == LocalMessageType::PROBE_RES) {
@@ -277,10 +277,10 @@ namespace SPSP::LocalLayers::ESPNOW
                       msg.addr.str.c_str(), rssi);
 
             // Store bridge with best signal
-            if (m_bestBridgeSignal < rssi) {
-                m_bestBridgeSignal = rssi;
-                m_bestBridgeAddr = msg.addr;
-                m_bestBridgeCh = WiFi::getInstance().getChannel();
+            if (m_bestBridge.rssi < rssi) {
+                m_bestBridge.rssi = rssi;
+                m_bestBridge.addr = msg.addr;
+                m_bestBridge.ch = WiFi::getInstance().getChannel();
             }
 
             m_bestBridgeMutex.unlock();
@@ -356,28 +356,25 @@ namespace SPSP::LocalLayers::ESPNOW
         m_sendingPromises[bucketId].set_value(delivered);
     }
 
-    bool Layer::connectToBridge(void* rtndBr, void* connBr)
+    bool Layer::connectToBridge(BridgeConnInfoRTC* rtndBr,
+                                BridgeConnInfoRTC* connBr)
     {
         // Mutex
         const std::lock_guard lock(m_mutex);
 
-        auto* rtndBrStruct = reinterpret_cast<BridgeConnInfo*>(rtndBr);
-        auto* connBrStruct = reinterpret_cast<BridgeConnInfo*>(connBr);
-
         WiFi& wifi = SPSP::WiFi::getInstance();
 
-        if (rtndBrStruct != nullptr) {
+        if (rtndBr != nullptr) {
             // Reconnect to retained bridge
-            m_bestBridgeAddr = rtndBrStruct->addr;
-            m_bestBridgeCh = rtndBrStruct->ch;
-            wifi.setChannel(m_bestBridgeCh);
+            m_bestBridge = *rtndBr;
+            wifi.setChannel(m_bestBridge.ch);
 
             if (connBr != nullptr) {
-                *connBrStruct = *rtndBrStruct;
+                *connBr = *rtndBr;
             }
 
             SPSP_LOGI("Reconnected to bridge: %s",
-                      m_bestBridgeAddr.str.c_str());
+                      m_bestBridge.addr.str.c_str());
 
             return true;
         }
@@ -394,7 +391,7 @@ namespace SPSP::LocalLayers::ESPNOW
                  wifiCountry.cc[0], wifiCountry.cc[1], lowCh, highCh - 1);
 
         // Clear previous results
-        m_bestBridgeSignal = SIGNAL_MIN;
+        m_bestBridge = {};
 
         // Prepare message
         LocalMessageT msg = {};
@@ -430,21 +427,20 @@ namespace SPSP::LocalLayers::ESPNOW
         }
 
         // No response
-        if (m_bestBridgeSignal == SIGNAL_MIN) {
+        if (m_bestBridge.empty()) {
             SPSP_LOGE("Connect to bridge: no response from bridge");
             return false;
         }
 
         // New best bridge is available - switch to it's channel
-        wifi.setChannel(m_bestBridgeCh);
+        wifi.setChannel(m_bestBridge.ch);
 
         SPSP_LOGI("Connected to bridge: %s on channel %u (%d dBm)",
-                  m_bestBridgeAddr.str.c_str(), m_bestBridgeCh,
-                  m_bestBridgeSignal);
+                  m_bestBridge.addr.str.c_str(), m_bestBridge.ch,
+                  m_bestBridge.rssi);
 
-        if (connBrStruct != nullptr) {
-            m_bestBridgeAddr.toMAC(connBrStruct->addr);
-            connBrStruct->ch = wifi.getChannel();
+        if (connBr != nullptr) {
+            *connBr = m_bestBridge.toRTC();
         }
 
         return true;
@@ -474,5 +470,13 @@ namespace SPSP::LocalLayers::ESPNOW
     uint8_t Layer::getBucketIdFromLocalAddr(const LocalAddrT& addr) const
     {
         return std::hash<LocalAddrT>{}(addr) % this->m_sendingPromises.size();
+    }
+
+    BridgeConnInfoRTC Layer::BridgeConnInfoInternal::toRTC()
+    {
+        BridgeConnInfoRTC brRTC = {};
+        addr.toMAC(brRTC.addr);
+        brRTC.ch = ch;
+        return brRTC;
     }
 } // namespace SPSP::LocalLayers::ESPNOW

@@ -70,18 +70,15 @@ namespace SPSP::LocalLayers::ESPNOW
     static_assert(sizeof(Packet) == 20);
 
     /**
-     * @brief Bridge connection info
+     * @brief RTC memory enabled bridge connection info
      * 
      * Needed for reconnection to the same bridge (i.e. after deep-sleep).
      */
-    struct BridgeConnInfo
+    struct BridgeConnInfoRTC
     {
         uint8_t addr[6];  //!< Address
         uint8_t ch;       //!< Wireless channel
     };
-
-    // Assert sizes
-    static_assert(sizeof(BridgeConnInfo) == 7);
 
     /**
      * @brief ESP-NOW configuration
@@ -104,13 +101,51 @@ namespace SPSP::LocalLayers::ESPNOW
         using LocalMessageT = typename SPSP::LocalMessage<SPSP::LocalAddrMAC>;
 
     protected:
-        uint32_t m_ssid;                       //!< Numeric SSID
-        std::string m_password;                //!< Password for packet payload encryption
-        LocalAddrT m_bestBridgeAddr = {};      //!< Address of bridge with the best signal
-        int m_bestBridgeSignal = SIGNAL_MIN;   //!< Signal RSSI of bridge with the best signal
-        uint8_t m_bestBridgeCh = 0;            //!< Channel of bridge with the best signal
-        std::mutex m_mutex;                    //!< Mutex to prevent race conditions
-        std::mutex m_bestBridgeMutex;          //!< Mutex for modifying m_bestBridge* attributes
+        /**
+         * @brief Internal bridge connection info
+         * 
+         */
+        struct BridgeConnInfoInternal
+        {
+            LocalAddrT addr = {};   //!< Address
+            int rssi = SIGNAL_MIN;  //!< Signal RSSI
+            uint8_t ch = 0;         //!< Wireless channel
+
+            /**
+             * @brief Construct a new empty object
+             * 
+             */
+            BridgeConnInfoInternal() {}
+
+            /**
+             * @brief Construct a new object from retained RTC version
+             * 
+             * @param brRTC RTC version
+             */
+            BridgeConnInfoInternal(BridgeConnInfoRTC brRTC)
+                : addr{brRTC.addr}, ch{brRTC.ch} {};
+
+            /**
+             * @brief Whether bridge info doesn't contain any meaningful bridge
+             * 
+             * @return true Bridge info is empty
+             * @return false Bridge info is not empty
+             */
+            bool empty() { return addr.empty(); }
+
+            /**
+             * @brief Convert internal info to RTC version
+             * 
+             * @return RTC version
+             */
+            BridgeConnInfoRTC toRTC();
+        };
+
+        uint32_t m_ssid;                           //!< Numeric SSID
+        std::string m_password;                    //!< Password for packet payload encryption
+        BridgeConnInfoInternal m_bestBridge = {};  //!< Bridge with best signal
+        std::mutex m_mutex;                        //!< Mutex to prevent race conditions
+        std::mutex m_bestBridgeMutex;              //!< Mutex for modifying m_bestBridge* attributes
 
         /**
          * @brief Container for promises of being-sent messages
@@ -175,12 +210,7 @@ namespace SPSP::LocalLayers::ESPNOW
          * You can use `retainedBridge` and `connectedBridge` parameters to
          * implement custom logic around deep-sleep reconnection without scans.
          * 
-         * Required size of memory under `rtndBr` and `connBr` is 7 bytes
-         * (`sizeof(SPSP::LocalLayers::ESPNOW::BridgeConnInfo)`).
-         * 
          * `rtndBr` and `connBr` may be the same pointers.
-         * 
-         * TODO: create struct for bridge info
          * 
          * @param rtndBr Retained bridge peer info (for reconnection)
          * @param connBr Connected bridge peer info storage (if connection
@@ -188,8 +218,8 @@ namespace SPSP::LocalLayers::ESPNOW
          * @return true Connection successful
          * @return false Connection failed
          */
-        bool connectToBridge(void* rtndBr = nullptr,
-                             void* connBr = nullptr);
+        bool connectToBridge(BridgeConnInfoRTC* rtndBr = nullptr,
+                             BridgeConnInfoRTC* connBr = nullptr);
 
         /**
          * @brief Receive callback for underlaying ESP-NOW C functions.
