@@ -74,24 +74,6 @@ namespace SPSP
          * @return false Delivery failed
          */
         virtual bool send(const TLocalMessage msg) = 0;
-
-        /**
-         * @brief Connects to bridge
-         * 
-         * After call to this method, client should be able to successfully
-         * send publish and subscribe messages.
-         * 
-         * Size of memory pointed to by `rtndBr` and `connBr` are concrete-
-         * protocol dependent.
-         * 
-         * @param rtndBr Retained bridge peer info (for reconnection)
-         * @param connBr Connected bridge peer info storage (if connection
-         *               successful and `connBr` != nullptr)
-         * @return true Connection successful
-         * @return false Connection failed
-         */
-        virtual bool connectToBridge(void* rtndBr = nullptr,
-                                     void* connBr = nullptr) = 0;
     };
 
     /**
