@@ -90,7 +90,7 @@ namespace SPSP
      * @tparam TLocalLayer Type of local layer
      */
     template <typename TLocalLayer>
-    class ILocalNode : public INode
+    class ILocalNode : virtual public INode
     {
         using LocalAddrT = typename TLocalLayer::LocalAddrT;
         using LocalMessageT = typename TLocalLayer::LocalMessageT;
@@ -275,7 +275,7 @@ namespace SPSP
      * @tparam TFarLayer Type of far layer
      */
     template <typename TFarLayer>
-    class IFarNode : public INode
+    class IFarNode : virtual public INode
     {
         TFarLayer* m_fl;
 
