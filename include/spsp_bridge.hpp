@@ -135,7 +135,7 @@ namespace SPSP::Nodes
         {
             SPSP_LOGD("Unsubscribing locally from topic '%s'", topic.c_str());
 
-            m_subDB.remove(topic, LocalAddr{});
+            m_subDB.remove(topic, LocalAddrT{});
             return true;
         }
 
