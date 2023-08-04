@@ -21,6 +21,7 @@ namespace SPSP
 {
     const char* const WIFI_HOSTNAME_PREFIX = "spsp-";         //!< Hostname prefix
     const auto WIFI_INIT_TIMEOUT = std::chrono::seconds(20);  //!< Timeout for connecting to AP
+    const int WIFI_TX_POWER_DEFAULT = INT_MIN;                //!< Default TX power
 
     /**
      * @brief WiFi connection error
@@ -28,6 +29,17 @@ namespace SPSP
      * Thrown when `WIFI_INIT_TIMEOUT` expires before successful connection.
      */
     class WiFiConnectionError : public std::exception {};
+
+    /**
+     * @brief ESP-NOW configuration
+     * 
+     */
+    struct WiFiConfig
+    {
+        std::string ssid;                        //!< SSID
+        std::string password;                    //!< Password
+        int maxTxPower = WIFI_TX_POWER_DEFAULT;  //!< Maximum transmit power (in dBm)
+    };
 
     /**
      * @brief WiFi manager for ESP platform (singleton)
@@ -69,11 +81,9 @@ namespace SPSP
          * Blocks until connection is established. May throw
          * `WiFiConnectionError`.
          * 
-         * @param ssid Service-set identifier
-         * @param password Password for given SSID
+         * @param config Configuration
          */
-        void init(const std::string ssid = "",
-                  const std::string password = "");
+        void init(const WiFiConfig config = {});
 
         /**
          * @brief Deinitializes WiFi

@@ -23,7 +23,7 @@ static const char* SPSP_LOG_TAG = "SPSP/WiFi";
 
 namespace SPSP
 {
-    void WiFi::init(const std::string ssid, const std::string password)
+    void WiFi::init(const WiFiConfig config)
     {
         // Mutex
         const std::lock_guard<std::mutex> lock(m_mutex);
@@ -32,8 +32,8 @@ namespace SPSP
         if (this->m_initialized) return;
 
         // Store given parameters
-        this->m_ssid = ssid;
-        this->m_password = password;
+        this->m_ssid = config.ssid;
+        this->m_password = config.password;
 
         // Create event loop
         ESP_ERROR_CHECK(esp_event_loop_create_default());
@@ -56,6 +56,11 @@ namespace SPSP
 
         // Start WiFi
         ESP_ERROR_CHECK(esp_wifi_start());
+
+        // Set TX power
+        if (config.maxTxPower != WIFI_TX_POWER_DEFAULT) {
+            ESP_ERROR_CHECK(esp_wifi_set_max_tx_power(4 * config.maxTxPower));
+        }
 
         // Wait until IP is received (only if SSID is not empty - i.e. this is
         // bridge node)
