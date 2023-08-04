@@ -36,8 +36,8 @@ namespace SPSP
      */
     struct WiFiConfig
     {
-        std::string ssid;                        //!< SSID
-        std::string password;                    //!< Password
+        std::string ssid = "";                   //!< SSID
+        std::string password = "";               //!< Password
         int maxTxPower = WIFI_TX_POWER_DEFAULT;  //!< Maximum transmit power (in dBm)
     };
 
@@ -51,8 +51,7 @@ namespace SPSP
      */
     class WiFi
     {
-        std::string m_ssid = "";                 //!< WiFi SSID
-        std::string m_password = "";             //!< WiFi Password
+        WiFiConfig m_config = {};                //!< Config
         bool m_initialized = false;              //!< Whether WiFi is initialized
         std::promise<void> m_connectingPromise;  //!< Promise to block until successful connection is made
         std::mutex m_mutex;                      //!< Mutex to prevent race conditions (primarily for initialization)

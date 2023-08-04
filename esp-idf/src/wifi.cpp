@@ -29,11 +29,9 @@ namespace SPSP
         const std::lock_guard<std::mutex> lock(m_mutex);
 
         // Don't do anything if already initialized
-        if (this->m_initialized) return;
+        if (m_initialized) return;
 
-        // Store given parameters
-        this->m_ssid = config.ssid;
-        this->m_password = config.password;
+        m_config = config;
 
         // Create event loop
         ESP_ERROR_CHECK(esp_event_loop_create_default());
@@ -64,7 +62,7 @@ namespace SPSP
 
         // Wait until IP is received (only if SSID is not empty - i.e. this is
         // bridge node)
-        if (m_ssid.length() > 0) {
+        if (m_config.ssid.length() > 0) {
             auto future = m_connectingPromise.get_future();
 
             SPSP_LOGI("Attempting connection with timeout %lld seconds",
@@ -79,7 +77,7 @@ namespace SPSP
             }
         }
 
-        this->m_initialized = true;
+        m_initialized = true;
 
         SPSP_LOGI("Initialized");
     }
@@ -88,7 +86,8 @@ namespace SPSP
     {
         esp_err_t nvsInitCode = nvs_flash_init();
 
-        if (nvsInitCode == ESP_ERR_NVS_NO_FREE_PAGES || nvsInitCode == ESP_ERR_NVS_NEW_VERSION_FOUND) {
+        if (nvsInitCode == ESP_ERR_NVS_NO_FREE_PAGES ||
+            nvsInitCode == ESP_ERR_NVS_NEW_VERSION_FOUND) {
             ESP_ERROR_CHECK(nvs_flash_erase());
             nvsInitCode = nvs_flash_init();
         }
@@ -101,7 +100,7 @@ namespace SPSP
     void WiFi::initNetIf()
     {
         // Don't do anything if SSID is empty
-        if (m_ssid.length() == 0) return;
+        if (m_config.ssid.length() == 0) return;
 
         ESP_ERROR_CHECK(esp_netif_init());
 
@@ -136,25 +135,25 @@ namespace SPSP
     void WiFi::initWiFiConfig()
     {
         // SSID is not empty (this is bridge node)
-        if (m_ssid.length() > 0) {
-            wifi_config_t wifi_config = {};
-            strcpy((char*) wifi_config.sta.ssid, m_ssid.c_str());
-            strcpy((char*) wifi_config.sta.password, m_password.c_str());
+        if (m_config.ssid.length() > 0) {
+            wifi_config_t espWiFiConfig = {};
+            strcpy((char*) espWiFiConfig.sta.ssid, m_config.ssid.c_str());
+            strcpy((char*) espWiFiConfig.sta.password, m_config.password.c_str());
 
             // Do full scan - connect to AP with strongest signal
-            wifi_config.sta.scan_method = WIFI_ALL_CHANNEL_SCAN;
+            espWiFiConfig.sta.scan_method = WIFI_ALL_CHANNEL_SCAN;
 
             // Enable roaming features
-            wifi_config.sta.rm_enabled = true;
-            wifi_config.sta.btm_enabled = true;
-            wifi_config.sta.mbo_enabled = true;
-            wifi_config.sta.ft_enabled = true;
+            espWiFiConfig.sta.rm_enabled = true;
+            espWiFiConfig.sta.btm_enabled = true;
+            espWiFiConfig.sta.mbo_enabled = true;
+            espWiFiConfig.sta.ft_enabled = true;
 
             // Enable security features
-            wifi_config.sta.owe_enabled = true;
-            wifi_config.sta.sae_pwe_h2e = WPA3_SAE_PWE_BOTH;
+            espWiFiConfig.sta.owe_enabled = true;
+            espWiFiConfig.sta.sae_pwe_h2e = WPA3_SAE_PWE_BOTH;
 
-            ESP_ERROR_CHECK(esp_wifi_set_config(WIFI_IF_STA, &wifi_config));
+            ESP_ERROR_CHECK(esp_wifi_set_config(WIFI_IF_STA, &espWiFiConfig));
 
             // No power saving for bridge (IMPORTANT!)
             esp_wifi_set_ps(WIFI_PS_NONE);
@@ -167,13 +166,13 @@ namespace SPSP
         const std::lock_guard<std::mutex> lock(m_mutex);
 
         // Don't do anything if already deinitialized
-        if (!this->m_initialized) return;
+        if (!m_initialized) return;
 
         ESP_ERROR_CHECK(esp_wifi_stop());
         ESP_ERROR_CHECK(esp_wifi_deinit());
         ESP_ERROR_CHECK(esp_event_loop_delete_default());
 
-        this->m_initialized = false;
+        m_initialized = false;
 
         SPSP_LOGI("Deinitialized");
     }
