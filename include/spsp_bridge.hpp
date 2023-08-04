@@ -12,6 +12,7 @@
 #include <mutex>
 
 #include "spsp_bridge_sub_db.hpp"
+#include "spsp_local_addr_mac.hpp"
 #include "spsp_logger.hpp"
 #include "spsp_node.hpp"
 
@@ -94,7 +95,7 @@ namespace SPSP::Nodes
             SPSP_LOGD("Publishing locally: topic '%s', payload '%s'",
                       topic.c_str(), payload.c_str());
 
-            return m_fl->publish(LocalAddr{}.str, topic, payload);
+            return m_fl->publish(LocalAddrMAC::local().str, topic, payload);
         }
 
         /**
