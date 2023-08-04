@@ -35,7 +35,8 @@ namespace SPSP::Nodes
     template <typename TLocalLayer, typename TFarLayer>
     class BridgeSubDB
     {
-        using BridgeT = typename SPSP::Bridge<TLocalLayer, TFarLayer>;
+        using BridgeT = typename SPSP::Nodes::Bridge<TLocalLayer, TFarLayer>;
+        using LocalAddrT = TLocalLayer::LocalAddrT;
 
         /**
          * @brief Bridge subscribe entry
@@ -55,7 +56,7 @@ namespace SPSP::Nodes
         Timer m_timer;                            //!< Timer handle pointer (platform dependent)
         std::unordered_map<
             std::string,
-            std::unordered_map<BridgeT::LocalAddrT, Entry>
+            std::unordered_map<LocalAddrT, Entry>
         > m_db;                                   //!< Database
     
     public:
@@ -63,7 +64,7 @@ namespace SPSP::Nodes
          * @brief Construct a new bridge sub DB
          * 
          * @param bridge Pointer to bridge node (owner)
-         */s
+         */
         BridgeSubDB(BridgeT* bridge)
             : m_bridge{bridge},
               m_timer{std::chrono::minutes(1),
@@ -92,7 +93,7 @@ namespace SPSP::Nodes
          * @return true Insert (including subscribe) successful
          * @return false Insert failed
          */
-        bool insert(const std::string topic, const BridgeT::LocalAddrT addr,
+        bool insert(const std::string topic, const LocalAddrT addr,
                     SPSP::SubscribeCb cb)
         {
             const std::lock_guard lock(m_mutex);
@@ -137,7 +138,7 @@ namespace SPSP::Nodes
          * @param topic Topic
          * @param addr Node address
          */
-        void remove(const std::string topic, const BridgeT::LocalAddrT addr)
+        void remove(const std::string topic, const LocalAddrT addr)
         {
             {
                 const std::scoped_lock lock(m_mutex);
