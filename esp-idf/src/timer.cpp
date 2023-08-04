@@ -23,8 +23,8 @@ namespace SPSP
     }
 
     Timer::Timer(const std::chrono::milliseconds interval,
-                 std::function<void()> cb)
-        : m_cb{cb}
+                 std::function<void()> cb, bool cbInNewThread)
+        : m_cb{cb}, cbInNewThread{cbInNewThread}
     {
         m_timer = xTimerCreate("SPSP::Timer", pdMS_TO_TICKS(interval.count()),
                                pdTRUE, this, _timer_callback);
@@ -49,7 +49,11 @@ namespace SPSP
 
     void Timer::callCb()
     {
-        std::thread t(m_cb);
-        t.detach();
+        if (cbInNewThread) {
+            std::thread t(m_cb);
+            t.detach();
+        } else {
+            m_cb();
+        }
     }
 }

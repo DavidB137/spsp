@@ -36,6 +36,7 @@ namespace SPSP
     protected:
         void* m_timer;               //!< Timer handle (platform dependent)
         std::function<void()> m_cb;  //!< Callback
+        bool cbInNewThread = true;   //!< Whether to call callback in new thread
 
     public:
         /**
@@ -46,8 +47,10 @@ namespace SPSP
          * 
          * @param interval Interval of timer
          * @param cb Callback (`std::bind` can be used)
+         * @param cbInNewThread Whether to call callback in new thread (prevents stack overflows)
          */
-        Timer(const std::chrono::milliseconds interval, std::function<void()> cb);
+        Timer(const std::chrono::milliseconds interval, std::function<void()> cb,
+              bool cbInNewThread = true);
 
         /**
          * @brief Destroys the timer
