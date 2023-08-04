@@ -62,7 +62,7 @@ namespace SPSP
 
         // Wait until IP is received (only if SSID is not empty - i.e. this is
         // bridge node)
-        if (m_config.ssid.length() > 0) {
+        if (config.ssid.length() > 0) {
             auto future = m_connectingPromise.get_future();
 
             SPSP_LOGI("Attempting connection with timeout %lld seconds",
