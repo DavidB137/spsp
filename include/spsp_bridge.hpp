@@ -95,7 +95,7 @@ namespace SPSP::Nodes
             SPSP_LOGD("Publishing locally: topic '%s', payload '%s'",
                       topic.c_str(), payload.c_str());
 
-            return m_fl->publish(LocalAddrMAC::local().str, topic, payload);
+            return this->getFarLayer()->publish(LocalAddrMAC::local().str, topic, payload);
         }
 
         /**
@@ -175,7 +175,7 @@ namespace SPSP::Nodes
          */
         bool processPub(const LocalMessageT req)
         {
-            return m_fl->publish(req.addr.str, req.topic, req.payload);
+            return this->getFarLayer()->publish(req.addr.str, req.topic, req.payload);
         }
 
         /**
@@ -247,7 +247,7 @@ namespace SPSP::Nodes
          */
         bool subscribeFar(const std::string topic)
         {
-            return m_fl->subscribe(topic);
+            return this->getFarLayer()->subscribe(topic);
         }
 
         /**
@@ -259,7 +259,7 @@ namespace SPSP::Nodes
          */
         bool unsubscribeFar(const std::string topic)
         {
-            return m_fl->unsubscribe(topic);
+            return this->getFarLayer()->unsubscribe(topic);
         }
     };
 } // namespace SPSP::Nodes
