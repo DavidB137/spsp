@@ -107,7 +107,6 @@ namespace SPSP::FarLayers::MQTT
          */
         void connected();
 
-    protected:
         /**
          * @brief Publishes message coming from node
          * 
@@ -142,6 +141,7 @@ namespace SPSP::FarLayers::MQTT
          */
         bool unsubscribe(const std::string topic);
 
+    protected:
         /**
          * @brief Helper to convert `std::string` to C string or `nullptr`
          * 
