@@ -38,6 +38,8 @@ namespace SPSP
     {
         std::string ssid = "";                   //!< SSID
         std::string password = "";               //!< Password
+        bool lockBssid = false;                  //!< Whether to use only AP with MAC address `bssid`
+        uint8_t bssid[6];                        //!< MAC address of AP
         int maxTxPower = WIFI_TX_POWER_DEFAULT;  //!< Maximum transmit power (in dBm)
     };
 

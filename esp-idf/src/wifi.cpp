@@ -140,6 +140,10 @@ namespace SPSP
             strcpy((char*) espWiFiConfig.sta.ssid, m_config.ssid.c_str());
             strcpy((char*) espWiFiConfig.sta.password, m_config.password.c_str());
 
+            // BSSID
+            espWiFiConfig.sta.bssid_set = m_config.lockBssid;
+            memcpy(espWiFiConfig.sta.bssid, m_config.bssid, sizeof(m_config.bssid));
+
             // Do full scan - connect to AP with strongest signal
             espWiFiConfig.sta.scan_method = WIFI_ALL_CHANNEL_SCAN;
 
