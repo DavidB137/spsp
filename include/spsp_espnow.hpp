@@ -339,7 +339,7 @@ namespace SPSP::LocalLayers::ESPNOW
         static uint8_t checksumRaw(uint8_t* data, unsigned dataLen, uint8_t existingChecksum = 0);
 
         /**
-         * @brief Calculates bucket id from `LocalAddr` object
+         * @brief Calculates bucket id from `LocalAddrT` object
          * 
          * Used for `m_sendingPromises` and `m_sendingMutexes` arrays.
          * 
