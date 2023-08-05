@@ -26,9 +26,12 @@
 
 namespace SPSP
 {
-    const std::string NODE_REPORTING_TOPIC = "_report";       //!< Topic for reporting
-    const std::string NODE_REPORTING_RSSI_SUBTOPIC = "rssi";  //!< Subtopic for RSSI reporting
-    const int NODE_RSSI_UNKNOWN = INT_MIN;                    //!< RSSI "unknown" value
+    // Topics for reporting
+    const std::string NODE_REPORTING_TOPIC = "_report";
+    const std::string NODE_REPORTING_RSSI_SUBTOPIC = "rssi";
+    const std::string NODE_REPORTING_VERSION_SUBTOPIC = "version";
+
+    const int NODE_RSSI_UNKNOWN = INT_MIN;  //!< RSSI "unknown" value
 
     /**
      * @brief Subscribe callback type
@@ -88,6 +91,24 @@ namespace SPSP
          * @return false Unsubscribe failed
          */
         virtual bool unsubscribe(const std::string topic) = 0;
+    
+    protected:
+        /**
+         * @brief Publishes version of this node
+         * 
+         * Doesn't block and doesn't check delivery status.
+         */
+        void publishVersion()
+        {
+            // Spawn new thread for this publish
+            std::thread t([this] {
+                std::string topic = NODE_REPORTING_TOPIC + "/"
+                                  + NODE_REPORTING_VERSION_SUBTOPIC;
+
+                this->publish(topic, SPSP::VERSION);
+            });
+            t.detach();
+        }
     };
 
     /**
