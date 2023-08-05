@@ -48,6 +48,9 @@ namespace SPSP::Nodes
         Bridge(TLocalLayer* ll, TFarLayer* fl)
             : ILocalAndFarNode<TLocalLayer, TFarLayer>{ll, fl}, m_subDB{this}
         {
+            // Publish version
+            this->publishVersion();
+
             SPSP_LOGI("Initialized");
         }
 
