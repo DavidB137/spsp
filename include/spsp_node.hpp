@@ -13,8 +13,10 @@
 #include <functional>
 #include <memory>
 #include <mutex>
+#include <thread>
 
 #include "spsp_layers.hpp"
+#include "spsp_local_addr_mac.hpp"
 #include "spsp_local_message.hpp"
 #include "spsp_logger.hpp"
 #include "spsp_version.hpp"
@@ -24,7 +26,9 @@
 
 namespace SPSP
 {
-    const int NODE_RSSI_UNKNOWN = INT_MIN;  //!< RSSI "unknown" value
+    const std::string NODE_REPORTING_TOPIC = "_report";       //!< Topic for reporting
+    const std::string NODE_REPORTING_RSSI_SUBTOPIC = "rssi";  //!< Subtopic for RSSI reporting
+    const int NODE_RSSI_UNKNOWN = INT_MIN;                    //!< RSSI "unknown" value
 
     /**
      * @brief Subscribe callback type
@@ -212,6 +216,29 @@ namespace SPSP
             }
 
             return delivered;
+        }
+
+        /**
+         * @brief Publishes RSSI of received message from `addr`
+         * 
+         * Doesn't block and doesn't check delivery status.
+         * If `rssi` is `NODE_RSSI_UNKNOWN`, doesn't do anything.
+         * 
+         * @param rssi Received signal strength indicator (in dBm)
+         */
+        void publishRssi(const LocalAddrT addr, int rssi)
+        {
+            if (rssi == NODE_RSSI_UNKNOWN) return;
+
+            // Spawn new thread for this publish
+            std::thread t([this, addr, rssi] {
+                std::string topic = NODE_REPORTING_TOPIC + "/"
+                                  + addr.str + "/"
+                                  + NODE_REPORTING_RSSI_SUBTOPIC;
+
+                this->publish(topic, std::to_string(rssi));
+            });
+            t.detach();
         }
 
         /**
