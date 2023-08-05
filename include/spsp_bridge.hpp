@@ -30,11 +30,12 @@ namespace SPSP::Nodes
     {
         struct Reporting
         {
-            bool version = true;      //!< Report SPSP version during construction
-            bool rssiOnProbe = true;  //!< Report RSSI on PROBE_REQ
-            bool rssiOnPub = true;    //!< Report RSSI on PUB
-            bool rssiOnSub = true;    //!< Report RSSI on SUB_REQ
-            bool rssiOnUnsub = true;  //!< Report RSSI on UNSUB
+            bool version = true;       //!< Report SPSP version during construction
+            bool probePayload = true;  //!< Report payload of PROBE_REQ (on ESP-NOW contains SPSP version)
+            bool rssiOnProbe = true;   //!< Report RSSI on PROBE_REQ
+            bool rssiOnPub = true;     //!< Report RSSI on PUB
+            bool rssiOnSub = true;     //!< Report RSSI on SUB_REQ
+            bool rssiOnUnsub = true;   //!< Report RSSI on UNSUB
         };
 
         Reporting reporting;
@@ -188,6 +189,16 @@ namespace SPSP::Nodes
             // Publish RSSI
             if (m_conf.reporting.rssiOnProbe) {
                 this->publishRssi(req.addr, rssi);
+            }
+
+            // Publish payload
+            if (m_conf.reporting.probePayload) {
+                std::string probePayloadReportTopic =
+                    NODE_REPORTING_TOPIC + "/" +
+                    NODE_REPORTING_PROBE_PAYLOAD_SUBTOPIC + "/" +
+                    req.addr.str;
+
+                this->publish(probePayloadReportTopic, req.payload);
             }
 
             return this->sendLocal(res);

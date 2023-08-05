@@ -30,6 +30,7 @@ namespace SPSP
     const std::string NODE_REPORTING_TOPIC = "_report";
     const std::string NODE_REPORTING_RSSI_SUBTOPIC = "rssi";
     const std::string NODE_REPORTING_VERSION_SUBTOPIC = "version";
+    const std::string NODE_REPORTING_PROBE_PAYLOAD_SUBTOPIC = "probe_payload";
 
     const int NODE_RSSI_UNKNOWN = INT_MIN;  //!< RSSI "unknown" value
 
