@@ -154,7 +154,7 @@ namespace SPSP::Nodes
         /**
          * @brief Processes PROBE_RES message
          * 
-         * Doesn't do anything.
+         * Just publishes RSSI.
          * This is handled internally by concrete local layer.
          * 
          * @param req Request message
@@ -163,7 +163,11 @@ namespace SPSP::Nodes
          * @return false Message delivery failed
          */
         bool processProbeRes(const LocalMessageT req,
-                             int rssi = NODE_RSSI_UNKNOWN) { return true; }
+                             int rssi = NODE_RSSI_UNKNOWN)
+        {
+            this->publishRssi(req.addr, rssi);
+            return true;
+        }
 
         /**
          * @brief Processes PUB message
