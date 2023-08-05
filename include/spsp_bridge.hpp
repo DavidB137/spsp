@@ -22,6 +22,25 @@
 namespace SPSP::Nodes
 {
     /**
+     * @brief Bridge configuration
+     * 
+     * Everything here is optional.
+     */
+    struct BridgeConfig
+    {
+        struct Reporting
+        {
+            bool version = true;      //!< Report SPSP version during construction
+            bool rssiOnProbe = true;  //!< Report RSSI on PROBE_REQ
+            bool rssiOnPub = true;    //!< Report RSSI on PUB
+            bool rssiOnSub = true;    //!< Report RSSI on SUB_REQ
+            bool rssiOnUnsub = true;  //!< Report RSSI on UNSUB
+        };
+
+        Reporting reporting;
+    };
+
+    /**
      * @brief Bridge node
      * 
      * @tparam TLocalLayer Type of local layer
@@ -34,6 +53,7 @@ namespace SPSP::Nodes
         friend class BridgeSubDB<TLocalLayer, TFarLayer>;
 
     protected:
+        BridgeConfig m_conf;
         BridgeSubDB<TLocalLayer, TFarLayer> m_subDB;
         std::mutex m_mutex;  //!< Mutex to prevent race conditions
 
@@ -42,14 +62,20 @@ namespace SPSP::Nodes
         using LocalMessageT = TLocalLayer::LocalMessageT;
 
         /**
-         * @brief Constructs a new bridge node
+         * @brief Construct a new bridge object
          * 
+         * @param ll Local layer
+         * @param fl Far layer
+         * @param conf Configuration
          */
-        Bridge(TLocalLayer* ll, TFarLayer* fl)
-            : ILocalAndFarNode<TLocalLayer, TFarLayer>{ll, fl}, m_subDB{this}
+        Bridge(TLocalLayer* ll, TFarLayer* fl, BridgeConfig conf = {})
+            : ILocalAndFarNode<TLocalLayer, TFarLayer>{ll, fl},
+              m_conf{conf}, m_subDB{this}
         {
             // Publish version
-            this->publishVersion();
+            if (conf.reporting.version) {
+                this->publishVersion();
+            }
 
             SPSP_LOGI("Initialized");
         }
@@ -158,6 +184,12 @@ namespace SPSP::Nodes
             LocalMessageT res = req;
             res.type = LocalMessageType::PROBE_RES;
             res.payload = SPSP::VERSION;
+
+            // Publish RSSI
+            if (m_conf.reporting.rssiOnProbe) {
+                this->publishRssi(req.addr, rssi);
+            }
+
             return this->sendLocal(res);
         }
 
@@ -185,6 +217,11 @@ namespace SPSP::Nodes
         bool processPub(const LocalMessageT req,
                         int rssi = NODE_RSSI_UNKNOWN)
         {
+            // Publish RSSI
+            if (m_conf.reporting.rssiOnPub) {
+                this->publishRssi(req.addr, rssi);
+            }
+
             return this->getFarLayer()->publish(req.addr.str, req.topic,
                                                 req.payload);
         }
@@ -200,6 +237,11 @@ namespace SPSP::Nodes
         bool processSubReq(const LocalMessageT req,
                            int rssi = NODE_RSSI_UNKNOWN)
         {
+            // Publish RSSI
+            if (m_conf.reporting.rssiOnSub) {
+                this->publishRssi(req.addr, rssi);
+            }
+
             return m_subDB.insert(req.topic, req.addr, nullptr);
         }
 
@@ -227,6 +269,11 @@ namespace SPSP::Nodes
         bool processUnsub(const LocalMessageT req,
                           int rssi = NODE_RSSI_UNKNOWN)
         {
+            // Publish RSSI
+            if (m_conf.reporting.rssiOnUnsub) {
+                this->publishRssi(req.addr, rssi);
+            }
+
             m_subDB.remove(req.topic, req.addr);
             return true;
         }
