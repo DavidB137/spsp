@@ -144,10 +144,11 @@ namespace SPSP::Nodes
          * @brief Processes PROBE_REQ message
          * 
          * @param req Request message
+         * @param rssi Received signal strength indicator (in dBm)
          * @return true Message delivery successful
          * @return false Message delivery failed
          */
-        bool processProbeReq(const LocalMessageT req)
+        bool processProbeReq(const LocalMessageT req, int rssi)
         {
             LocalMessageT res = req;
             res.type = LocalMessageType::PROBE_RES;
@@ -161,19 +162,21 @@ namespace SPSP::Nodes
          * Doesn't do anything.
          * 
          * @param req Request message
+         * @param rssi Received signal strength indicator (in dBm)
          * @return true Message delivery successful
          * @return false Message delivery failed
          */
-        bool processProbeRes(const LocalMessageT req) { return false; }
+        bool processProbeRes(const LocalMessageT req, int rssi) { return false; }
 
         /**
          * @brief Processes PUB message
          * 
          * @param req Request message
+         * @param rssi Received signal strength indicator (in dBm)
          * @return true Message delivery successful
          * @return false Message delivery failed
          */
-        bool processPub(const LocalMessageT req)
+        bool processPub(const LocalMessageT req, int rssi)
         {
             return this->getFarLayer()->publish(req.addr.str, req.topic, req.payload);
         }
@@ -182,10 +185,11 @@ namespace SPSP::Nodes
          * @brief Processes SUB_REQ message
          * 
          * @param req Request message
+         * @param rssi Received signal strength indicator (in dBm)
          * @return true Message delivery successful
          * @return false Message delivery failed
          */
-        bool processSubReq(const LocalMessageT req)
+        bool processSubReq(const LocalMessageT req, int rssi)
         {
             return m_subDB.insert(req.topic, req.addr, nullptr);
         }
@@ -196,19 +200,21 @@ namespace SPSP::Nodes
          * Doesn't do anything.
          * 
          * @param req Request message
+         * @param rssi Received signal strength indicator (in dBm)
          * @return true Message delivery successful
          * @return false Message delivery failed
          */
-        bool processSubData(const LocalMessageT req) { return false; }
+        bool processSubData(const LocalMessageT req, int rssi) { return false; }
 
         /**
          * @brief Processes UNSUB message
          * 
          * @param req Request message
+         * @param rssi Received signal strength indicator (in dBm)
          * @return true Message delivery successful
          * @return false Message delivery failed
          */
-        bool processUnsub(const LocalMessageT req)
+        bool processUnsub(const LocalMessageT req, int rssi)
         {
             m_subDB.remove(req.topic, req.addr);
             return true;

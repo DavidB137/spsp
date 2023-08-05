@@ -136,12 +136,12 @@ namespace SPSP
 
             // Call responsible handler
             switch (msg.type) {
-            case LocalMessageType::PROBE_REQ: processed = processProbeReq(msg); break;
-            case LocalMessageType::PROBE_RES: processed = processProbeRes(msg); break;
-            case LocalMessageType::PUB: processed = processPub(msg); break;
-            case LocalMessageType::SUB_REQ: processed = processSubReq(msg); break;
-            case LocalMessageType::SUB_DATA: processed = processSubData(msg); break;
-            case LocalMessageType::UNSUB: processed = processUnsub(msg); break;
+            case LocalMessageType::PROBE_REQ: processed = processProbeReq(msg, rssi); break;
+            case LocalMessageType::PROBE_RES: processed = processProbeRes(msg, rssi); break;
+            case LocalMessageType::PUB: processed = processPub(msg, rssi); break;
+            case LocalMessageType::SUB_REQ: processed = processSubReq(msg, rssi); break;
+            case LocalMessageType::SUB_DATA: processed = processSubData(msg, rssi); break;
+            case LocalMessageType::UNSUB: processed = processUnsub(msg, rssi); break;
             default:
                 SPSP_LOGW("Unprocessable message type %s (%d)",
                         localMessageTypeToStr(msg.type),
@@ -216,55 +216,61 @@ namespace SPSP
          * @brief Processes PROBE_REQ message
          * 
          * @param req Request message
+         * @param rssi Received signal strength indicator (in dBm)
          * @return true Message delivery successful
          * @return false Message delivery failed
          */
-        virtual bool processProbeReq(const LocalMessageT req) = 0;
+        virtual bool processProbeReq(const LocalMessageT req, int rssi) = 0;
 
         /**
          * @brief Processes PROBE_RES message
          * 
          * @param req Request message
+         * @param rssi Received signal strength indicator (in dBm)
          * @return true Message delivery successful
          * @return false Message delivery failed
          */
-        virtual bool processProbeRes(const LocalMessageT req) = 0;
+        virtual bool processProbeRes(const LocalMessageT req, int rssi) = 0;
 
         /**
          * @brief Processes PUB message
          * 
          * @param req Request message
+         * @param rssi Received signal strength indicator (in dBm)
          * @return true Message delivery successful
          * @return false Message delivery failed
          */
-        virtual bool processPub(const LocalMessageT req) = 0;
+        virtual bool processPub(const LocalMessageT req, int rssi) = 0;
 
         /**
          * @brief Processes SUB_REQ message
          * 
          * @param req Request message
+         * @param rssi Received signal strength indicator (in dBm)
          * @return true Message delivery successful
          * @return false Message delivery failed
          */
-        virtual bool processSubReq(const LocalMessageT req) = 0;
+        virtual bool processSubReq(const LocalMessageT req, int rssi) = 0;
 
         /**
          * @brief Processes SUB_DATA message
          * 
          * @param req Request message
+         * @param rssi Received signal strength indicator (in dBm)
          * @return true Message delivery successful
          * @return false Message delivery failed
          */
-        virtual bool processSubData(const LocalMessageT req) = 0;
+        virtual bool processSubData(const LocalMessageT req, int rssi) = 0;
 
         /**
          * @brief Processes UNSUB message
          * 
          * @param req Request message
+         * @param rssi Received signal strength indicator (in dBm)
          * @return true Message delivery successful
          * @return false Message delivery failed
          */
-        virtual bool processUnsub(const LocalMessageT req) = 0;
+        virtual bool processUnsub(const LocalMessageT req, int rssi) = 0;
     };
 
     /**
