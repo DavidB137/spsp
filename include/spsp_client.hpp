@@ -148,7 +148,8 @@ namespace SPSP::Nodes
          * @return true Message delivery successful
          * @return false Message delivery failed
          */
-        bool processProbeReq(const LocalMessageT req, int rssi) { return false; }
+        bool processProbeReq(const LocalMessageT req,
+                             int rssi = NODE_RSSI_UNKNOWN) { return false; }
 
         /**
          * @brief Processes PROBE_RES message
@@ -161,7 +162,8 @@ namespace SPSP::Nodes
          * @return true Message delivery successful
          * @return false Message delivery failed
          */
-        bool processProbeRes(const LocalMessageT req, int rssi) { return true; }
+        bool processProbeRes(const LocalMessageT req,
+                             int rssi = NODE_RSSI_UNKNOWN) { return true; }
 
         /**
          * @brief Processes PUB message
@@ -173,7 +175,8 @@ namespace SPSP::Nodes
          * @return true Message delivery successful
          * @return false Message delivery failed
          */
-        bool processPub(const LocalMessageT req, int rssi) { return false; }
+        bool processPub(const LocalMessageT req,
+                        int rssi = NODE_RSSI_UNKNOWN) { return false; }
 
         /**
          * @brief Processes SUB_REQ message
@@ -185,7 +188,8 @@ namespace SPSP::Nodes
          * @return true Message delivery successful
          * @return false Message delivery failed
          */
-        bool processSubReq(const LocalMessageT req, int rssi) { return false; }
+        bool processSubReq(const LocalMessageT req,
+                           int rssi = NODE_RSSI_UNKNOWN) { return false; }
 
         /**
          * @brief Processes SUB_DATA message
@@ -195,7 +199,8 @@ namespace SPSP::Nodes
          * @return true Message delivery successful
          * @return false Message delivery failed
          */
-        bool processSubData(const LocalMessageT req, int rssi)
+        bool processSubData(const LocalMessageT req,
+                            int rssi = NODE_RSSI_UNKNOWN)
         {
             m_subDB.callCb(req.topic, req.payload);
             return true;
@@ -209,7 +214,8 @@ namespace SPSP::Nodes
          * @return true Message delivery successful
          * @return false Message delivery failed
          */
-        bool processUnsub(const LocalMessageT req, int rssi) { return false; }
+        bool processUnsub(const LocalMessageT req,
+                          int rssi = NODE_RSSI_UNKNOWN) { return false; }
     };
 } // namespace SPSP::Nodes
 

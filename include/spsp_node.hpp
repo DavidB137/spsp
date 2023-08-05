@@ -24,6 +24,8 @@
 
 namespace SPSP
 {
+    const int NODE_RSSI_UNKNOWN = INT_MIN;  //!< RSSI "unknown" value
+
     /**
      * @brief Subscribe callback type
      * 
@@ -117,9 +119,9 @@ namespace SPSP
          * @param msg Received message
          * @param rssi Received signal strength indicator (in dBm)
          */
-        void receiveLocal(const LocalMessageT msg, int rssi = INT_MAX)
+        void receiveLocal(const LocalMessageT msg, int rssi = NODE_RSSI_UNKNOWN)
         {
-            if (rssi < INT_MAX) {
+            if (rssi != NODE_RSSI_UNKNOWN) {
                 SPSP_LOGI("Received local msg: %s (%d dBm)",
                           msg.toString().c_str(), rssi);
             } else {
@@ -220,7 +222,8 @@ namespace SPSP
          * @return true Message delivery successful
          * @return false Message delivery failed
          */
-        virtual bool processProbeReq(const LocalMessageT req, int rssi) = 0;
+        virtual bool processProbeReq(const LocalMessageT req,
+                                     int rssi = NODE_RSSI_UNKNOWN) = 0;
 
         /**
          * @brief Processes PROBE_RES message
@@ -230,7 +233,8 @@ namespace SPSP
          * @return true Message delivery successful
          * @return false Message delivery failed
          */
-        virtual bool processProbeRes(const LocalMessageT req, int rssi) = 0;
+        virtual bool processProbeRes(const LocalMessageT req,
+                                     int rssi = NODE_RSSI_UNKNOWN) = 0;
 
         /**
          * @brief Processes PUB message
@@ -240,7 +244,8 @@ namespace SPSP
          * @return true Message delivery successful
          * @return false Message delivery failed
          */
-        virtual bool processPub(const LocalMessageT req, int rssi) = 0;
+        virtual bool processPub(const LocalMessageT req,
+                                int rssi = NODE_RSSI_UNKNOWN) = 0;
 
         /**
          * @brief Processes SUB_REQ message
@@ -250,7 +255,8 @@ namespace SPSP
          * @return true Message delivery successful
          * @return false Message delivery failed
          */
-        virtual bool processSubReq(const LocalMessageT req, int rssi) = 0;
+        virtual bool processSubReq(const LocalMessageT req,
+                                   int rssi = NODE_RSSI_UNKNOWN) = 0;
 
         /**
          * @brief Processes SUB_DATA message
@@ -260,7 +266,8 @@ namespace SPSP
          * @return true Message delivery successful
          * @return false Message delivery failed
          */
-        virtual bool processSubData(const LocalMessageT req, int rssi) = 0;
+        virtual bool processSubData(const LocalMessageT req,
+                                    int rssi = NODE_RSSI_UNKNOWN) = 0;
 
         /**
          * @brief Processes UNSUB message
@@ -270,7 +277,8 @@ namespace SPSP
          * @return true Message delivery successful
          * @return false Message delivery failed
          */
-        virtual bool processUnsub(const LocalMessageT req, int rssi) = 0;
+        virtual bool processUnsub(const LocalMessageT req,
+                                  int rssi = NODE_RSSI_UNKNOWN) = 0;
     };
 
     /**

@@ -148,7 +148,8 @@ namespace SPSP::Nodes
          * @return true Message delivery successful
          * @return false Message delivery failed
          */
-        bool processProbeReq(const LocalMessageT req, int rssi)
+        bool processProbeReq(const LocalMessageT req,
+                             int rssi = NODE_RSSI_UNKNOWN)
         {
             LocalMessageT res = req;
             res.type = LocalMessageType::PROBE_RES;
@@ -166,7 +167,8 @@ namespace SPSP::Nodes
          * @return true Message delivery successful
          * @return false Message delivery failed
          */
-        bool processProbeRes(const LocalMessageT req, int rssi) { return false; }
+        bool processProbeRes(const LocalMessageT req,
+                             int rssi = NODE_RSSI_UNKNOWN) { return false; }
 
         /**
          * @brief Processes PUB message
@@ -176,7 +178,8 @@ namespace SPSP::Nodes
          * @return true Message delivery successful
          * @return false Message delivery failed
          */
-        bool processPub(const LocalMessageT req, int rssi)
+        bool processPub(const LocalMessageT req,
+                        int rssi = NODE_RSSI_UNKNOWN)
         {
             return this->getFarLayer()->publish(req.addr.str, req.topic, req.payload);
         }
@@ -189,7 +192,8 @@ namespace SPSP::Nodes
          * @return true Message delivery successful
          * @return false Message delivery failed
          */
-        bool processSubReq(const LocalMessageT req, int rssi)
+        bool processSubReq(const LocalMessageT req,
+                           int rssi = NODE_RSSI_UNKNOWN)
         {
             return m_subDB.insert(req.topic, req.addr, nullptr);
         }
@@ -204,7 +208,8 @@ namespace SPSP::Nodes
          * @return true Message delivery successful
          * @return false Message delivery failed
          */
-        bool processSubData(const LocalMessageT req, int rssi) { return false; }
+        bool processSubData(const LocalMessageT req,
+                            int rssi = NODE_RSSI_UNKNOWN) { return false; }
 
         /**
          * @brief Processes UNSUB message
@@ -214,7 +219,8 @@ namespace SPSP::Nodes
          * @return true Message delivery successful
          * @return false Message delivery failed
          */
-        bool processUnsub(const LocalMessageT req, int rssi)
+        bool processUnsub(const LocalMessageT req,
+                          int rssi = NODE_RSSI_UNKNOWN)
         {
             m_subDB.remove(req.topic, req.addr);
             return true;
