@@ -254,8 +254,8 @@ namespace SPSP
             // Spawn new thread for this publish
             std::thread t([this, addr, rssi] {
                 std::string topic = NODE_REPORTING_TOPIC + "/"
-                                  + addr.str + "/"
-                                  + NODE_REPORTING_RSSI_SUBTOPIC;
+                                  + NODE_REPORTING_RSSI_SUBTOPIC + "/"
+                                  + addr.str;
 
                 this->publish(topic, std::to_string(rssi));
             });
