@@ -98,7 +98,8 @@ namespace SPSP::Nodes
             SPSP_LOGD("Publishing locally: topic '%s', payload '%s'",
                       topic.c_str(), payload.c_str());
 
-            return this->getFarLayer()->publish(LocalAddrMAC::local().str, topic, payload);
+            return this->getFarLayer()->publish(LocalAddrMAC::local().str,
+                                                topic, payload);
         }
 
         /**
@@ -184,7 +185,8 @@ namespace SPSP::Nodes
         bool processPub(const LocalMessageT req,
                         int rssi = NODE_RSSI_UNKNOWN)
         {
-            return this->getFarLayer()->publish(req.addr.str, req.topic, req.payload);
+            return this->getFarLayer()->publish(req.addr.str, req.topic,
+                                                req.payload);
         }
 
         /**
