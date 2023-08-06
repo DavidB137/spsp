@@ -142,10 +142,10 @@ Internally ensures retransmission and reconnection to MQTT broker if needed.
 TODO
 
 
-[^mqtt]: https://mqtt.org
-[^mqtt_wildcard]: http://docs.oasis-open.org/mqtt/mqtt/v3.1.1/os/mqtt-v3.1.1-os.html#_Toc398718107
-[^espidf]: https://docs.espressif.com/projects/esp-idf/en/latest/esp32/
-[^espnow]: https://docs.espressif.com/projects/esp-idf/en/latest/esp32/api-reference/network/esp_now.html
-[^esp32]: https://en.wikipedia.org/wiki/ESP32
-[^openwrt]: https://openwrt.org
-[^platformio]: https://platformio.org
+[^mqtt]: MQTT https://mqtt.org
+[^mqtt_wildcard]: MQTT wildcard: http://docs.oasis-open.org/mqtt/mqtt/v3.1.1/os/mqtt-v3.1.1-os.html#_Toc398718107
+[^espidf]: ESP-IDF: https://docs.espressif.com/projects/esp-idf/en/latest/esp32/
+[^espnow]: ESP-NOW: https://docs.espressif.com/projects/esp-idf/en/latest/esp32/api-reference/network/esp_now.html
+[^esp32]: ESP32: https://en.wikipedia.org/wiki/ESP32
+[^openwrt]: OpenWrt: https://openwrt.org
+[^platformio]: PlatformIO: https://platformio.org
