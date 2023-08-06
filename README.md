@@ -1,6 +1,7 @@
 # Simple publish-subscribe protocol
 
-SPSP connects low power IoT clients to MQTT or other protocols.
+SPSP connects low power IoT clients to MQTT[^mqtt] or other protocols.
+
 It's an extensible framework for publish-subscribe pattern.
 
 ### Reliability
@@ -8,7 +9,8 @@ It's an extensible framework for publish-subscribe pattern.
 As reliability is important, the whole system aims to be a highly reliable
 platform while taking into account protocol-specific and performance
 restrictions. There's not a 100 % guarantee of message delivery from client
-to the MQTT broker, but with correct settings, you can get extremely close.
+to the MQTT[^mqtt] broker, but with correct settings, you can get extremely
+close.
 
 No retrasmission logic between *nodes* is implemented, because it's highly
 application-specific, but the *node* always knows whether data have or have not
@@ -19,18 +21,18 @@ beed delivered, so you can implement it yourself.
 
 ### Platform
 
-Implemenation is based on **ESP-IDF** framework, so all ESP32 devices are
-supported and they are a key target of this project.
+Implemenation is based on **ESP-IDF**[^espidf] framework, so all ESP32[^esp32]
+devices are supported and they are a key target of this project.
 
-Future plans include port to **OpenWrt** (or other Linux based systems) –
-primarily for the *bridge* nodes as it's convenient to have an access point
-serving "standard" devices as well as all of IoT.
+Future plans include port to **OpenWrt**[^openwrt] (or other Linux based
+systems) – primarily for the *bridge* nodes as it's convenient to have
+an access point serving "standard" devices as well as all of IoT.
 
 ### Dependencies
 
 - C++ 17 or newer (C++ 20 is going to be required soon)
-- ESP-IDF 5.x
-- optionally PlatformIO
+- ESP-IDF[^espidf] 5.x
+- optionally PlatformIO[^platformio]
 
 ### Setup
 
@@ -38,8 +40,8 @@ TODO
 
 ### Known limitations
 
-- Subscription to topic which includes wildcards (`+`, `#`) is not yet
-  supported.
+- Subscription to topic which includes wildcards[^mqtt_wildcard] (`+`, `#`) is
+  not yet supported.
 
 
 ## Network architecture
@@ -58,7 +60,8 @@ The client typically makes a measurement as quickly as possible
 Always-on clients and any combinations are supported as well.
 
 Upstream connectivity (to the *bridge*) is provided by *local layer*
-(for example ESP-NOW), which allows for this extremly quick wake-up periods.
+(for example ESP-NOW[^espnow]), which allows for this extremly quick wake-up
+periods.
 The client somehow (protocol dependent) establishes connection to near-by
 *bridge* (think of it as router) processing all messages from client.
 
@@ -70,7 +73,7 @@ Bridge **connects *clients* on *local layer* and *far layer***.
 You can think of bridge as a IP network router.
 
 All received *publish* messages are forwarded to upstream *far layer*
-(typically MQTT). When *subscribe* request is received from a client, topic of
+(typically MQTT[^mqtt]). When *subscribe* request is received from a client, topic of
 the subscription gets stored in the database and registered on the *far layer*.
 Any number of *clients* can subscribe to the same topic and even the bridge
 itself can be one of them.
@@ -88,7 +91,7 @@ More will come later.
 
 #### ESP-NOW
 
-ESP-NOW local layer protocol is a wrapper around Espressif's ESP-NOW.
+ESP-NOW local layer protocol is a wrapper around Espressif's ESP-NOW[^espnow].
 It's basically a WiFi without any state management (connecting to AP,...)
 whatsoever. Just a quick setup, send of single packet, receive of delivery
 confirmation – all over WiFi MAC.
@@ -122,7 +125,7 @@ More will come later.
 
 #### MQTT
 
-Wrapper for most well known publish-subscribe IoT protocol – MQTT.
+Wrapper for most well known publish-subscribe IoT protocol – MQTT[^mqtt].
 
 All standard authentication methods are supported:
 - unauthenticated over TCP
@@ -137,3 +140,11 @@ Internally ensures retransmission and reconnection to MQTT broker if needed.
 ## Debugging
 
 TODO
+
+
+[^mqtt]: https://mqtt.org
+[^mqtt_wildcard]: http://docs.oasis-open.org/mqtt/mqtt/v3.1.1/os/mqtt-v3.1.1-os.html#_Toc398718107
+[^espidf]: https://docs.espressif.com/projects/esp-idf/en/latest/esp32/
+[^esp32]: https://en.wikipedia.org/wiki/ESP32
+[^openwrt]: https://openwrt.org
+[^platformio]: https://platformio.org
