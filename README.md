@@ -145,6 +145,7 @@ TODO
 [^mqtt]: https://mqtt.org
 [^mqtt_wildcard]: http://docs.oasis-open.org/mqtt/mqtt/v3.1.1/os/mqtt-v3.1.1-os.html#_Toc398718107
 [^espidf]: https://docs.espressif.com/projects/esp-idf/en/latest/esp32/
+[^espnow]: https://docs.espressif.com/projects/esp-idf/en/latest/esp32/api-reference/network/esp_now.html
 [^esp32]: https://en.wikipedia.org/wiki/ESP32
 [^openwrt]: https://openwrt.org
 [^platformio]: https://platformio.org
