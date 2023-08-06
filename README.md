@@ -38,6 +38,10 @@ an access point serving "standard" devices as well as all of IoT.
 
 TODO
 
+### Examples
+
+You can find usage examples in `examples/` directory.
+
 ### Known limitations
 
 - Subscription to topic which includes wildcards[^mqtt_wildcard] (`+`, `#`) is
