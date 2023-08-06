@@ -1,9 +1,9 @@
 # SPSP client example
 
 Simple example of how to integrate SPSP framework into ESP-IDF and create
-client node.
+*client* node.
 
-Uses ESP-NOW as local layer.
+Uses ESP-NOW as *local layer*.
 
 You need to update path to Git clone of this repository in `CMakeLists.txt`.
 
