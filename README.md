@@ -67,6 +67,12 @@ The client somehow (protocol dependent) establishes connection to near-by
 
 The client can *publish* data or *subscribe* to upstream data.
 
+##### Reporting
+
+For debugging purposes, client also publishes signal strength when it receives
+[probe response](#clients-using-esp-now) to `_report/rssi/{BRIDGE_ADDR}` topic
+(+ prefix depending on far layer).
+
 #### Bridge
 
 Bridge **connects *clients* on *local layer* and *far layer***.
@@ -80,6 +86,16 @@ itself can be one of them.
 
 The bridge can also *publish* data, so it can function as both bridge and
 client at the same time.
+
+##### Reporting
+
+Bridge reports (topics don't include far layer prefix):
+- SPSP version on startup to `_report/version` topic
+- signal strength to *client* nodes to `_report/rssi/{CLIENT_ADDR}` topic
+- probe request payload to `_report/probe_payload/{CLIENT_ADDR}` topic
+  (should include SPSP version of client)
+
+Reporting can be configured or completely disabled in bridge configuration.
 
 ### Local layer protocols
 
@@ -106,14 +122,14 @@ Internally, Espressif's implemenation does some sort of retransmission, but
 generally, it's not guaranteed that data will be delivered, so custom
 implementation of retransmission may be needed if required by your use-case.
 
-##### Clients
+##### Clients using ESP-NOW
 
 *Clients* search for *bridges* to connect to using **probes**.
 During this process, the *client* iterates through all WiFi channels allowed by
 country restrictions (see `WiFi::setCountryRestrictions`) and broadcasts probe
 requests to the broadcast address. *Bridges* on the same SSID with the correct
 password will decrypt the request and send back probe response. The *client*
-then chooses *bridge* with the best signal level.
+then chooses *bridge* with the best signal strength.
 
 ### Far layer protocols
 
@@ -136,10 +152,13 @@ All standard authentication methods are supported:
 
 Internally ensures retransmission and reconnection to MQTT broker if needed.
 
+Default topic structure for *publishing* is `{PREFIX}/{ADDR}/{TOPIC}` where:
+- `PREFIX` is configured topic prefix (`spsp` by default)
+- `ADDR` is node's address as reasonably-formatted string (in case of
+ESP-NOW[^espnow] it's lowercase MAC address without separators)
+- `TOPIC` is topic received in message (e.g. `temperature`)
 
-## Debugging
-
-TODO
+Topics for *subscribing* are not prepended or modified in any way.
 
 
 [^mqtt]: MQTT https://mqtt.org
