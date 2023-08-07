@@ -11,7 +11,6 @@
 #include <string>
 
 #include "esp_mac.h"
-#include "esp_netif.h"
 #include "esp_wifi.h"
 #include "nvs_flash.h"
 
@@ -105,7 +104,7 @@ namespace SPSP
         ESP_ERROR_CHECK(esp_netif_init());
 
         // Create net interface
-        esp_netif_t* netif = esp_netif_create_default_wifi_sta();
+        m_netIf = esp_netif_create_default_wifi_sta();
 
         // Set hostname
         std::string hostname = WIFI_HOSTNAME_PREFIX;
@@ -114,7 +113,7 @@ namespace SPSP
         ESP_ERROR_CHECK(esp_efuse_mac_get_default(mac));
         sprintf(macStr, "%02x%02x%02x%02x%02x%02x", MAC2STR(mac));
         hostname += macStr;
-        esp_netif_set_hostname(netif, hostname.c_str());
+        esp_netif_set_hostname(m_netIf, hostname.c_str());
 
         SPSP_LOGI("Network interface initialized");
     }
@@ -216,13 +215,29 @@ namespace SPSP
         SPSP_LOGI("Set country restrictions: %c%c (channels %d - %d)",
                   cc[0], cc[1], lowCh, highCh);
     }
+
+    void WiFi::createIPv6LinkLocal()
+    {
+        if (!m_config.enableIPv6) {
+            return;
+        }
+
+        ESP_ERROR_CHECK(esp_netif_create_ip6_linklocal(m_netIf));
+    }
     
     void WiFi::eventHandlerWiFi(void* ctx, esp_event_base_t, int32_t eventId, void* eventData)
     {
+        // Get "this"
+        WiFi* inst = static_cast<WiFi*>(ctx);
+
         switch (eventId) {
         case WIFI_EVENT_STA_START:
         case WIFI_EVENT_STA_DISCONNECTED:
             esp_wifi_connect();
+            break;
+
+        case WIFI_EVENT_STA_CONNECTED:
+            inst->createIPv6LinkLocal();
             break;
         
         default:

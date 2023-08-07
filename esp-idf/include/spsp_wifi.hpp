@@ -16,6 +16,7 @@
 #include <string>
 
 #include "esp_event.h"
+#include "esp_netif.h"
 
 namespace SPSP
 {
@@ -39,6 +40,7 @@ namespace SPSP
         std::string ssid = "";                   //!< SSID
         std::string password = "";               //!< Password
         bool lockBssid = false;                  //!< Whether to use only AP with MAC address `bssid`
+        bool enableIPv6 = false;                 //!< Whether to enable IPv6 addressing
         uint8_t bssid[6];                        //!< MAC address of AP
         int maxTxPower = WIFI_TX_POWER_DEFAULT;  //!< Maximum transmit power (in dBm)
     };
@@ -54,6 +56,7 @@ namespace SPSP
     class WiFi
     {
         WiFiConfig m_config = {};                //!< Config
+        esp_netif_t* m_netIf = nullptr;          //!< Network interface pointer
         bool m_initialized = false;              //!< Whether WiFi is initialized
         std::promise<void> m_connectingPromise;  //!< Promise to block until successful connection is made
         std::mutex m_mutex;                      //!< Mutex to prevent race conditions (primarily for initialization)
@@ -118,6 +121,13 @@ namespace SPSP
          */
         void setCountryRestrictions(const char cc[3], uint8_t lowCh,
                                     uint8_t highCh);
+
+        /**
+         * @brief Creates IPv6 link-local address
+         * 
+         * If IPv6 is disabled in config, does nothing.
+         */
+        void createIPv6LinkLocal();
 
     private:
         /**
