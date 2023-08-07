@@ -9,6 +9,7 @@
 
 #pragma once
 
+#include <chrono>
 #include <climits>
 #include <functional>
 #include <memory>
@@ -161,6 +162,7 @@ namespace SPSP
             }
 
             bool processed = false;
+            auto processingTimeBegin = std::chrono::steady_clock::now();
 
             // Call responsible handler
             switch (msg.type) {
@@ -177,10 +179,17 @@ namespace SPSP
                 break;
             }
 
+            auto processingTimeEnd = std::chrono::steady_clock::now();
+            auto processingDuration = std::chrono::duration_cast
+                <std::chrono::milliseconds>(processingTimeEnd
+                                            - processingTimeBegin);
+
             if (processed) {
-                SPSP_LOGI("Message processed: %s", msg.toString().c_str());
+                SPSP_LOGI("Message processed (%lld ms): %s",
+                          processingDuration.count(), msg.toString().c_str());
             } else {
-                SPSP_LOGE("Message not processed: %s", msg.toString().c_str());
+                SPSP_LOGE("Message not processed (%lld ms): %s",
+                          processingDuration.count(), msg.toString().c_str());
             }
         }
 
