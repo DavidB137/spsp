@@ -76,9 +76,7 @@ namespace SPSP::FarLayers::MQTT
     class Layer : public IFarLayer
     {
         void* m_mqtt;                            //!< MQTT client handle
-        std::string m_pubTopicPrefix;            //!< Topic prefix (see `ClientConfig`)
-        int m_qos = 0;                           //!< QoS for sent messages
-        bool m_retain = false;                   //!< Retain flag for sent messages
+        ClientConfig m_conf;                     //!< Configuration
         bool m_initializing = true;              //!< Whether we are currently in initializing phase
         std::promise<void> m_connectingPromise;  //!< Promise to block until successful connection is made
 

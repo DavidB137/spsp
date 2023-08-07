@@ -69,15 +69,14 @@ namespace SPSP::FarLayers::MQTT
     }
 
     Layer::Layer(const ClientConfig config)
-        : m_pubTopicPrefix{config.pubTopicPrefix}, m_qos{config.connection.qos},
-          m_retain{config.connection.retain}
+        : m_conf{config}
     {
         m_initializing = true;
 
         // Client ID
         std::string clientId;
 
-        if (config.auth.clientId.empty()) {
+        if (m_conf.auth.clientId.empty()) {
             clientId = MQTT_CLIENT_ID_PREFIX;
 
             uint8_t mac[8];
@@ -87,25 +86,25 @@ namespace SPSP::FarLayers::MQTT
 
             clientId += macStr;
         } else {
-            clientId = config.auth.clientId;
+            clientId = m_conf.auth.clientId;
         }
 
         // Create ESP config
         esp_mqtt_client_config_t espConfig = {};
 
-        espConfig.broker.address.uri = config.connection.uri.c_str();
-        espConfig.broker.verification.certificate = this->stringToCOrNull(config.connection.verifyCrt);
-        espConfig.credentials.username = config.auth.username.c_str();
+        espConfig.broker.address.uri = m_conf.connection.uri.c_str();
+        espConfig.broker.verification.certificate = this->stringToCOrNull(m_conf.connection.verifyCrt);
+        espConfig.credentials.username = m_conf.auth.username.c_str();
         espConfig.credentials.client_id = clientId.c_str();
-        espConfig.credentials.authentication.password = this->stringToCOrNull(config.auth.password);
-        espConfig.credentials.authentication.certificate = this->stringToCOrNull(config.auth.crt);
-        espConfig.credentials.authentication.key = this->stringToCOrNull(config.auth.crtKey);
-        espConfig.session.last_will.topic = this->stringToCOrNull(config.lastWill.topic);
-        espConfig.session.last_will.msg = this->stringToCOrNull(config.lastWill.msg);
-        espConfig.session.last_will.qos = config.lastWill.qos;
-        espConfig.session.last_will.retain = config.lastWill.retain;
-        espConfig.session.keepalive = config.connection.keepalive;
-        espConfig.session.disable_keepalive = config.connection.keepalive <= 0;
+        espConfig.credentials.authentication.password = this->stringToCOrNull(m_conf.auth.password);
+        espConfig.credentials.authentication.certificate = this->stringToCOrNull(m_conf.auth.crt);
+        espConfig.credentials.authentication.key = this->stringToCOrNull(m_conf.auth.crtKey);
+        espConfig.session.last_will.topic = this->stringToCOrNull(m_conf.lastWill.topic);
+        espConfig.session.last_will.msg = this->stringToCOrNull(m_conf.lastWill.msg);
+        espConfig.session.last_will.qos = m_conf.lastWill.qos;
+        espConfig.session.last_will.retain = m_conf.lastWill.retain;
+        espConfig.session.keepalive = m_conf.connection.keepalive;
+        espConfig.session.disable_keepalive = m_conf.connection.keepalive <= 0;
 
         // Initialize client
         m_mqtt = esp_mqtt_client_init(&espConfig);
@@ -171,12 +170,14 @@ namespace SPSP::FarLayers::MQTT
         SPSP_LOGD("Publish: payload '%s' to topic '%s' from %s",
                   payload.c_str(), topic.c_str(), src.c_str());
 
-        std::string topicExtended = m_pubTopicPrefix + "/" + src + "/" + topic;
+        std::string topicExtended = m_conf.pubTopicPrefix + "/" + src + "/"
+                                  + topic;
 
         // No-blocking publish
         auto mqtt = static_cast<esp_mqtt_client_handle_t>(m_mqtt);
         esp_mqtt_client_enqueue(mqtt, topicExtended.c_str(), payload.c_str(),
-                                payload.length(), m_qos, m_retain, true);
+                                payload.length(), m_conf.connection.qos,
+                                m_conf.connection.retain, true);
 
         return true;
     }
@@ -187,7 +188,8 @@ namespace SPSP::FarLayers::MQTT
 
         // Subscribe (blocks)
         auto mqtt = static_cast<esp_mqtt_client_handle_t>(m_mqtt);
-        return esp_mqtt_client_subscribe(mqtt, topic.c_str(), m_qos) > 0;
+        return esp_mqtt_client_subscribe(mqtt, topic.c_str(),
+                                         m_conf.connection.qos) > 0;
     }
 
     bool Layer::unsubscribe(const std::string topic)
