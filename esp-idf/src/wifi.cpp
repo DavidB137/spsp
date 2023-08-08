@@ -252,6 +252,7 @@ namespace SPSP
 
         ip_event_got_ip_t* event_got_ip4;
         ip_event_got_ip6_t* event_got_ip6;
+        esp_ip6_addr_type_t ipv6AddrType;
 
         switch (eventId) {
         case IP_EVENT_STA_GOT_IP:
@@ -271,8 +272,10 @@ namespace SPSP
             event_got_ip6 = static_cast<ip_event_got_ip6_t*>(eventData);
             SPSP_LOGI("Got IPv6: " IPV6STR, IPV62STR(event_got_ip6->ip6_info.ip));
 
-            // Resolve promise
-            if (!inst->m_initialized) {
+            ipv6AddrType = esp_netif_ip6_get_addr_type(&(event_got_ip6->ip6_info.ip));
+
+            // Resolve promise if it's global address
+            if (!inst->m_initialized && ipv6AddrType == ESP_IP6_ADDR_IS_GLOBAL) {
                 inst->m_connectingPromise.set_value();
             }
 

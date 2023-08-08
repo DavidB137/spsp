@@ -40,7 +40,7 @@ namespace SPSP
         std::string ssid = "";                   //!< SSID
         std::string password = "";               //!< Password
         bool lockBssid = false;                  //!< Whether to use only AP with MAC address `bssid`
-        bool enableIPv6 = false;                 //!< Whether to enable IPv6 addressing
+        bool enableIPv6 = false;                 //!< Whether to enable IPv6 addressing (waits for either IPv4 or *global* IPv6 address)
         uint8_t bssid[6];                        //!< MAC address of AP
         int maxTxPower = WIFI_TX_POWER_DEFAULT;  //!< Maximum transmit power (in dBm)
     };
