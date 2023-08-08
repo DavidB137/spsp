@@ -250,15 +250,15 @@ namespace SPSP
         // Get "this"
         WiFi* inst = static_cast<WiFi*>(ctx);
 
-        ip_event_got_ip_t* event_got_ip4;
-        ip_event_got_ip6_t* event_got_ip6;
+        ip_event_got_ip_t* eventGotIPv4;
+        ip_event_got_ip6_t* eventGotIPv6;
         esp_ip6_addr_type_t ipv6AddrType;
 
         switch (eventId) {
         case IP_EVENT_STA_GOT_IP:
             // Got IPv4 address
-            event_got_ip4 = static_cast<ip_event_got_ip_t*>(eventData);
-            SPSP_LOGI("Got IP: " IPSTR, IP2STR(&event_got_ip4->ip_info.ip));
+            eventGotIPv4 = static_cast<ip_event_got_ip_t*>(eventData);
+            SPSP_LOGI("Got IP: " IPSTR, IP2STR(&eventGotIPv4->ip_info.ip));
 
             // Resolve promise
             if (!inst->m_initialized) {
@@ -269,10 +269,10 @@ namespace SPSP
         
         case IP_EVENT_GOT_IP6:
             // Got IPv6 address
-            event_got_ip6 = static_cast<ip_event_got_ip6_t*>(eventData);
-            SPSP_LOGI("Got IPv6: " IPV6STR, IPV62STR(event_got_ip6->ip6_info.ip));
+            eventGotIPv6 = static_cast<ip_event_got_ip6_t*>(eventData);
+            SPSP_LOGI("Got IPv6: " IPV6STR, IPV62STR(eventGotIPv6->ip6_info.ip));
 
-            ipv6AddrType = esp_netif_ip6_get_addr_type(&(event_got_ip6->ip6_info.ip));
+            ipv6AddrType = esp_netif_ip6_get_addr_type(&(eventGotIPv6->ip6_info.ip));
 
             // Resolve promise if it's global address
             if (!inst->m_initialized && ipv6AddrType == ESP_IP6_ADDR_IS_GLOBAL) {
