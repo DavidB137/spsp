@@ -15,5 +15,5 @@ namespace SPSP
      * @brief Version of SPSP
      * 
      */
-    constexpr const char* const VERSION = "0.2.1";
+    constexpr const char* const VERSION = "0.2.2";
 } // namespace SPSP
