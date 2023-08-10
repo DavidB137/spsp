@@ -17,7 +17,6 @@
 #include <thread>
 
 #include "spsp_layers.hpp"
-#include "spsp_local_addr_mac.hpp"
 #include "spsp_local_message.hpp"
 #include "spsp_logger.hpp"
 #include "spsp_version.hpp"
