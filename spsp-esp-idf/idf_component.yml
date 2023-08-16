@@ -1,7 +1,6 @@
 version: 0.3.0
 description: Simple publish-subscribe protocol. Connects low power IoT clients to MQTT.
-repository: https://github.com/DavidB137/spsp
-license: Apache-2.0
+url: https://github.com/DavidB137/spsp
 dependencies:
   idf:
     version: ">=5.0"
