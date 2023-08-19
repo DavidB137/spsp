@@ -2,9 +2,9 @@
  * @file spsp_bridge.hpp
  * @author Dávid Benko (davidbenko@davidbenko.dev)
  * @brief Bridge node type of SPSP
- * 
+ *
  * @copyright Copyright (c) 2023
- * 
+ *
  */
 
 #pragma once
@@ -23,7 +23,7 @@ namespace SPSP::Nodes
 {
     /**
      * @brief Bridge configuration
-     * 
+     *
      * Everything here is optional.
      */
     struct BridgeConfig
@@ -43,7 +43,7 @@ namespace SPSP::Nodes
 
     /**
      * @brief Bridge node
-     * 
+     *
      * @tparam TLocalLayer Type of local layer
      * @tparam TFarLayer   Type of far layer
      */
@@ -64,7 +64,7 @@ namespace SPSP::Nodes
 
         /**
          * @brief Construct a new bridge object
-         * 
+         *
          * @param ll Local layer
          * @param fl Far layer
          * @param conf Configuration
@@ -83,7 +83,7 @@ namespace SPSP::Nodes
 
         /**
          * @brief Destroys the bridge node
-         * 
+         *
          */
         ~Bridge()
         {
@@ -92,9 +92,9 @@ namespace SPSP::Nodes
 
         /**
          * @brief Receives the message from far layer
-         * 
+         *
          * Acts as a callback for far layer receiver.
-         * 
+         *
          * @param topic Topic
          * @param payload Payload (data)
          * @return true Message delivery successful
@@ -111,10 +111,10 @@ namespace SPSP::Nodes
 
         /**
          * @brief Publishes payload to topic
-         * 
+         *
          * This is primary endpoint for publishing locally data on this node.
          * Directly sends data to far layer.
-         * 
+         *
          * @param topic Topic
          * @param payload Payload
          * @return true Delivery successful
@@ -131,10 +131,10 @@ namespace SPSP::Nodes
 
         /**
          * @brief Subscribes to topic
-         * 
+         *
          * This is primary endpoint for subscribing locally on this node.
          * Directly forwards incoming data from far layer to given callback.
-         * 
+         *
          * @param topic Topic
          * @param cb Callback function
          * @return true Subscribe successful
@@ -149,15 +149,15 @@ namespace SPSP::Nodes
 
         /**
          * @brief Resubscribes to all topics
-         * 
+         *
          */
         void resubscribeAll() { m_subDB.resubscribeAll(); }
 
         /**
          * @brief Unsubscribes from topic
-         * 
+         *
          * This is primary endpoint for unsubscribing locally on this node.
-         * 
+         *
          * @param topic Topic
          * @return true Unsubscribe successful
          * @return false Unsubscribe failed
@@ -173,7 +173,7 @@ namespace SPSP::Nodes
     protected:
         /**
          * @brief Processes PROBE_REQ message
-         * 
+         *
          * @param req Request message
          * @param rssi Received signal strength indicator (in dBm)
          * @return true Message delivery successful
@@ -206,9 +206,9 @@ namespace SPSP::Nodes
 
         /**
          * @brief Processes PROBE_RES message
-         * 
+         *
          * Doesn't do anything.
-         * 
+         *
          * @param req Request message
          * @param rssi Received signal strength indicator (in dBm)
          * @return true Message delivery successful
@@ -219,7 +219,7 @@ namespace SPSP::Nodes
 
         /**
          * @brief Processes PUB message
-         * 
+         *
          * @param req Request message
          * @param rssi Received signal strength indicator (in dBm)
          * @return true Message delivery successful
@@ -239,7 +239,7 @@ namespace SPSP::Nodes
 
         /**
          * @brief Processes SUB_REQ message
-         * 
+         *
          * @param req Request message
          * @param rssi Received signal strength indicator (in dBm)
          * @return true Message delivery successful
@@ -258,9 +258,9 @@ namespace SPSP::Nodes
 
         /**
          * @brief Processes SUB_DATA message
-         * 
+         *
          * Doesn't do anything.
-         * 
+         *
          * @param req Request message
          * @param rssi Received signal strength indicator (in dBm)
          * @return true Message delivery successful
@@ -271,7 +271,7 @@ namespace SPSP::Nodes
 
         /**
          * @brief Processes UNSUB message
-         * 
+         *
          * @param req Request message
          * @param rssi Received signal strength indicator (in dBm)
          * @return true Message delivery successful
@@ -291,7 +291,7 @@ namespace SPSP::Nodes
 
         /**
          * @brief Publishes received subscription data to local layer node
-         * 
+         *
          * @param addr Node address
          * @param topic Topic
          * @param payload Payload
@@ -315,7 +315,7 @@ namespace SPSP::Nodes
 
         /**
          * @brief Subscribes to topic on far layer (if connected)
-         * 
+         *
          * @param topic Topic
          * @return true Subscription successful
          * @return false Subscription failed
@@ -327,7 +327,7 @@ namespace SPSP::Nodes
 
         /**
          * @brief Unsubscribes from topic on far layer (if connected)
-         * 
+         *
          * @param topic Topic
          * @return true Unsubscription successful
          * @return false Unsubscription failed

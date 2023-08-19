@@ -2,9 +2,9 @@
  * @file spsp_bridge_sub_db.hpp
  * @author Dávid Benko (davidbenko@davidbenko.dev)
  * @brief Bridge subscribe database of SPSP
- * 
+ *
  * @copyright Copyright (c) 2023
- * 
+ *
  */
 
 #pragma once
@@ -30,7 +30,7 @@ namespace SPSP::Nodes
 
     /**
      * @brief Container for subscribe database of bridge
-     * 
+     *
      */
     template <typename TLocalLayer, typename TFarLayer>
     class BridgeSubDB
@@ -40,9 +40,9 @@ namespace SPSP::Nodes
 
         /**
          * @brief Bridge subscribe entry
-         * 
+         *
          * Single entry in subscribe database of a bridge.
-         * 
+         *
          * Empty addresses are treated as local to this node.
          */
         struct Entry
@@ -58,11 +58,11 @@ namespace SPSP::Nodes
             std::string,
             std::unordered_map<LocalAddrT, Entry>
         > m_db;                                   //!< Database
-    
+
     public:
         /**
          * @brief Construct a new bridge sub DB
-         * 
+         *
          * @param bridge Pointer to bridge node (owner)
          */
         BridgeSubDB(BridgeT* bridge)
@@ -84,9 +84,9 @@ namespace SPSP::Nodes
 
         /**
          * @brief Inserts entry into database
-         * 
+         *
          * Internally subscribes on far layer if needed.
-         * 
+         *
          * @param topic Topic
          * @param addr Node address
          * @param cb Callback for incoming data (only for local subscriptions)
@@ -132,9 +132,9 @@ namespace SPSP::Nodes
 
         /**
          * @brief Removes entry from database
-         * 
+         *
          * Calls `removeUnusedTopics()`.
-         * 
+         *
          * @param topic Topic
          * @param addr Node address
          */
@@ -158,7 +158,7 @@ namespace SPSP::Nodes
 
         /**
          * @brief Resubscribes to all topics
-         * 
+         *
          */
         void resubscribeAll()
         {
@@ -175,9 +175,9 @@ namespace SPSP::Nodes
 
         /**
          * @brief Calls callbacks for incoming data
-         * 
+         *
          * For non-local addresses calls `Bridge::publishSubData()`.
-         * 
+         *
          * @param topic Topic
          * @param payload Data
          */
@@ -208,7 +208,7 @@ namespace SPSP::Nodes
 
         /**
          * @brief Time tick callback
-         * 
+         *
          * Decrements subscribe database lifetimes.
          * If any entry expires, removes it and if it was the last one for
          * given topic, unsubscribes from it.
@@ -224,11 +224,11 @@ namespace SPSP::Nodes
 
             SPSP_LOGD("Tick done");
         }
-    
+
     protected:
         /**
          * @brief Decrements lifetimes of entries
-         * 
+         *
          */
         void decrementLifetimes()
         {
@@ -246,7 +246,7 @@ namespace SPSP::Nodes
 
         /**
          * @brief Removes expired entries
-         * 
+         *
          */
         void removeExpiredSubEntries()
         {
@@ -272,7 +272,7 @@ namespace SPSP::Nodes
 
         /**
          * @brief Removes and unsubscribes from unused topics
-         * 
+         *
          * In case of unsubscribe calls `Bridge::unsubscribeFar()`.
          */
         void removeUnusedTopics()

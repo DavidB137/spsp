@@ -2,9 +2,9 @@
  * @file spsp_local_addr.hpp
  * @author Dávid Benko (davidbenko@davidbenko.dev)
  * @brief Local layer address container
- * 
+ *
  * @copyright Copyright (c) 2023
- * 
+ *
  */
 
 #pragma once
@@ -16,10 +16,10 @@ namespace SPSP
 {
     /**
      * @brief Local layer address container
-     * 
+     *
      * Internal representation is decisive. Two addresses are the same if they
      * have the same internal representation.
-     * 
+     *
      * Printable string is also passed to far layer (MQTT).
      */
     struct LocalAddr
@@ -34,7 +34,7 @@ namespace SPSP
 
         /**
          * @brief Checks whether the address is empty
-         * 
+         *
          * @return true Local address is empty
          * @return false Local address is not empty
          */

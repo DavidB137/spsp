@@ -1,10 +1,10 @@
 /**
  * @file spsp_chacha20.hpp
- * @brief C++ implementation of ChaCha20 algorithm 
+ * @brief C++ implementation of ChaCha20 algorithm
  * @date 2023-06-21
- * 
+ *
  * Source: https://github.com/983/ChaCha20
- * 
+ *
  * License: Unlicense license
  */
 
@@ -106,12 +106,12 @@ struct Chacha20Block {
             assert(0 != counter[1]);
         }
     }
-    
+
     void next(uint8_t result8[64]){
         uint32_t temp32[16];
-        
+
         next(temp32);
-        
+
         for (size_t i = 0; i < 16; i++) unpack4(temp32[i], result8 + i*4);
     }
 };

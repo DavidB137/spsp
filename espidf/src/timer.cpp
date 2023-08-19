@@ -2,9 +2,9 @@
  * @file timer.cpp
  * @author Dávid Benko (davidbenko@davidbenko.dev)
  * @brief Timer for SPSP purposes
- * 
+ *
  * @copyright Copyright (c) 2023
- * 
+ *
  */
 
 #include <thread>

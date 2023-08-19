@@ -2,9 +2,9 @@
  * @file spsp_espnow.hpp
  * @author Dávid Benko (davidbenko@davidbenko.dev)
  * @brief ESP-NOW local layer for SPSP
- * 
+ *
  * @copyright Copyright (c) 2023
- * 
+ *
  */
 
 #pragma once
@@ -27,7 +27,7 @@ namespace SPSP::LocalLayers::ESPNOW
 
     /**
      * @brief Maximum number of simultaneous peers
-     * 
+     *
      * Peers are added and removed during each message sending, so this really
      * only limits number of concurrent "deliveries". Concurrent "deliveries"
      * over this limit will have to wait in queue.
@@ -37,7 +37,7 @@ namespace SPSP::LocalLayers::ESPNOW
     #pragma pack(push, 1)
     /**
      * @brief ESP-NOW packet header
-     * 
+     *
      * Constains SSID and encryption nonce.
      */
     struct PacketHeader
@@ -71,7 +71,7 @@ namespace SPSP::LocalLayers::ESPNOW
 
     /**
      * @brief RTC memory enabled bridge connection info
-     * 
+     *
      * Needed for reconnection to the same bridge (i.e. after deep-sleep).
      */
     struct BridgeConnInfoRTC
@@ -82,7 +82,7 @@ namespace SPSP::LocalLayers::ESPNOW
 
     /**
      * @brief ESP-NOW configuration
-     * 
+     *
      */
     struct Config
     {
@@ -92,7 +92,7 @@ namespace SPSP::LocalLayers::ESPNOW
 
     /**
      * @brief ESP-NOW local layer
-     * 
+     *
      */
     class Layer : public ILocalLayer<LocalMessage<LocalAddrMAC>>
     {
@@ -103,7 +103,7 @@ namespace SPSP::LocalLayers::ESPNOW
     protected:
         /**
          * @brief Internal bridge connection info
-         * 
+         *
          */
         struct BridgeConnInfoInternal
         {
@@ -113,13 +113,13 @@ namespace SPSP::LocalLayers::ESPNOW
 
             /**
              * @brief Construct a new empty object
-             * 
+             *
              */
             BridgeConnInfoInternal() {}
 
             /**
              * @brief Construct a new object from retained RTC version
-             * 
+             *
              * @param brRTC RTC version
              */
             BridgeConnInfoInternal(BridgeConnInfoRTC brRTC)
@@ -127,7 +127,7 @@ namespace SPSP::LocalLayers::ESPNOW
 
             /**
              * @brief Whether bridge info doesn't contain any meaningful bridge
-             * 
+             *
              * @return true Bridge info is empty
              * @return false Bridge info is not empty
              */
@@ -135,7 +135,7 @@ namespace SPSP::LocalLayers::ESPNOW
 
             /**
              * @brief Convert internal info to RTC version
-             * 
+             *
              * @return RTC version
              */
             BridgeConnInfoRTC toRTC();
@@ -149,7 +149,7 @@ namespace SPSP::LocalLayers::ESPNOW
 
         /**
          * @brief Container for promises of being-sent messages
-         * 
+         *
          * `send()` blocks until status of delivery is available (and no other
          * message is being sent to the same node).
          * Assign each peer a "bucket". When sending a message to other peer
@@ -160,7 +160,7 @@ namespace SPSP::LocalLayers::ESPNOW
 
         /**
          * @brief Container for mutex of being-sent messages
-         * 
+         *
          * We need only one thread waiting for message status per bucket in
          * `m_sendingPromises`.
          * Efectively allows maximum of `MAX_PEER_NUM` messages being sent
@@ -171,28 +171,28 @@ namespace SPSP::LocalLayers::ESPNOW
     public:
         /**
          * @brief Constructs a new ESP-NOW layer object
-         * 
+         *
          * Requires already initialized WiFi.
-         * 
+         *
          * Only one instance may exist at the same time.
-         * 
+         *
          * @param config Configuration
          */
         Layer(const Config config);
 
         /**
          * @brief Destroys ESP-NOW layer object
-         * 
+         *
          */
         ~Layer();
 
         /**
          * @brief Sends the message to given node
-         * 
+         *
          * In the message, empty address means send to the bridge peer.
-         * 
+         *
          * Note: this will block until delivery status is confirmed!
-         * 
+         *
          * @param msg Message
          * @return true Delivery successful
          * @return false Delivery failed
@@ -201,17 +201,17 @@ namespace SPSP::LocalLayers::ESPNOW
 
         /**
          * @brief Connects to the bridge
-         * 
+         *
          * If `rtndBr` is not `nullptr`, uses it's address, returns
          * `true` immediately, does no scan whatsoever and `connBr = rtndBr`.
          * Otherwise probes all wireless channels (available in the currently
          * configured country) and selects bridge with the best signal.
-         * 
+         *
          * You can use `retainedBridge` and `connectedBridge` parameters to
          * implement custom logic around deep-sleep reconnection without scans.
-         * 
+         *
          * `rtndBr` and `connBr` may be the same pointers.
-         * 
+         *
          * @param rtndBr Retained bridge peer info (for reconnection)
          * @param connBr Connected bridge peer info storage (if connection
          *               successful and `connBr` != nullptr)
@@ -223,9 +223,9 @@ namespace SPSP::LocalLayers::ESPNOW
 
         /**
          * @brief Receive callback for underlaying ESP-NOW C functions.
-         * 
+         *
          * Used indirectly.
-         * 
+         *
          * @param src Source address
          * @param data Raw data
          * @param dataLen Length of data
@@ -235,9 +235,9 @@ namespace SPSP::LocalLayers::ESPNOW
 
         /**
          * @brief Send callback for underlaying ESP-NOW C functions.
-         * 
+         *
          * Used indirectly.
-         * 
+         *
          * @param dst Destination address
          * @param delivered Whether packet has been delivered successfully
          */
@@ -246,24 +246,24 @@ namespace SPSP::LocalLayers::ESPNOW
     protected:
         /**
          * @brief Sends raw packet to the underlaying library
-         * 
+         *
          * Also registers and unregisters the peer temporarily.
-         * 
+         *
          * This is not multi-thread safe.
-         * 
+         *
          * @param dst Destination address
          * @param data Raw data
          * @param dataLen Length of data
          */
         void sendRaw(const LocalAddrT& dst, const uint8_t* data, size_t dataLen);
-        
+
         /**
          * @brief Encryption provider for raw data (bytes)
-         * 
+         *
          * Wraps ChaCha20 encryption.
          * This function is used for both encryption and decryption.
          * Data are encrypted/decrypted in-place.
-         * 
+         *
          * @param data Data to encrypt/decrypt
          * @param dataLen Length of data
          * @param nonce Encryption nonce
@@ -272,7 +272,7 @@ namespace SPSP::LocalLayers::ESPNOW
 
         /**
          * @brief Validates packet's header
-         * 
+         *
          * @param p Packet
          * @return true Packet header is valid
          * @return false Packet header is invalid
@@ -281,7 +281,7 @@ namespace SPSP::LocalLayers::ESPNOW
 
         /**
          * @brief Decrypts and validates packet's payload
-         * 
+         *
          * @param data Raw packet data
          * @param dataLen Length of data
          * @return true Packet header is valid
@@ -291,7 +291,7 @@ namespace SPSP::LocalLayers::ESPNOW
 
         /**
          * @brief Validates whether message can be sent
-         * 
+         *
          * @param msg Message
          * @return true Message can be sent
          * @return false Message can't be sent
@@ -300,9 +300,9 @@ namespace SPSP::LocalLayers::ESPNOW
 
         /**
          * @brief Prepares packet to be sent
-         * 
+         *
          * Populates raw data with Packet object.
-         * 
+         *
          * @param msg Message
          * @param data Raw memory for Packet
          */
@@ -310,27 +310,27 @@ namespace SPSP::LocalLayers::ESPNOW
 
         /**
          * @brief Registers given peer
-         * 
+         *
          * This is not multi-thread safe.
-         * 
+         *
          * @param addr Address of the peer
          */
         void registerPeer(const LocalAddrT& addr);
 
         /**
          * @brief Unregisters given peer
-         * 
+         *
          * This is not multi-thread safe.
-         * 
+         *
          * @param addr Address of the peer
          */
         void unregisterPeer(const LocalAddrT& addr);
 
         /**
          * @brief Checksums the given raw data (bytes)
-         * 
+         *
          * Optionally subtracts existing checksum.
-         * 
+         *
          * @param data Data to encrypt/decrypt
          * @param dataLen Length of data
          * @param existingChecksum Existing checksum (to subtract)
@@ -340,9 +340,9 @@ namespace SPSP::LocalLayers::ESPNOW
 
         /**
          * @brief Calculates bucket id from `LocalAddrT` object
-         * 
+         *
          * Used for `m_sendingPromises` and `m_sendingMutexes` arrays.
-         * 
+         *
          * @param addr Address of the peer
          * @return Bucket id
          */

@@ -2,9 +2,9 @@
  * @file spsp_local_message.hpp
  * @author Dávid Benko (davidbenko@davidbenko.dev)
  * @brief Local message classes
- * 
+ *
  * @copyright Copyright (c) 2023
- * 
+ *
  */
 
 #pragma once
@@ -17,7 +17,7 @@ namespace SPSP
 {
     /**
      * @brief Local message types
-     * 
+     *
      */
     enum class LocalMessageType : uint8_t
     {
@@ -34,7 +34,7 @@ namespace SPSP
 
     /**
      * @brief Helper to convert `LocalMessageType` to string representation.
-     * 
+     *
      * @param mt Message type
      * @return String representation
      */
@@ -57,9 +57,9 @@ namespace SPSP
 
     /**
      * @brief Local message representation
-     * 
+     *
      * Used primarily for communication between `LocalLayer` and `Node` classes.
-     * 
+     *
      * @tparam TLocalAddr Type of local address
      */
     template <typename TLocalAddr>
@@ -74,9 +74,9 @@ namespace SPSP
 
         /**
          * @brief Converts `LocalMessage` to printable string
-         * 
+         *
          * Primarily for logging purposes
-         * 
+         *
          * @return String representation of contained data
          */
         std::string toString() const

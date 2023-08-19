@@ -2,9 +2,9 @@
  * @file wifi.cpp
  * @author Dávid Benko (davidbenko@davidbenko.dev)
  * @brief WiFi manager for ESP platform
- * 
+ *
  * @copyright Copyright (c) 2023
- * 
+ *
  */
 
 #include <cstring>
@@ -224,7 +224,7 @@ namespace SPSP
 
         ESP_ERROR_CHECK(esp_netif_create_ip6_linklocal(m_netIf));
     }
-    
+
     void WiFi::eventHandlerWiFi(void* ctx, esp_event_base_t, int32_t eventId, void* eventData)
     {
         // Get "this"
@@ -239,7 +239,7 @@ namespace SPSP
         case WIFI_EVENT_STA_CONNECTED:
             inst->createIPv6LinkLocal();
             break;
-        
+
         default:
             break;
         }
@@ -266,7 +266,7 @@ namespace SPSP
             }
 
             break;
-        
+
         case IP_EVENT_GOT_IP6:
             // Got IPv6 address
             eventGotIPv6 = static_cast<ip_event_got_ip6_t*>(eventData);
@@ -280,7 +280,7 @@ namespace SPSP
             }
 
             break;
-        
+
         default:
             break;
         }

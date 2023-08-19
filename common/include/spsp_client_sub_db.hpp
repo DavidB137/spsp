@@ -2,9 +2,9 @@
  * @file spsp_client_sub_db.hpp
  * @author Dávid Benko (davidbenko@davidbenko.dev)
  * @brief Client subscribe database of SPSP
- * 
+ *
  * @copyright Copyright (c) 2023
- * 
+ *
  */
 
 #pragma once
@@ -29,7 +29,7 @@ namespace SPSP::Nodes
 
     /**
      * @brief Container for subscribe database of client
-     * 
+     *
      * @tparam TLocalLayer Type of local layer
      */
     template <typename TLocalLayer>
@@ -37,7 +37,7 @@ namespace SPSP::Nodes
     {
         /**
          * @brief Client subscribe entry
-         * 
+         *
          * Single entry in subscribe database of a client.
          */
         struct Entry
@@ -54,7 +54,7 @@ namespace SPSP::Nodes
     public:
         /**
          * @brief Construct a new client sub DB
-         * 
+         *
          * @param client Pointer to client node (owner)
          */
         ClientSubDB(Client<TLocalLayer>* client)
@@ -76,7 +76,7 @@ namespace SPSP::Nodes
 
         /**
          * @brief Inserts entry into database
-         * 
+         *
          * @param topic Topic
          * @param cb Callback for incoming data
          */
@@ -92,7 +92,7 @@ namespace SPSP::Nodes
 
         /**
          * @brief Removes entry from database
-         * 
+         *
          * @param topic Topic
          */
         void remove(const std::string topic)
@@ -106,7 +106,7 @@ namespace SPSP::Nodes
 
         /**
          * @brief Calls callbacks for incoming data
-         * 
+         *
          * @param topic Topic
          * @param payload Data
          */
@@ -135,7 +135,7 @@ namespace SPSP::Nodes
 
         /**
          * @brief Time tick callback
-         * 
+         *
          * Decrements subscribe database lifetimes.
          * If any item expires, renews it.
          */

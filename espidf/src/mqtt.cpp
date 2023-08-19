@@ -2,9 +2,9 @@
  * @file mqtt.cpp
  * @author Dávid Benko (davidbenko@davidbenko.dev)
  * @brief MQTT far layer for SPSP
- * 
+ *
  * @copyright Copyright (c) 2023
- * 
+ *
  */
 
 #include <chrono>
@@ -195,7 +195,7 @@ namespace SPSP::FarLayers::MQTT
     bool Layer::unsubscribe(const std::string topic)
     {
         SPSP_LOGD("Unsubscribe from topic '%s'", topic.c_str());
-        
+
         // Unsubscribe (blocks)
         auto mqtt = static_cast<esp_mqtt_client_handle_t>(m_mqtt);
         return esp_mqtt_client_unsubscribe(mqtt, topic.c_str()) > 0;

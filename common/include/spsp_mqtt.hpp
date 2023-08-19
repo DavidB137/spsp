@@ -2,9 +2,9 @@
  * @file spsp_mqtt.hpp
  * @author Dávid Benko (davidbenko@davidbenko.dev)
  * @brief MQTT far layer for SPSP
- * 
+ *
  * @copyright Copyright (c) 2023
- * 
+ *
  */
 
 #pragma once
@@ -22,14 +22,14 @@ namespace SPSP::FarLayers::MQTT
 
     /**
      * @brief MQTT connection error
-     * 
+     *
      * Thrown when `MQTT_CONNECT_TIMEOUT` expires before successful connection.
      */
     class MQTTConnectionError : public std::exception {};
 
     /**
      * @brief MQTT client configuration
-     * 
+     *
      */
     struct ClientConfig
     {
@@ -71,7 +71,7 @@ namespace SPSP::FarLayers::MQTT
 
     /**
      * @brief MQTT far layer
-     * 
+     *
      */
     class Layer : public IFarLayer
     {
@@ -83,31 +83,31 @@ namespace SPSP::FarLayers::MQTT
     public:
         /**
          * @brief Constructs a new MQTT layer object
-         * 
+         *
          * Requires already initialized WiFi (with IP address).
-         * 
+         *
          * Block until connection is successfully made.
          * May throw `MQTTConnectionError`.
-         * 
+         *
          * @param config Configuration
          */
         Layer(const ClientConfig config);
 
         /**
          * @brief Destroys MQTT layer object
-         * 
+         *
          */
         ~Layer();
 
         /**
          * @brief Signalizes successful initial connection to broker
-         * 
+         *
          */
         void connected();
 
         /**
          * @brief Publishes message coming from node
-         * 
+         *
          * @param src Source address
          * @param topic Topic
          * @param payload Payload (data)
@@ -119,9 +119,9 @@ namespace SPSP::FarLayers::MQTT
 
         /**
          * @brief Subscribes to given topic
-         * 
+         *
          * Should be used by `INode` only!
-         * 
+         *
          * @param topic Topic
          * @return true Subscribe successful
          * @return false Subscribe failed
@@ -130,9 +130,9 @@ namespace SPSP::FarLayers::MQTT
 
         /**
          * @brief Unsubscribes from given topic
-         * 
+         *
          * Should be used by `INode` only!
-         * 
+         *
          * @param topic Topic
          * @return true Unsubscribe successful
          * @return false Unsubscribe failed
@@ -142,9 +142,9 @@ namespace SPSP::FarLayers::MQTT
     protected:
         /**
          * @brief Helper to convert `std::string` to C string or `nullptr`
-         * 
+         *
          * @param str String
-         * @return If string is empty, `nullptr`, otherwise C string. 
+         * @return If string is empty, `nullptr`, otherwise C string.
          */
         inline static const char* stringToCOrNull(const std::string& str)
         {

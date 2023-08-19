@@ -2,9 +2,9 @@
  * @file local_addr_mac.cpp
  * @author Dávid Benko (davidbenko@davidbenko.dev)
  * @brief Local layer address container for MAC address
- * 
+ *
  * @copyright Copyright (c) 2023
- * 
+ *
  */
 
 #include <cstring>

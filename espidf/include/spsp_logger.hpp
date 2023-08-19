@@ -2,9 +2,9 @@
  * @file spsp_logger.hpp
  * @author Dávid Benko (davidbenko@davidbenko.dev)
  * @brief Logger for SPSP
- * 
+ *
  * @copyright Copyright (c) 2023
- * 
+ *
  */
 
 #include "esp_log.h"

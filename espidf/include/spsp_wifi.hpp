@@ -2,9 +2,9 @@
  * @file spsp_wifi.hpp
  * @author Dávid Benko (davidbenko@davidbenko.dev)
  * @brief WiFi manager for ESP platform
- * 
+ *
  * @copyright Copyright (c) 2023
- * 
+ *
  */
 
 #pragma once
@@ -26,14 +26,14 @@ namespace SPSP
 
     /**
      * @brief WiFi connection error
-     * 
+     *
      * Thrown when `WIFI_INIT_TIMEOUT` expires before successful connection.
      */
     class WiFiConnectionError : public std::exception {};
 
     /**
      * @brief ESP-NOW configuration
-     * 
+     *
      */
     struct WiFiConfig
     {
@@ -47,10 +47,10 @@ namespace SPSP
 
     /**
      * @brief WiFi manager for ESP platform (singleton)
-     * 
+     *
      * Must be initialized manually before instantiating ESP-NOW and MQTT.
      * (And deinitialized also manually.)
-     * 
+     *
      * In WiFi station mode, all roaming features and WPA3 are enabled.
      */
     class WiFi
@@ -66,7 +66,7 @@ namespace SPSP
     public:
         /**
          * @brief Returns instance of this singleton class
-         * 
+         *
          * @return This instance
          */
         static WiFi& getInstance()
@@ -77,44 +77,44 @@ namespace SPSP
 
         /**
          * @brief Initializes WiFi
-         * 
+         *
          * If SSID is zero-length (or not given), no net interface is created
          * and WiFi is initalized in ESP-NOW-only mode.
-         * 
+         *
          * May be called multiple times and is multi-thread safe.
          * Blocks until connection is established. May throw
          * `WiFiConnectionError`.
-         * 
+         *
          * @param config Configuration
          */
         void init(const WiFiConfig config = {});
 
         /**
          * @brief Deinitializes WiFi
-         * 
+         *
          * May be called multiple times.
          */
         void deinit();
 
         /**
          * @brief Gets current WiFi channel
-         * 
+         *
          * @return Channel number
          */
         uint8_t getChannel();
 
         /**
          * @brief Sets current channel
-         * 
+         *
          * @param ch Channel
          */
         void setChannel(uint8_t ch);
 
         /**
          * @brief Sets country restrictions
-         * 
+         *
          * Calling this method is not needed on bridge node.
-         * 
+         *
          * @param cc Country code
          * @param lowCh Lowest allowed channel
          * @param highCh Highest allowed channel
@@ -124,7 +124,7 @@ namespace SPSP
 
         /**
          * @brief Creates IPv6 link-local address
-         * 
+         *
          * If IPv6 is disabled in config, does nothing.
          */
         void createIPv6LinkLocal();
@@ -132,35 +132,35 @@ namespace SPSP
     private:
         /**
          * @brief Initializes NVS
-         * 
+         *
          * Called from `init()`.
          */
         void initNVS();
 
         /**
          * @brief Initializes network interface.
-         * 
+         *
          * Called from `init()`.
          */
         void initNetIf();
 
         /**
          * @brief Registers WiFi event handlers.
-         * 
+         *
          * Called from `init()`.
          */
         void registerEventHandlers();
 
         /**
          * @brief Initializes WiFi configuration to match current parameters.
-         * 
+         *
          * Called from `init()`.
          */
         void initWiFiConfig();
 
         /**
          * @brief Event handler for WiFi
-         * 
+         *
          * @param ctx Context (pointer to this instance)
          * @param eventBase Event base (`WIFI_EVENT`)
          * @param eventId Event ID
@@ -171,7 +171,7 @@ namespace SPSP
 
         /**
          * @brief Event handler for IP
-         * 
+         *
          * @param ctx Context (pointer to this instance)
          * @param eventBase Event base (`IP_EVENT`)
          * @param eventId Event ID

@@ -2,9 +2,9 @@
  * @file spsp_layers.hpp
  * @author Dávid Benko (davidbenko@davidbenko.dev)
  * @brief Local and far layers for SPSP
- * 
+ *
  * @copyright Copyright (c) 2023
- * 
+ *
  */
 
 #pragma once
@@ -19,7 +19,7 @@ namespace SPSP
 
     /**
      * @brief Interface for local layer
-     * 
+     *
      * @tparam TLocalMessage Type of local message
      */
     template <typename TLocalMessage>
@@ -33,7 +33,7 @@ namespace SPSP
 
         /**
          * @brief Sets pointer to the owner node.
-         * 
+         *
          * @param n Owner node
          */
         void setNode(void* n)
@@ -43,7 +43,7 @@ namespace SPSP
 
         /**
          * @brief Gets the node object
-         * 
+         *
          * @return Node pointer
          */
         inline ILocalNode<ILocalLayer>* getNode() const
@@ -53,7 +53,7 @@ namespace SPSP
 
         /**
          * @brief Checks whether the owner node is connected
-         * 
+         *
          * @return true Node is connected
          * @return false Node is disconnected
          */
@@ -64,11 +64,11 @@ namespace SPSP
 
         /**
          * @brief Sends the message to given node
-         * 
+         *
          * Should be used by `INode` only!
-         * 
+         *
          * In the message, empty address means send to the bridge peer.
-         * 
+         *
          * @param msg Message
          * @return true Delivery successful
          * @return false Delivery failed
@@ -78,7 +78,7 @@ namespace SPSP
 
     /**
      * @brief Interface for far layer
-     * 
+     *
      */
     class IFarLayer
     {
@@ -87,7 +87,7 @@ namespace SPSP
     public:
         /**
          * @brief Sets pointer to the owner node.
-         * 
+         *
          * @param n Owner node
          */
         void setNode(void* n)
@@ -97,7 +97,7 @@ namespace SPSP
 
         /**
          * @brief Gets the node object
-         * 
+         *
          * @return Node pointer
          */
         inline IFarNode<IFarLayer>* getNode() const
@@ -107,7 +107,7 @@ namespace SPSP
 
         /**
          * @brief Checks whether the owner node is connected
-         * 
+         *
          * @return true Node is connected
          * @return false Node is disconnected
          */
@@ -118,9 +118,9 @@ namespace SPSP
 
         /**
          * @brief Publishes message coming from node
-         * 
+         *
          * Should be used by `INode` only!
-         * 
+         *
          * @param src Source address
          * @param topic Topic
          * @param payload Payload (data)
@@ -132,9 +132,9 @@ namespace SPSP
 
         /**
          * @brief Subscribes to given topic
-         * 
+         *
          * Should be used by `INode` only!
-         * 
+         *
          * @param topic Topic
          * @return true Subscribe successful
          * @return false Subscribe failed
@@ -143,9 +143,9 @@ namespace SPSP
 
          /**
          * @brief Unsubscribes from given topic
-         * 
+         *
          * Should be used by `INode` only!
-         * 
+         *
          * @param topic Topic
          * @return true Unsubscribe successful
          * @return false Unsubscribe failed

@@ -2,9 +2,9 @@
  * @file spsp_node.hpp
  * @author Dávid Benko (davidbenko@davidbenko.dev)
  * @brief Node interface for SPSP
- * 
+ *
  * @copyright Copyright (c) 2023
- * 
+ *
  */
 
 #pragma once
@@ -36,14 +36,14 @@ namespace SPSP
 
     /**
      * @brief Subscribe callback type
-     * 
+     *
      */
     using SubscribeCb = std::function<void(const std::string topic,
                                            const std::string payload)>;
 
     /**
      * @brief Most generic node type of SPSP
-     * 
+     *
      * Doesn't do anything at all.
      */
     class INode
@@ -51,7 +51,7 @@ namespace SPSP
     public:
         /**
          * @brief Constructs a new generic node
-         * 
+         *
          */
         INode()
         {
@@ -60,9 +60,9 @@ namespace SPSP
 
         /**
          * @brief Publishes payload to topic
-         * 
+         *
          * This is primary endpoint for publishing data locally on all node types.
-         * 
+         *
          * @param topic Topic
          * @param payload Payload
          * @return true Delivery successful
@@ -72,9 +72,9 @@ namespace SPSP
 
         /**
          * @brief Subscribes to topic
-         * 
+         *
          * This is primary endpoint for subscribing locally on all node types.
-         * 
+         *
          * @param topic Topic
          * @param cb Callback function
          * @return true Subscribe successful
@@ -84,19 +84,19 @@ namespace SPSP
 
         /**
          * @brief Unsubscribes from topic
-         * 
+         *
          * This is primary endpoint for unsubscribing locally on all node types.
-         * 
+         *
          * @param topic Topic
          * @return true Unsubscribe successful
          * @return false Unsubscribe failed
          */
         virtual bool unsubscribe(const std::string topic) = 0;
-    
+
     protected:
         /**
          * @brief Publishes version of this node
-         * 
+         *
          * Doesn't block and doesn't check delivery status.
          */
         void publishVersion()
@@ -114,7 +114,7 @@ namespace SPSP
 
     /**
      * @brief Generic local node of SPSP
-     * 
+     *
      * @tparam TLocalLayer Type of local layer
      */
     template <typename TLocalLayer>
@@ -130,7 +130,7 @@ namespace SPSP
     public:
         /**
          * @brief Constructs a new node
-         * 
+         *
          */
         ILocalNode(TLocalLayer* ll) : m_ll{ll}
         {
@@ -139,9 +139,9 @@ namespace SPSP
 
         /**
          * @brief Receives the message from local layer
-         * 
+         *
          * Acts as a callback for local layer receiver.
-         * 
+         *
          * @param msg Received message
          * @param rssi Received signal strength indicator (in dBm)
          */
@@ -194,13 +194,13 @@ namespace SPSP
 
         /**
          * @brief Sets local receive/send callback function
-         * 
+         *
          * May be used to blink LEDs, compute statistics, etc.
-         * 
+         *
          * Don't do any long action inside the callback!
          * If you need to perform long blocking operation, spawn yourself
          * a new thread.
-         * 
+         *
          * @param cb Callback (if `nullptr`, unsets the callback)
          */
         void setLocalRecvSendCb(LocalRecvSendCb cb)
@@ -211,7 +211,7 @@ namespace SPSP
     protected:
         /**
          * @brief Gets the far layer object
-         * 
+         *
          * @return Far layer object
          */
         inline TLocalLayer* getLocalLayer() const
@@ -221,7 +221,7 @@ namespace SPSP
 
         /**
          * @brief Sends the message to local layer
-         * 
+         *
          * @param msg Message to send
          * @return true Message delivery successful
          * @return false Message delivery failed
@@ -250,10 +250,10 @@ namespace SPSP
 
         /**
          * @brief Publishes RSSI of received message from `addr`
-         * 
+         *
          * Doesn't block and doesn't check delivery status.
          * If `rssi` is `NODE_RSSI_UNKNOWN`, doesn't do anything.
-         * 
+         *
          * @param rssi Received signal strength indicator (in dBm)
          */
         void publishRssi(const LocalAddrT addr, int rssi)
@@ -273,7 +273,7 @@ namespace SPSP
 
         /**
          * @brief Processes PROBE_REQ message
-         * 
+         *
          * @param req Request message
          * @param rssi Received signal strength indicator (in dBm)
          * @return true Message delivery successful
@@ -284,7 +284,7 @@ namespace SPSP
 
         /**
          * @brief Processes PROBE_RES message
-         * 
+         *
          * @param req Request message
          * @param rssi Received signal strength indicator (in dBm)
          * @return true Message delivery successful
@@ -295,7 +295,7 @@ namespace SPSP
 
         /**
          * @brief Processes PUB message
-         * 
+         *
          * @param req Request message
          * @param rssi Received signal strength indicator (in dBm)
          * @return true Message delivery successful
@@ -306,7 +306,7 @@ namespace SPSP
 
         /**
          * @brief Processes SUB_REQ message
-         * 
+         *
          * @param req Request message
          * @param rssi Received signal strength indicator (in dBm)
          * @return true Message delivery successful
@@ -317,7 +317,7 @@ namespace SPSP
 
         /**
          * @brief Processes SUB_DATA message
-         * 
+         *
          * @param req Request message
          * @param rssi Received signal strength indicator (in dBm)
          * @return true Message delivery successful
@@ -328,7 +328,7 @@ namespace SPSP
 
         /**
          * @brief Processes UNSUB message
-         * 
+         *
          * @param req Request message
          * @param rssi Received signal strength indicator (in dBm)
          * @return true Message delivery successful
@@ -340,9 +340,9 @@ namespace SPSP
 
     /**
      * @brief Generic far layer node of SPSP
-     * 
+     *
      * Supplied far layer must be valid during whole lifetime of this
-     * 
+     *
      * @tparam TFarLayer Type of far layer
      */
     template <typename TFarLayer>
@@ -353,7 +353,7 @@ namespace SPSP
     public:
         /**
          * @brief Constructs a new node
-         * 
+         *
          */
         IFarNode(TFarLayer* fl) : m_fl{fl}
         {
@@ -362,9 +362,9 @@ namespace SPSP
 
         /**
          * @brief Receives the message from far layer
-         * 
+         *
          * Acts as a callback for far layer receiver.
-         * 
+         *
          * @param topic Topic
          * @param payload Payload (data)
          * @return true Message delivery successful
@@ -374,14 +374,14 @@ namespace SPSP
 
         /**
          * @brief Resubscribes to all topics
-         * 
+         *
          */
         virtual void resubscribeAll() = 0;
-    
+
     protected:
         /**
          * @brief Gets the far layer object
-         * 
+         *
          * @return Far layer object
          */
         inline TFarLayer* getFarLayer() const
@@ -392,7 +392,7 @@ namespace SPSP
 
     /**
      * @brief Generic local and far layer node of SPSP
-     * 
+     *
      * @tparam TLocalLayer Type of local layer
      * @tparam TFarLayer Type of far layer
      */
@@ -403,7 +403,7 @@ namespace SPSP
     public:
         /**
          * @brief Constructs a new node
-         * 
+         *
          */
         ILocalAndFarNode(TLocalLayer *ll, TFarLayer *fl)
             : ILocalNode<TLocalLayer>(ll), IFarNode<TFarLayer>(fl) {}

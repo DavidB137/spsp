@@ -2,9 +2,9 @@
  * @file spsp_client.hpp
  * @author Dávid Benko (davidbenko@davidbenko.dev)
  * @brief Client node type of SPSP
- * 
+ *
  * @copyright Copyright (c) 2023
- * 
+ *
  */
 
 #pragma once
@@ -22,7 +22,7 @@ namespace SPSP::Nodes
 {
     /**
      * @brief Client node
-     * 
+     *
      * @tparam TLocalLayer Type of local layer
      */
     template <typename TLocalLayer>
@@ -41,7 +41,7 @@ namespace SPSP::Nodes
 
         /**
          * @brief Constructs a new client node
-         * 
+         *
          * @param ll Local layer
          */
         Client(TLocalLayer* ll) : ILocalNode<TLocalLayer>{ll}, m_subDB{this}
@@ -51,7 +51,7 @@ namespace SPSP::Nodes
 
         /**
          * @brief Destroys the client node
-         * 
+         *
          */
         ~Client()
         {
@@ -60,10 +60,10 @@ namespace SPSP::Nodes
 
         /**
          * @brief Publishes payload to topic
-         * 
+         *
          * This is primary endpoint for publishing locally data on this node.
          * Sends data to the local layer.
-         * 
+         *
          * @param topic Topic
          * @param payload Payload
          * @return true Delivery successful
@@ -85,12 +85,12 @@ namespace SPSP::Nodes
 
         /**
          * @brief Subscribes to topic
-         * 
+         *
          * This is primary endpoint for subscribing locally on this node.
          * Directly forwards incoming data from local layer to given callback.
          * Subscribe request is sent to the bridge and extended automatically
          * until `unsubscribe()` is called.
-         * 
+         *
          * @param topic Topic
          * @param cb Callback function
          * @return true Subscribe successful
@@ -114,9 +114,9 @@ namespace SPSP::Nodes
 
         /**
          * @brief Unsubscribes from topic
-         * 
+         *
          * This is primary endpoint for unsubscribing locally on this node.
-         * 
+         *
          * @param topic Topic
          * @return true Unsubscribe successful
          * @return false Unsubscribe failed
@@ -140,9 +140,9 @@ namespace SPSP::Nodes
     protected:
         /**
          * @brief Processes PROBE_REQ message
-         * 
+         *
          * Doesn't do anything.
-         * 
+         *
          * @param req Request message
          * @param rssi Received signal strength indicator (in dBm)
          * @return true Message delivery successful
@@ -153,10 +153,10 @@ namespace SPSP::Nodes
 
         /**
          * @brief Processes PROBE_RES message
-         * 
+         *
          * Just publishes RSSI.
          * This is handled internally by concrete local layer.
-         * 
+         *
          * @param req Request message
          * @param rssi Received signal strength indicator (in dBm)
          * @return true Message delivery successful
@@ -171,9 +171,9 @@ namespace SPSP::Nodes
 
         /**
          * @brief Processes PUB message
-         * 
+         *
          * Doesn't do anything.
-         * 
+         *
          * @param req Request message
          * @param rssi Received signal strength indicator (in dBm)
          * @return true Message delivery successful
@@ -184,9 +184,9 @@ namespace SPSP::Nodes
 
         /**
          * @brief Processes SUB_REQ message
-         * 
+         *
          * Doesn't do anything.
-         * 
+         *
          * @param req Request message
          * @param rssi Received signal strength indicator (in dBm)
          * @return true Message delivery successful
@@ -197,7 +197,7 @@ namespace SPSP::Nodes
 
         /**
          * @brief Processes SUB_DATA message
-         * 
+         *
          * @param req Request message
          * @param rssi Received signal strength indicator (in dBm)
          * @return true Message delivery successful
@@ -212,7 +212,7 @@ namespace SPSP::Nodes
 
         /**
          * @brief Processes UNSUB message
-         * 
+         *
          * @param req Request message
          * @param rssi Received signal strength indicator (in dBm)
          * @return true Message delivery successful
