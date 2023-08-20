@@ -11,7 +11,7 @@
 
 #include <cstdint>
 
-#include "spsp_wifi_country_restrictions.hpp"
+#include "spsp_wifi_channel_restrictions.hpp"
 
 namespace SPSP::WiFi
 {
@@ -45,7 +45,7 @@ namespace SPSP::WiFi
          *
          * @return Country restrictions
          */
-        virtual const CountryRestrictions getCountryRestrictions() = 0;
+        virtual const ChannelRestrictions getCountryRestrictions() = 0;
     };
 } // namespace SPSP::WiFi
 
