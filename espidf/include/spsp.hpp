@@ -7,5 +7,7 @@
  *
  */
 
+#pragma once
+
 #include "spsp_common.hpp"
 #include "spsp_wifi.hpp"

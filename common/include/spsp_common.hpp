@@ -7,6 +7,8 @@
  *
  */
 
+#pragma once
+
 #include "spsp_bridge.hpp"
 #include "spsp_client.hpp"
 #include "spsp_espnow.hpp"
