@@ -30,6 +30,10 @@ namespace SPSP::LocalLayers::ESPNOW
         auto cb = _adapterInstance->getRecvCb();
         auto rssi = espnowInfo->rx_ctrl->rssi;
 
+        if (cb == nullptr) {
+            return;
+        }
+
         // Create new thread for receive handler
         // Otherwise creates deadlock, because receive callback tries to send
         // response, but ESP-NOW's internal mutex is still held by this
@@ -45,6 +49,11 @@ namespace SPSP::LocalLayers::ESPNOW
     void _sendCallback(const uint8_t *dst, esp_now_send_status_t status)
     {
         auto cb = _adapterInstance->getSendCb();
+
+        if (cb == nullptr) {
+            return;
+        }
+
         cb(dst, status == ESP_NOW_SEND_SUCCESS);
     }
 
