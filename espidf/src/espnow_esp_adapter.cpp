@@ -9,10 +9,7 @@
 
 #include <thread>
 
-#include "esp_mac.h"
 #include "esp_now.h"
-#include "esp_random.h"
-#include "esp_wifi.h"
 
 #include "spsp_espnow_esp_adapter.hpp"
 #include "spsp_exception_check.hpp"
