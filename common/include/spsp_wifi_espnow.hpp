@@ -25,21 +25,24 @@ namespace SPSP::WiFi
     public:
         /**
          * @brief Gets current WiFi channel
-         * 
+         *
          * @return Current WiFi channel
          */
         virtual uint8_t getChannel() = 0;
 
         /**
          * @brief Sets current WiFi channel
-         * 
+         *
+         * May do nothing, but in this case return value of
+         * `getCountryRestrictions()` must hold `lowCh = highCh`.
+         *
          * @param ch New current WiFi channel
          */
         virtual void setChannel(uint8_t ch) = 0;
 
         /**
          * @brief Gets currently set country restrictions of WiFi adapter
-         * 
+         *
          * @return Country restrictions
          */
         virtual const CountryRestrictions getCountryRestrictions() = 0;
