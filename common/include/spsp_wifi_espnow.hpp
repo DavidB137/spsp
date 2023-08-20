@@ -22,6 +22,7 @@ namespace SPSP::WiFi
      */
     class IESPNOW
     {
+    public:
         /**
          * @brief Gets current WiFi channel
          * 
