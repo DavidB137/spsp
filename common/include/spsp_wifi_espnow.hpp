@@ -34,7 +34,7 @@ namespace SPSP::WiFi
          * @brief Sets current WiFi channel
          *
          * May do nothing, but in this case return value of
-         * `getCountryRestrictions()` must hold `lowCh = highCh`.
+         * `getChannelRestrictions()` must hold `low = high`.
          *
          * @param ch New current WiFi channel
          */
