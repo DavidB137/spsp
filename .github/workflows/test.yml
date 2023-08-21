@@ -1,0 +1,25 @@
+name: Test
+
+on:
+  push:
+    branches: ["*"]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+
+    - name: Install dependencies
+      run: sudo apt-get install git make cmake
+
+    - name: Checkout
+      uses: actions/checkout@v3
+
+    - name: Configure
+      run: mkdir build && cd build && cmake ..
+
+    - name: Build
+      run: cd build && make
+
+    - name: Run tests
+      run: ./build/spsp_test
