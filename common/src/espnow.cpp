@@ -258,4 +258,12 @@ namespace SPSP::LocalLayers::ESPNOW
     {
         return std::hash<LocalAddrT>{}(addr) % this->m_sendingPromises.size();
     }
+
+    BridgeConnInfoRTC ESPNOW::BridgeConnInfoInternal::toRTC()
+    {
+        BridgeConnInfoRTC brRTC = {};
+        addr.toMAC(brRTC.addr);
+        brRTC.ch = ch;
+        return brRTC;
+    }
 } // namespace SPSP::LocalLayers::ESPNOW

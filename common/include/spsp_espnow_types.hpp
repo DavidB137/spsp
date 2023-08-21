@@ -14,8 +14,8 @@
 
 namespace SPSP::LocalLayers::ESPNOW
 {
-    using LocalAddrT = typename SPSP::LocalAddrMAC;
-    using LocalMessageT = typename SPSP::LocalMessage<SPSP::LocalAddrMAC>;
+    using LocalAddrT = SPSP::LocalAddrMAC;
+    using LocalMessageT = SPSP::LocalMessage<SPSP::LocalAddrMAC>;
 
     /**
      * @brief ESP-NOW configuration

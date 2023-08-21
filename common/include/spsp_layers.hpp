@@ -28,7 +28,7 @@ namespace SPSP
         void* m_node = nullptr;
 
     public:
-        using LocalAddrT = TLocalMessage::LocalAddrT;
+        using LocalAddrT = typename TLocalMessage::LocalAddrT;
         using LocalMessageT = TLocalMessage;
 
         /**
