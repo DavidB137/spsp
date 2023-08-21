@@ -84,7 +84,7 @@ namespace SPSP::LocalLayers::ESPNOW
             m_serdes.serialize(msg, data);
 
             // Send
-            m_adapter.send(dst, data);
+            this->sendRaw(dst, data);
         }
 
         m_mutex.unlock();
@@ -161,7 +161,7 @@ namespace SPSP::LocalLayers::ESPNOW
             auto future = m_sendingPromises[bucketId].get_future();
 
             m_wifi.setChannel(ch);
-            m_adapter.send(msg.addr, data);
+            this->sendRaw(msg.addr, data);
 
             SPSP_LOGD("Connect to bridge: waiting for callback");
 
@@ -193,6 +193,19 @@ namespace SPSP::LocalLayers::ESPNOW
         }
 
         return true;
+    }
+
+    void ESPNOW::sendRaw(const LocalAddrT& dst, const std::string& data)
+    {
+        // Register peer
+        m_adapter.addPeer(dst);
+
+        // Send
+        SPSP_LOGD("Send raw: %u bytes to %s", data.length(), dst.str.c_str());
+        m_adapter.send(dst, data);
+
+        // Unregister peer
+        m_adapter.removePeer(dst);
     }
 
     void ESPNOW::recvCb(const LocalAddrT src, std::string data, int rssi)

@@ -181,6 +181,18 @@ namespace SPSP::LocalLayers::ESPNOW
 
     protected:
         /**
+         * @brief Sends raw packet to the underlaying library
+         *
+         * Also registers and unregisters the peer temporarily.
+         *
+         * This is not multi-thread safe.
+         *
+         * @param dst Destination address
+         * @param data Raw data
+         */
+        void sendRaw(const LocalAddrT& dst, const std::string& data);
+
+        /**
          * @brief Receive callback for underlaying ESP-NOW adapter
          *
          * @param src Source address
