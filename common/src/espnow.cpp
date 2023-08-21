@@ -107,8 +107,8 @@ namespace SPSP::LocalLayers::ESPNOW
         return delivered;
     }
 
-    bool ESPNOW::connectToBridge(BridgeConnInfoRTC* rtndBr = nullptr,
-                                 BridgeConnInfoRTC* connBr = nullptr)
+    bool ESPNOW::connectToBridge(BridgeConnInfoRTC* rtndBr,
+                                 BridgeConnInfoRTC* connBr)
     {
         using namespace std::chrono_literals;
 
