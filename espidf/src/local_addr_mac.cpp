@@ -36,7 +36,7 @@ namespace SPSP
     LocalAddrMAC LocalAddrMAC::local()
     {
         uint8_t mac[MAC_LEN];
-        ESP_ERROR_CHECK(esp_efuse_mac_get_default(mac));
+        esp_efuse_mac_get_default(mac);
         return LocalAddrMAC(mac);
     }
 
