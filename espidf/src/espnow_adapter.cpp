@@ -72,22 +72,22 @@ namespace SPSP::LocalLayers::ESPNOW
         esp_now_deinit();
     }
 
-    void Adapter::setRecvCb(AdapterRecvCb cb)
+    void Adapter::setRecvCb(AdapterRecvCb cb) noexcept
     {
         m_recvCb = cb;
     }
 
-    AdapterRecvCb Adapter::getRecvCb() const
+    AdapterRecvCb Adapter::getRecvCb() const noexcept
     {
         return m_recvCb;
     }
 
-    void Adapter::setSendCb(AdapterSendCb cb)
+    void Adapter::setSendCb(AdapterSendCb cb) noexcept
     {
         m_sendCb = cb;
     }
 
-    AdapterSendCb Adapter::getSendCb() const
+    AdapterSendCb Adapter::getSendCb() const noexcept
     {
         return m_sendCb;
     }

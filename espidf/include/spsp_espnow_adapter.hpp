@@ -33,7 +33,7 @@ namespace SPSP::LocalLayers::ESPNOW
         /**
          * @brief Constructs a new ESP-NOW adapter
          *
-         * May throw `AdapterError`.
+         * @throw AdapterError when any call to underlaying library fails
          */
         Adapter();
 
@@ -78,6 +78,8 @@ namespace SPSP::LocalLayers::ESPNOW
          *
          * @param dst Destination address
          * @param data Raw data to be sent
+         * @throw AdapterError when call to send function fails
+         *        (not when packet undelivered)
          */
         void send(const LocalAddrT& dst, const std::string& data) const;
 
@@ -85,6 +87,7 @@ namespace SPSP::LocalLayers::ESPNOW
          * @brief Adds peer to peer list
          *
          * @param peer Peer address
+         * @throw AdapterError when peer can't be added
          */
         void addPeer(const LocalAddrT& peer);
 
@@ -92,6 +95,7 @@ namespace SPSP::LocalLayers::ESPNOW
          * @brief Removes peer from peer list
          *
          * @param peer Peer address
+         * @throw AdapterError when peer can't be removed
          */
         void removePeer(const LocalAddrT& peer);
     };

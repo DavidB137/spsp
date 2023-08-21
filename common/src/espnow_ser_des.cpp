@@ -18,11 +18,11 @@ static const char* SPSP_LOG_TAG = "SPSP/Local/ESPNOW/SerDes";
 
 namespace SPSP::LocalLayers::ESPNOW
 {
-    SerDes::SerDes(const Config& conf) : m_conf{conf}
+    SerDes::SerDes(const Config& conf) noexcept : m_conf{conf}
     {
     }
 
-    void SerDes::serialize(const LocalMessageT& msg, std::string& data) const
+    void SerDes::serialize(const LocalMessageT& msg, std::string& data) const noexcept
     {
         size_t topicLen = msg.topic.length();
         size_t payloadLen = msg.payload.length();
@@ -67,7 +67,7 @@ namespace SPSP::LocalLayers::ESPNOW
     }
 
     bool SerDes::deserialize(const LocalAddrT& src, std::string& data,
-                             LocalMessageT& msg) const
+                             LocalMessageT& msg) const noexcept
     {
         size_t dataLen = data.length();
 
@@ -109,13 +109,13 @@ namespace SPSP::LocalLayers::ESPNOW
         return true;
     }
 
-    size_t SerDes::getPacketLength(const LocalMessageT& msg)
+    size_t SerDes::getPacketLength(const LocalMessageT& msg) noexcept
     {
         return sizeof(Packet) + msg.topic.length() + msg.payload.length();
     }
 
     uint8_t SerDes::checksumRaw(uint8_t* data, size_t dataLen,
-                                uint8_t existingChecksum = 0)
+                                uint8_t existingChecksum) noexcept
     {
         uint8_t checksum = 0;
 
@@ -127,7 +127,7 @@ namespace SPSP::LocalLayers::ESPNOW
     }
 
     void SerDes::encryptRaw(uint8_t* data, size_t dataLen,
-                            const uint8_t* nonce) const
+                            const uint8_t* nonce) const noexcept
     {
         Chacha20 chch{
             reinterpret_cast<const uint8_t*>(m_conf.password.c_str()),
@@ -137,7 +137,7 @@ namespace SPSP::LocalLayers::ESPNOW
         chch.crypt(reinterpret_cast<uint8_t*>(data), dataLen);
     }
 
-    bool SerDes::validatePacketHeader(const Packet* p) const
+    bool SerDes::validatePacketHeader(const Packet* p) const noexcept
     {
         // Check SSID
         if (p->header.ssid != m_conf.ssid) {
@@ -156,7 +156,7 @@ namespace SPSP::LocalLayers::ESPNOW
         return true;
     }
 
-    bool SerDes::decryptAndValidatePacketPayload(uint8_t* data, size_t dataLen) const
+    bool SerDes::decryptAndValidatePacketPayload(uint8_t* data, size_t dataLen) const noexcept
     {
         // Treat as `Packet`
         Packet* p = reinterpret_cast<Packet*>(data);

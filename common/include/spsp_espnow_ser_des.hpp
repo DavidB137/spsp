@@ -99,7 +99,7 @@ namespace SPSP::LocalLayers::ESPNOW
          * @return true Header is valid
          * @return false Header is invalid
          */
-        bool validatePacketHeader(const Packet* p) const;
+        bool validatePacketHeader(const Packet* p) const noexcept;
 
         /**
          * @brief Decrypts and validates packet's payload
@@ -109,6 +109,6 @@ namespace SPSP::LocalLayers::ESPNOW
          * @return true Payload is valid
          * @return false Payload is invalid
          */
-        bool decryptAndValidatePacketPayload(uint8_t* data, size_t dataLen) const;
+        bool decryptAndValidatePacketPayload(uint8_t* data, size_t dataLen) const noexcept;
     };
 } // namespace SPSP::LocalLayers::ESPNOW
