@@ -14,6 +14,7 @@
 
 #include "spsp_espnow.hpp"
 #include "spsp_logger.hpp"
+#include "spsp_node.hpp"
 #include "spsp_version.hpp"
 
 // Log tag
