@@ -1,5 +1,5 @@
 /**
- * @file spsp_espnow_esp_adapter.hpp
+ * @file spsp_espnow_adapter.hpp
  * @author Dávid Benko (davidbenko@davidbenko.dev)
  * @brief ESP-NOW adapter for ESP platform
  *
@@ -12,7 +12,7 @@
 #include <functional>
 #include <string>
 
-#include "spsp_espnow_adapter.hpp"
+#include "spsp_espnow_adapter_if.hpp"
 #include "spsp_espnow_types.hpp"
 
 namespace SPSP::LocalLayers::ESPNOW
