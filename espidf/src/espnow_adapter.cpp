@@ -15,7 +15,7 @@
 #include "spsp_exception_check.hpp"
 
 // Log tag
-static const char* SPSP_LOG_TAG = "SPSP/Local/ESPNOW";
+static const char* SPSP_LOG_TAG = "SPSP/Local/ESPNOW/Adapter";
 
 namespace SPSP::LocalLayers::ESPNOW
 {
