@@ -16,4 +16,14 @@ namespace SPSP::LocalLayers::ESPNOW
 {
     using LocalAddrT = typename SPSP::LocalAddrMAC;
     using LocalMessageT = typename SPSP::LocalMessage<SPSP::LocalAddrMAC>;
+
+    /**
+     * @brief ESP-NOW configuration
+     *
+     */
+    struct Config
+    {
+        uint32_t ssid;         //!< Numeric SSID
+        std::string password;  //!< Password for packet payload encryption
+    };
 } // namespace SPSP::LocalLayers::ESPNOW
