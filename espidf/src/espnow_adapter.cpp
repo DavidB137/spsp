@@ -65,6 +65,8 @@ namespace SPSP::LocalLayers::ESPNOW
                          AdapterError("Internal receive callback registration failed"));
         SPSP_ERROR_CHECK(esp_now_register_send_cb(_sendCallback),
                          AdapterError("Internal send callback registration failed"));
+
+        _adapterInstance = this;
     }
 
     Adapter::~Adapter()
