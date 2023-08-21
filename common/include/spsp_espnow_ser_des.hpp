@@ -36,22 +36,23 @@ namespace SPSP::LocalLayers::ESPNOW
         /**
          * @brief Serializes local message to raw data
          *
+         * Total message length is not checked!
+         *
          * @param msg Message input
          * @param data Raw data output
          */
-        void serialize(const LocalMessageT& msg, uint8_t* data) const noexcept;
+        void serialize(const LocalMessageT& msg, std::string& data) const noexcept;
 
         /**
          * @brief Deserializes raw data to local message
          *
          * @param src Source address
          * @param data Raw data input
-         * @param dataLen Length of data
          * @param msg Message output
          * @return true Deserialization successful
          * @return false Deserialization failed
          */
-        bool deserialize(const LocalAddrT& src, uint8_t* data, size_t dataLen,
+        bool deserialize(const LocalAddrT& src, std::string& data,
                          LocalMessageT& msg) const noexcept;
 
         /**

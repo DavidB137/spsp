@@ -22,13 +22,17 @@ namespace SPSP::LocalLayers::ESPNOW
     {
     }
 
-    void SerDes::serialize(const LocalMessageT& msg, uint8_t* data) const
+    void SerDes::serialize(const LocalMessageT& msg, std::string& data) const
     {
         size_t topicLen = msg.topic.length();
         size_t payloadLen = msg.payload.length();
         size_t dataLen = this->getPacketLength(msg);
 
-        Packet* p = reinterpret_cast<Packet*>(data);
+        // Allocate buffer
+        uint8_t* dataRaw = new uint8_t[dataLen];
+        uint8_t* dataRawToDelete = dataRaw;
+
+        Packet* p = reinterpret_cast<Packet*>(dataRaw);
 
         // Fill data
         p->header.ssid = m_conf.ssid;
@@ -47,19 +51,26 @@ namespace SPSP::LocalLayers::ESPNOW
         m_rand.bytes(&(p->header.nonce), NONCE_LEN);
 
         // Skip header
-        data += sizeof(PacketHeader);
+        dataRaw += sizeof(PacketHeader);
         dataLen -= sizeof(PacketHeader);
 
         // Checksum
-        p->payload.checksum = this->checksumRaw(data, dataLen);
+        p->payload.checksum = this->checksumRaw(dataRaw, dataLen);
 
         // Encrypt
-        this->encryptRaw(data, dataLen, p->header.nonce);
+        this->encryptRaw(dataRaw, dataLen, p->header.nonce);
+
+        // Convert to std::string
+        data = std::string(reinterpret_cast<char*>(dataRaw), dataLen);
+
+        delete[] dataRawToDelete;
     }
 
-    bool SerDes::deserialize(const LocalAddrT& src, uint8_t* data,
-                             size_t dataLen, LocalMessageT& msg) const
+    bool SerDes::deserialize(const LocalAddrT& src, std::string& data,
+                             LocalMessageT& msg) const
     {
+        size_t dataLen = data.length();
+
         // Check packet length
         if (dataLen < sizeof(Packet)) {
             SPSP_LOGD("Deserialize failed: packet too short (%u < %u bytes)",
@@ -67,12 +78,22 @@ namespace SPSP::LocalLayers::ESPNOW
             return false;
         }
 
+        // Allocate buffer and copy data
+        uint8_t* dataRaw = new uint8_t[dataLen];
+        memcpy(dataRaw, data.c_str(), dataLen);
+
         // Treat as `Packet`
-        Packet* p = reinterpret_cast<Packet*>(data);
+        Packet* p = reinterpret_cast<Packet*>(dataRaw);
 
         // Validate and decrypt
-        if (!this->validatePacketHeader(p)) return false;
-        if (!this->decryptAndValidatePacketPayload(data, dataLen)) return false;
+        if (!this->validatePacketHeader(p)) {
+            delete[] dataRaw;
+            return false;
+        }
+        if (!this->decryptAndValidatePacketPayload(dataRaw, dataLen)) {
+            delete[] dataRaw;
+            return false;
+        }
 
         const char* topicAndPayload = reinterpret_cast<const char*>(p->payload.topicAndPayload);
 
@@ -84,6 +105,7 @@ namespace SPSP::LocalLayers::ESPNOW
         msg.payload = std::string{topicAndPayload + p->payload.topicLen,
                                   p->payload.payloadLen};
 
+        delete[] dataRaw;
         return true;
     }
 
