@@ -15,7 +15,6 @@
 
 #include "spsp_logger.hpp"
 #include "spsp_mqtt.hpp"
-#include "spsp_wifi.hpp"
 
 // Log tag
 static const char* SPSP_LOG_TAG = "SPSP/Far/MQTT";
