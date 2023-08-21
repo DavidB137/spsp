@@ -71,8 +71,8 @@ namespace SPSP::WiFi
          * @brief Constructs new WiFi station object and initializes connection
          *
          * @param config Configuration
-         * @throw SPSP::WiFi::ConnectionError when connection cannot be
-         *        established within configured timeout
+         * @throw ConnectionError when connection cannot be established within
+         *        configured timeout
          */
         Station(const StationConfig& config);
 
