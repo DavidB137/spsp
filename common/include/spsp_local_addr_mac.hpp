@@ -17,13 +17,6 @@
 namespace SPSP
 {
     /**
-     * @brief Length of MAC address in bytes
-     *
-     * Should be the same as `ESP_NOW_ETH_ALEN`, but plaform independent.
-     */
-    static constexpr size_t MAC_LEN = 6;
-
-    /**
      * @brief Local layer address container for MAC address
      *
      * MAC as addess type is very common, so implement everything here.
@@ -31,17 +24,11 @@ namespace SPSP
     struct LocalAddrMAC : public LocalAddr
     {
         /**
-         * @brief Construct a new object from 00:00:00:00:00:00 MAC address
-         *
-         */
-        LocalAddrMAC();
-
-        /**
          * @brief Constructs a new object
          *
-         * @param mac MAC address
+         * @param mac MAC address (00:00:00:00:00:00 is assumed if `nullptr`)
          */
-        LocalAddrMAC(const uint8_t* mac);
+        LocalAddrMAC(const uint8_t* mac = nullptr);
 
         /**
          * @brief Constructs a new object from MAC address of this node

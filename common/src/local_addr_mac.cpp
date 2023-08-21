@@ -10,33 +10,35 @@
 #include <cstring>
 #include <memory>
 
-#include "esp_mac.h"
-
 #include "spsp_local_addr_mac.hpp"
+#include "spsp_mac.hpp"
 
 namespace SPSP
 {
-    LocalAddrMAC::LocalAddrMAC()
-    {
-        uint8_t mac[MAC_LEN];
-        memset(mac, 0x00, MAC_LEN);
-    }
+    // Assert MAC length
+    static_assert(MAC_LEN == 6);
 
     LocalAddrMAC::LocalAddrMAC(const uint8_t* mac)
     {
+        if (mac == nullptr) {
+            uint8_t mac[MAC_LEN];
+            memset(mac, 0x00, MAC_LEN);
+        }
+
         // Internal representation
         addr = std::vector<uint8_t>(mac, mac + MAC_LEN);
 
         // Printable string
         char macStr[2*MAC_LEN + 1];
-        sprintf(macStr, "%02x%02x%02x%02x%02x%02x", MAC2STR(mac));
+        sprintf(macStr, "%02x%02x%02x%02x%02x%02x",
+                mac[0], mac[1], mac[2], mac[3], mac[4], mac[5]);
         str = std::string(macStr);
     }
 
     LocalAddrMAC LocalAddrMAC::local()
     {
         uint8_t mac[MAC_LEN];
-        esp_efuse_mac_get_default(mac);
+        getLocalMAC(mac);
         return LocalAddrMAC(mac);
     }
 
