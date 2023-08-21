@@ -30,7 +30,6 @@ namespace SPSP::LocalLayers::ESPNOW
 
         // Allocate buffer
         uint8_t* dataRaw = new uint8_t[dataLen];
-        uint8_t* dataRawToDelete = dataRaw;
 
         Packet* p = reinterpret_cast<Packet*>(dataRaw);
 
@@ -51,19 +50,20 @@ namespace SPSP::LocalLayers::ESPNOW
         m_rand.bytes(&(p->header.nonce), NONCE_LEN);
 
         // Skip header
-        dataRaw += sizeof(PacketHeader);
-        dataLen -= sizeof(PacketHeader);
+        auto dataRawNoHeader = dataRaw + sizeof(PacketHeader);
+        auto dataLenNoHeader = dataLen - sizeof(PacketHeader);
 
         // Checksum
-        p->payload.checksum = this->checksumRaw(dataRaw, dataLen);
+        p->payload.checksum = this->checksumRaw(dataRawNoHeader,
+                                                dataLenNoHeader);
 
         // Encrypt
-        this->encryptRaw(dataRaw, dataLen, p->header.nonce);
+        this->encryptRaw(dataRawNoHeader, dataLenNoHeader, p->header.nonce);
 
         // Convert to std::string
         data = std::string(reinterpret_cast<char*>(dataRaw), dataLen);
 
-        delete[] dataRawToDelete;
+        delete[] dataRaw;
     }
 
     bool SerDes::deserialize(const LocalAddrT& src, std::string& data,
