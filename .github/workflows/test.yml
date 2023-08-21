@@ -10,16 +10,16 @@ jobs:
     steps:
 
     - name: Install dependencies
-      run: sudo apt-get install git make cmake
+      run: sudo apt update && sudo apt-get install -y git make cmake
 
     - name: Checkout
       uses: actions/checkout@v3
 
     - name: Configure
-      run: mkdir build && cd build && cmake ..
+      run: cd test && mkdir build && cd build && cmake ..
 
     - name: Build
-      run: cd build && make
+      run: cd test/build && make
 
     - name: Run tests
-      run: ./build/spsp_test
+      run: ./test/build/spsp_test
