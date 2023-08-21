@@ -41,11 +41,11 @@ namespace SPSP::WiFi
         virtual void setChannel(uint8_t ch) = 0;
 
         /**
-         * @brief Gets currently set country restrictions of WiFi adapter
+         * @brief Gets currently set channel restrictions of WiFi adapter
          *
-         * @return Country restrictions
+         * @return Channel restrictions
          */
-        virtual const ChannelRestrictions getCountryRestrictions() = 0;
+        virtual const ChannelRestrictions getChannelRestrictions() = 0;
     };
 } // namespace SPSP::WiFi
 
