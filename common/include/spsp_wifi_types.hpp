@@ -1,7 +1,7 @@
 /**
- * @file spsp_wifi_channel_restrictions.hpp
+ * @file spsp_wifi_types.hpp
  * @author Dávid Benko (davidbenko@davidbenko.dev)
- * @brief WiFi channel restrictions struct
+ * @brief Common WiFi types (and some constants)
  *
  * @copyright Copyright (c) 2023
  *
@@ -11,8 +11,21 @@
 
 #include <cstdint>
 
+#include "spsp_exception.hpp"
+
 namespace SPSP::WiFi
 {
+    static constexpr int TX_POWER_DEFAULT = INT_MIN;  //!< Default TX power
+
+    /**
+     * @brief WiFi connection error
+     *
+     */
+    class ConnectionError : public SPSP::Exception
+    {
+        using SPSP::Exception::Exception;
+    };
+
     /**
      * @brief WiFi channel restrictions structure
      *
