@@ -15,9 +15,9 @@
 
 namespace SPSP::LocalLayers::ESPNOW
 {
-    constexpr uint8_t PROTO_VERSION = 1;   //!< Current protocol version
-    constexpr uint8_t PASSWORD_LEN  = 32;  //!< Password length in bytes
-    constexpr uint8_t NONCE_LEN     = 8;   //!< Length of encryption nonce
+    static constexpr uint8_t PROTO_VERSION = 1;   //!< Current protocol version
+    static constexpr uint8_t PASSWORD_LEN  = 32;  //!< Password length in bytes
+    static constexpr uint8_t NONCE_LEN     = 8;   //!< Length of encryption nonce
 
     #pragma pack(push, 1)
     /**

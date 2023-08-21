@@ -21,7 +21,7 @@ namespace SPSP
      *
      * Should be the same as `ESP_NOW_ETH_ALEN`, but plaform independent.
      */
-    constexpr const size_t MAC_LEN = 6;
+    static constexpr size_t MAC_LEN = 6;
 
     /**
      * @brief Local layer address container for MAC address
