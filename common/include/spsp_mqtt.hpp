@@ -114,8 +114,8 @@ namespace SPSP::FarLayers::MQTT
          * @return true Delivery successful
          * @return false Delivery failed
          */
-        bool publish(const std::string src, const std::string topic,
-                     const std::string payload);
+        bool publish(const std::string& src, const std::string& topic,
+                     const std::string& payload);
 
         /**
          * @brief Subscribes to given topic
@@ -126,7 +126,7 @@ namespace SPSP::FarLayers::MQTT
          * @return true Subscribe successful
          * @return false Subscribe failed
          */
-        bool subscribe(const std::string topic);
+        bool subscribe(const std::string& topic);
 
         /**
          * @brief Unsubscribes from given topic
@@ -137,7 +137,7 @@ namespace SPSP::FarLayers::MQTT
          * @return true Unsubscribe successful
          * @return false Unsubscribe failed
          */
-        bool unsubscribe(const std::string topic);
+        bool unsubscribe(const std::string& topic);
 
     protected:
         /**

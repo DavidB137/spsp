@@ -73,7 +73,7 @@ namespace SPSP
          * @return true Delivery successful
          * @return false Delivery failed
          */
-        virtual bool send(const TLocalMessage msg) = 0;
+        virtual bool send(const TLocalMessage& msg) = 0;
     };
 
     /**
@@ -127,8 +127,8 @@ namespace SPSP
          * @return true Delivery successful
          * @return false Delivery failed
          */
-        virtual bool publish(const std::string src, const std::string topic,
-                             const std::string payload) = 0;
+        virtual bool publish(const std::string& src, const std::string& topic,
+                             const std::string& payload) = 0;
 
         /**
          * @brief Subscribes to given topic
@@ -139,7 +139,7 @@ namespace SPSP
          * @return true Subscribe successful
          * @return false Subscribe failed
          */
-        virtual bool subscribe(const std::string topic) = 0;
+        virtual bool subscribe(const std::string& topic) = 0;
 
          /**
          * @brief Unsubscribes from given topic
@@ -150,6 +150,6 @@ namespace SPSP
          * @return true Unsubscribe successful
          * @return false Unsubscribe failed
          */
-        virtual bool unsubscribe(const std::string topic) = 0;
+        virtual bool unsubscribe(const std::string& topic) = 0;
     };
 } // namespace SPSP

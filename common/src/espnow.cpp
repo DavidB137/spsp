@@ -40,7 +40,7 @@ namespace SPSP::LocalLayers::ESPNOW
         SPSP_LOGI("Deinitialized");
     }
 
-    bool ESPNOW::send(const LocalMessageT msg)
+    bool ESPNOW::send(const LocalMessageT& msg)
     {
         SPSP_LOGD("Send: %s", msg.toString().c_str());
 
@@ -93,7 +93,6 @@ namespace SPSP::LocalLayers::ESPNOW
                   dst.empty() ? "." : dst.str.c_str(), bucketId);
 
         // Wait for callback to finish
-        // Note: this doesn't work for empty (NULL) destination MAC address
         bool delivered = future.get();
 
         // Reset promise

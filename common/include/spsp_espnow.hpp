@@ -155,7 +155,7 @@ namespace SPSP::LocalLayers::ESPNOW
          * @return true Delivery successful
          * @return false Delivery failed
          */
-        bool send(const LocalMessageT msg);
+        bool send(const LocalMessageT& msg);
 
         /**
          * @brief Connects to the bridge

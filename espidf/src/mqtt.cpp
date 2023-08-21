@@ -163,8 +163,8 @@ namespace SPSP::FarLayers::MQTT
         }
     }
 
-    bool Layer::publish(const std::string src, const std::string topic,
-                        const std::string payload)
+    bool Layer::publish(const std::string& src, const std::string& topic,
+                        const std::string& payload)
     {
         SPSP_LOGD("Publish: payload '%s' to topic '%s' from %s",
                   payload.c_str(), topic.c_str(), src.c_str());
@@ -181,7 +181,7 @@ namespace SPSP::FarLayers::MQTT
         return true;
     }
 
-    bool Layer::subscribe(const std::string topic)
+    bool Layer::subscribe(const std::string& topic)
     {
         SPSP_LOGD("Subscribe to topic '%s'", topic.c_str());
 
@@ -191,7 +191,7 @@ namespace SPSP::FarLayers::MQTT
                                          m_conf.connection.qos) > 0;
     }
 
-    bool Layer::unsubscribe(const std::string topic)
+    bool Layer::unsubscribe(const std::string& topic)
     {
         SPSP_LOGD("Unsubscribe from topic '%s'", topic.c_str());
 
