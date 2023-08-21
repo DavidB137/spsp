@@ -1,7 +1,7 @@
 /**
- * @file spsp_wifi.hpp
+ * @file spsp_wifi_station.hpp
  * @author Dávid Benko (davidbenko@davidbenko.dev)
- * @brief WiFi manager for ESP platform
+ * @brief WiFi station for ESP platform
  *
  * @copyright Copyright (c) 2023
  *
@@ -18,90 +18,76 @@
 #include "esp_event.h"
 #include "esp_netif.h"
 
-namespace SPSP
+#include "spsp_wifi_espnow_if.hpp"
+#include "spsp_wifi_types.hpp"
+
+namespace SPSP::WiFi
 {
-    const char* const WIFI_HOSTNAME_PREFIX = "spsp-";         //!< Hostname prefix
-    const auto WIFI_INIT_TIMEOUT = std::chrono::seconds(20);  //!< Timeout for connecting to AP
-    const int WIFI_TX_POWER_DEFAULT = INT_MIN;                //!< Default TX power
-
     /**
-     * @brief WiFi connection error
-     *
-     * Thrown when `WIFI_INIT_TIMEOUT` expires before successful connection.
-     */
-    class WiFiConnectionError : public std::exception {};
-
-    /**
-     * @brief ESP-NOW configuration
+     * @brief WiFi station configuration
      *
      */
-    struct WiFiConfig
+    struct StationConfig
     {
-        std::string ssid = "";                   //!< SSID
-        std::string password = "";               //!< Password
-        bool lockBssid = false;                  //!< Whether to use only AP with MAC address `bssid`
-        bool enableIPv6 = false;                 //!< Whether to enable IPv6 addressing (waits for either IPv4 or *global* IPv6 address)
-        uint8_t bssid[6];                        //!< MAC address of AP
-        int maxTxPower = WIFI_TX_POWER_DEFAULT;  //!< Maximum transmit power (in dBm)
+        // Connection
+        std::string ssid = "";      //!< SSID
+        std::string password = "";  //!< Password
+        bool lockBssid = false;     //!< Whether to use only AP with MAC address `bssid`
+        uint8_t bssid[6];           //!< MAC address of AP
+
+        // Network
+        std::string hostnamePrefix = "spsp-";  //!< Hostname prefix (followed by MAC address)
+        bool enableIPv6 = false;               //!< Whether to enable IPv6 addressing (waits for either IPv4 or *global* IPv6 address)
+
+        // Signal
+        int maxTxPower = TX_POWER_DEFAULT;     //!< Maximum transmit power (in dBm)
+
+        // Timing
+        std::chrono::seconds initTimeout = std::chrono::seconds(20);  //!< Timeout for connecting to AP
     };
 
     /**
-     * @brief WiFi manager for ESP platform (singleton)
+     * @brief WiFi station for ESP platform
      *
-     * Must be initialized manually before instantiating ESP-NOW and MQTT.
-     * (And deinitialized also manually.)
+     * There may be only one instance at a time (despite of not being
+     * implemented as singleton).
      *
-     * In WiFi station mode, all roaming features and WPA3 are enabled.
+     * If config contains empty SSID, only functions as ESP-NOW transceiver.
+     *
+     * All roaming features and WPA3 are enabled by default.
+     *
+     * Implements ESP-NOW interface requirements.
      */
-    class WiFi
+    class Station : public IESPNOW
     {
-        WiFiConfig m_config = {};                //!< Config
+        StationConfig m_config = {};             //!< Config
         esp_netif_t* m_netIf = nullptr;          //!< Network interface pointer
         bool m_initialized = false;              //!< Whether WiFi is initialized
         std::promise<void> m_connectingPromise;  //!< Promise to block until successful connection is made
         std::mutex m_mutex;                      //!< Mutex to prevent race conditions (primarily for initialization)
 
-        WiFi() {}
-
     public:
         /**
-         * @brief Returns instance of this singleton class
-         *
-         * @return This instance
-         */
-        static WiFi& getInstance()
-        {
-            static WiFi inst;
-            return inst;
-        }
-
-        /**
-         * @brief Initializes WiFi
-         *
-         * If SSID is zero-length (or not given), no net interface is created
-         * and WiFi is initalized in ESP-NOW-only mode.
-         *
-         * May be called multiple times and is multi-thread safe.
-         * Blocks until connection is established. May throw
-         * `WiFiConnectionError`.
+         * @brief Constructs new WiFi station object and initializes connection
          *
          * @param config Configuration
+         * @throw SPSP::WiFi::ConnectionError when connection cannot be
+         *        established within configured timeout
          */
-        void init(const WiFiConfig config = {});
+        Station(const StationConfig& config);
 
         /**
-         * @brief Deinitializes WiFi
+         * @brief Disconnects from AP and destroys WiFi station
          *
-         * May be called multiple times.
          */
-        void deinit();
+        ~Station();
 
         /**
          * @brief Gets current WiFi channel
          *
          * @return Channel number
          */
-        uint8_t getChannel();
+        uint8_t getChannel() const;
 
         /**
          * @brief Sets current channel
@@ -111,16 +97,21 @@ namespace SPSP
         void setChannel(uint8_t ch);
 
         /**
-         * @brief Sets country restrictions
+         * @brief Sets channel restrictions
          *
-         * Calling this method is not needed on bridge node.
+         * Set lowest and highest usable WiFi channel
+         * (legal country restrictions).
          *
-         * @param cc Country code
-         * @param lowCh Lowest allowed channel
-         * @param highCh Highest allowed channel
+         * @param rest Restrictions
          */
-        void setCountryRestrictions(const char cc[3], uint8_t lowCh,
-                                    uint8_t highCh);
+        void setChannelRestrictions(const ChannelRestrictions& rest);
+
+        /**
+         * @brief Get the Channel Restrictions object
+         * 
+         * @return const ChannelRestrictions 
+         */
+        const ChannelRestrictions getChannelRestrictions() const;
 
         /**
          * @brief Creates IPv6 link-local address
@@ -180,4 +171,4 @@ namespace SPSP
         static void eventHandlerIP(void* ctx, esp_event_base_t eventBase,
                                    int32_t eventId, void* eventData);
     };
-} // namespace SPSP
+} // namespace SPSP::WiFi
