@@ -11,7 +11,7 @@
 
 #include "esp_now.h"
 
-#include "spsp_espnow_esp_adapter.hpp"
+#include "spsp_espnow_adapter.hpp"
 #include "spsp_exception_check.hpp"
 
 // Log tag
