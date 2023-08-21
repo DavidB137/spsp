@@ -27,7 +27,7 @@ namespace SPSP::LocalLayers::ESPNOW
     };
 
     // Callback types
-    using AdapterRecvCb = std::function<void(const LocalAddrT sndr, std::string data, int rssi)>;
+    using AdapterRecvCb = std::function<void(const LocalAddrT src, std::string data, int rssi)>;
     using AdapterSendCb = std::function<void(const LocalAddrT dst, bool delivered)>;
 
     /**
