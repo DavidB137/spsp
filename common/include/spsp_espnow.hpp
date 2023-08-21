@@ -15,15 +15,17 @@
 #include <mutex>
 #include <string>
 
+#include "spsp_espnow_adapter.hpp"
+#include "spsp_espnow_packet.hpp"
+#include "spsp_espnow_ser_des.hpp"
+#include "spsp_espnow_types.hpp"
 #include "spsp_layers.hpp"
 #include "spsp_local_addr_mac.hpp"
+#include "spsp_wifi_espnow.hpp"
 
 namespace SPSP::LocalLayers::ESPNOW
 {
-    static const uint8_t PROTO_VERSION = 1;        //!< Current protocol version
-    static const uint8_t PASSWORD_LEN  = 32;       //!< Password length in bytes
-    static const uint8_t NONCE_LEN     = 8;        //!< Length of encryption nonce
-    static const int SIGNAL_MIN        = INT_MIN;  //!< Worst signal value
+    static constexpr int SIGNAL_MIN = INT_MIN;  //!< Worst signal value
 
     /**
      * @brief Maximum number of simultaneous peers
@@ -32,42 +34,7 @@ namespace SPSP::LocalLayers::ESPNOW
      * only limits number of concurrent "deliveries". Concurrent "deliveries"
      * over this limit will have to wait in queue.
      */
-    static const uint8_t MAX_PEER_NUM = 15;
-
-    #pragma pack(push, 1)
-    /**
-     * @brief ESP-NOW packet header
-     *
-     * Constains SSID and encryption nonce.
-     */
-    struct PacketHeader
-    {
-        uint32_t ssid;              //!< Service set identifier
-        uint8_t nonce[NONCE_LEN];   //!< Encryption nonce
-        uint8_t version;            //!< Current protocol version
-    };
-
-    struct PacketPayload
-    {
-        LocalMessageType type;      //!< Message type
-        uint8_t _reserved[3];       //!< Reserved for future use
-        uint8_t checksum;           //!< Simple checksum of `PacketPayload` to validate decrypted packet
-        uint8_t topicLen;           //!< Length of topic
-        uint8_t payloadLen;         //!< Length of payload (data)
-        uint8_t topicAndPayload[];  //!< Topic and payload as string (not null terminated)
-    };
-
-    struct Packet
-    {
-        PacketHeader header;
-        PacketPayload payload;
-    };
-    #pragma pack(pop)
-
-    // Assert sizes
-    static_assert(sizeof(PacketHeader) == 13);
-    static_assert(sizeof(PacketPayload) == 7);
-    static_assert(sizeof(Packet) == 20);
+    static constexpr uint8_t MAX_PEER_NUM = 15;
 
     /**
      * @brief RTC memory enabled bridge connection info
@@ -81,25 +48,15 @@ namespace SPSP::LocalLayers::ESPNOW
     };
 
     /**
-     * @brief ESP-NOW configuration
-     *
-     */
-    struct Config
-    {
-        uint32_t ssid;         //!< Numeric SSID
-        std::string password;  //!< Password for packet payload encryption
-    };
-
-    /**
      * @brief ESP-NOW local layer
      *
      */
-    class Layer : public ILocalLayer<LocalMessage<LocalAddrMAC>>
+    class ESPNOW : public ILocalLayer<LocalMessageT>
     {
     public:
-        using LocalAddrT = typename SPSP::LocalAddrMAC;
-        using LocalMessageT = typename SPSP::LocalMessage<SPSP::LocalAddrMAC>;
-
+        using LocalAddrT = SPSP::LocalLayers::ESPNOW::LocalAddrT;
+        using LocalMessageT = SPSP::LocalLayers::ESPNOW::LocalMessageT;
+    
     protected:
         /**
          * @brief Internal bridge connection info
@@ -141,8 +98,10 @@ namespace SPSP::LocalLayers::ESPNOW
             BridgeConnInfoRTC toRTC();
         };
 
-        uint32_t m_ssid;                           //!< Numeric SSID
-        std::string m_password;                    //!< Password for packet payload encryption
+        const Config m_conf;                       //!< Configuration
+        WiFi::IESPNOW& m_wifi;                     //!< WiFi instance
+        Adapter m_adapter;                         //!< Low level ESP-NOW adapter
+        SerDes m_serdes;                           //!< Packet serializer/deserializer
         BridgeConnInfoInternal m_bestBridge = {};  //!< Bridge with best signal
         std::mutex m_mutex;                        //!< Mutex to prevent race conditions
         std::mutex m_bestBridgeMutex;              //!< Mutex for modifying m_bestBridge* attributes
@@ -167,24 +126,23 @@ namespace SPSP::LocalLayers::ESPNOW
          * at the same time.
          */
         std::array<std::mutex, MAX_PEER_NUM> m_sendingMutexes;
-
+    
     public:
         /**
          * @brief Constructs a new ESP-NOW layer object
          *
          * Requires already initialized WiFi.
          *
-         * Only one instance may exist at the same time.
-         *
-         * @param config Configuration
+         * @param conf Configuration
+         * @param wifi WiFi instance
          */
-        Layer(const Config config);
+        ESPNOW(const Config& conf, WiFi::IESPNOW& wifi);
 
         /**
          * @brief Destroys ESP-NOW layer object
          *
          */
-        ~Layer();
+        ~ESPNOW();
 
         /**
          * @brief Sends the message to given node
@@ -221,122 +179,23 @@ namespace SPSP::LocalLayers::ESPNOW
         bool connectToBridge(BridgeConnInfoRTC* rtndBr = nullptr,
                              BridgeConnInfoRTC* connBr = nullptr);
 
+    protected:
         /**
-         * @brief Receive callback for underlaying ESP-NOW C functions.
-         *
-         * Used indirectly.
+         * @brief Receive callback for underlaying ESP-NOW adapter
          *
          * @param src Source address
          * @param data Raw data
-         * @param dataLen Length of data
          * @param rssi Received signal strength indicator (in dBm)
          */
-        void receiveCallback(const uint8_t* src, uint8_t* data, unsigned dataLen, int rssi);
+        void recvCb(const LocalAddrT src, std::string data, int rssi);
 
         /**
-         * @brief Send callback for underlaying ESP-NOW C functions.
-         *
-         * Used indirectly.
+         * @brief Send callback for underlaying ESP-NOW adapter
          *
          * @param dst Destination address
          * @param delivered Whether packet has been delivered successfully
          */
-        void sendCallback(const uint8_t* dst, bool delivered);
-
-    protected:
-        /**
-         * @brief Sends raw packet to the underlaying library
-         *
-         * Also registers and unregisters the peer temporarily.
-         *
-         * This is not multi-thread safe.
-         *
-         * @param dst Destination address
-         * @param data Raw data
-         * @param dataLen Length of data
-         */
-        void sendRaw(const LocalAddrT& dst, const uint8_t* data, size_t dataLen);
-
-        /**
-         * @brief Encryption provider for raw data (bytes)
-         *
-         * Wraps ChaCha20 encryption.
-         * This function is used for both encryption and decryption.
-         * Data are encrypted/decrypted in-place.
-         *
-         * @param data Data to encrypt/decrypt
-         * @param dataLen Length of data
-         * @param nonce Encryption nonce
-         */
-        void encryptRaw(uint8_t* data, unsigned dataLen, const uint8_t* nonce) const;
-
-        /**
-         * @brief Validates packet's header
-         *
-         * @param p Packet
-         * @return true Packet header is valid
-         * @return false Packet header is invalid
-         */
-        bool validatePacketHeader(const Packet* p) const;
-
-        /**
-         * @brief Decrypts and validates packet's payload
-         *
-         * @param data Raw packet data
-         * @param dataLen Length of data
-         * @return true Packet header is valid
-         * @return false Packet header is invalid
-         */
-        bool decryptAndValidatePacketPayload(uint8_t* data, unsigned dataLen) const;
-
-        /**
-         * @brief Validates whether message can be sent
-         *
-         * @param msg Message
-         * @return true Message can be sent
-         * @return false Message can't be sent
-         */
-        bool validateMessage(const LocalMessageT msg) const;
-
-        /**
-         * @brief Prepares packet to be sent
-         *
-         * Populates raw data with Packet object.
-         *
-         * @param msg Message
-         * @param data Raw memory for Packet
-         */
-        void preparePacket(const LocalMessageT msg, uint8_t* data) const;
-
-        /**
-         * @brief Registers given peer
-         *
-         * This is not multi-thread safe.
-         *
-         * @param addr Address of the peer
-         */
-        void registerPeer(const LocalAddrT& addr);
-
-        /**
-         * @brief Unregisters given peer
-         *
-         * This is not multi-thread safe.
-         *
-         * @param addr Address of the peer
-         */
-        void unregisterPeer(const LocalAddrT& addr);
-
-        /**
-         * @brief Checksums the given raw data (bytes)
-         *
-         * Optionally subtracts existing checksum.
-         *
-         * @param data Data to encrypt/decrypt
-         * @param dataLen Length of data
-         * @param existingChecksum Existing checksum (to subtract)
-         * @return Correct checksum
-         */
-        static uint8_t checksumRaw(uint8_t* data, unsigned dataLen, uint8_t existingChecksum = 0);
+        void sendCb(const LocalAddrT dst, bool delivered);
 
         /**
          * @brief Calculates bucket id from `LocalAddrT` object
