@@ -7,8 +7,6 @@
  *
  */
 
-#include "esp_mac.h"
-
 #include "spsp_mac.hpp"
 #include "spsp_random.hpp"
 
