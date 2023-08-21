@@ -21,7 +21,7 @@
 #include "spsp_espnow_types.hpp"
 #include "spsp_layers.hpp"
 #include "spsp_local_addr_mac.hpp"
-#include "spsp_wifi_espnow.hpp"
+#include "spsp_wifi_espnow_if.hpp"
 
 namespace SPSP::LocalLayers::ESPNOW
 {

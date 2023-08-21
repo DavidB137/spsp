@@ -1,5 +1,5 @@
 /**
- * @file spsp_wifi_espnow.hpp
+ * @file spsp_wifi_espnow_if.hpp
  * @author Dávid Benko (davidbenko@davidbenko.dev)
  * @brief WiFi interface for ESP-NOW
  *
@@ -11,7 +11,7 @@
 
 #include <cstdint>
 
-#include "spsp_wifi_channel_restrictions.hpp"
+#include "spsp_wifi_types.hpp"
 
 namespace SPSP::WiFi
 {
@@ -28,7 +28,7 @@ namespace SPSP::WiFi
          *
          * @return Current WiFi channel
          */
-        virtual uint8_t getChannel() = 0;
+        virtual uint8_t getChannel() const = 0;
 
         /**
          * @brief Sets current WiFi channel
@@ -45,7 +45,7 @@ namespace SPSP::WiFi
          *
          * @return Channel restrictions
          */
-        virtual const ChannelRestrictions getChannelRestrictions() = 0;
+        virtual const ChannelRestrictions getChannelRestrictions() const = 0;
     };
 } // namespace SPSP::WiFi
 
