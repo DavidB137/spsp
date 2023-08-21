@@ -28,7 +28,7 @@ namespace SPSP::WiFi
          *
          * @return Current WiFi channel
          */
-        virtual uint8_t getChannel() const = 0;
+        virtual uint8_t getChannel() = 0;
 
         /**
          * @brief Sets current WiFi channel
@@ -45,7 +45,7 @@ namespace SPSP::WiFi
          *
          * @return Channel restrictions
          */
-        virtual const ChannelRestrictions getChannelRestrictions() const = 0;
+        virtual const ChannelRestrictions getChannelRestrictions() = 0;
     };
 } // namespace SPSP::WiFi
 

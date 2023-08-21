@@ -87,7 +87,7 @@ namespace SPSP::WiFi
          *
          * @return Channel number
          */
-        uint8_t getChannel() const;
+        uint8_t getChannel();
 
         /**
          * @brief Sets current channel
@@ -111,7 +111,7 @@ namespace SPSP::WiFi
          * 
          * @return const ChannelRestrictions 
          */
-        const ChannelRestrictions getChannelRestrictions() const;
+        const ChannelRestrictions getChannelRestrictions();
 
         /**
          * @brief Creates IPv6 link-local address

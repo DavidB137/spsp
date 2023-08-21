@@ -97,7 +97,7 @@ namespace SPSP::WiFi
         SPSP_LOGI("Deinitialized");
     }
 
-    uint8_t Station::getChannel() const
+    uint8_t Station::getChannel()
     {
         // Mutex
         const std::lock_guard lock(m_mutex);
@@ -122,26 +122,27 @@ namespace SPSP::WiFi
         // Mutex
         const std::lock_guard lock(m_mutex);
 
-        wifi_country_t c = {
-            .cc = "XX",
-            .schan = rest.low,
-            .nchan = rest.high - rest.low + 1,
-        };
+        wifi_country_t c = {};
+        c.schan = rest.low;
+        c.nchan = rest.high - rest.low + 1;
 
         ESP_ERROR_CHECK(esp_wifi_set_country(&c));
 
         SPSP_LOGI("Set channel restrictions: %d - %d", rest.low, rest.high);
     }
 
-    const ChannelRestrictions Station::getChannelRestrictions() const
+    const ChannelRestrictions Station::getChannelRestrictions()
     {
+        // Mutex
+        const std::lock_guard lock(m_mutex);
+
         wifi_country_t c;
         ESP_ERROR_CHECK(esp_wifi_get_country(&c));
 
-        return {
-            .low = c.schan,
-            .high = c.schan + c.nchan - 1
-        };
+        ChannelRestrictions rest = {};
+        rest.low = c.schan;
+        rest.high = c.schan + c.nchan - 1;
+        return rest;
     }
 
     void Station::createIPv6LinkLocal()
