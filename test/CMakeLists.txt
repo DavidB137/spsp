@@ -10,12 +10,12 @@ FetchContent_Declare(
 FetchContent_MakeAvailable(Catch2)
 
 include_directories(
-  "../common/include"
-  "../common/private_include"
+  "../include/common"
+  "../priv_include/common"
   "include"
 )
 file(GLOB srcs CONFIGURE_DEPENDS
-  "../common/src/*.cpp"
+  "../src/common/*.cpp"
   "src/*.cpp"
   "tests/*.cpp"
 )

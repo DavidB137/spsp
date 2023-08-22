@@ -1,6 +1,6 @@
 idf_component_register(
-    SRC_DIRS "common/src" "espidf/src"
-    INCLUDE_DIRS "common/include" "espidf/include"
-    PRIV_INCLUDE_DIRS "common/private_include" "espidf/private_include"
+    SRC_DIRS "src/common" "src/espidf"
+    INCLUDE_DIRS "include/common" "include/espidf"
+    PRIV_INCLUDE_DIRS "priv_include/common" "priv_include/espidf"
     REQUIRES cxx esp_event esp_netif esp_wifi freertos mqtt nvs_flash
 )
