@@ -12,11 +12,11 @@ FetchContent_MakeAvailable(Catch2)
 include_directories(
   "../include/common"
   "../priv_include/common"
-  "include"
+  "../include/testing"
 )
 file(GLOB srcs CONFIGURE_DEPENDS
   "../src/common/*.cpp"
-  "src/*.cpp"
+  "../src/testing/*.cpp"
   "tests/*.cpp"
 )
 add_executable(spsp_test ${srcs})
