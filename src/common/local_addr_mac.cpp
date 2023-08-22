@@ -20,9 +20,9 @@ namespace SPSP
 
     LocalAddrMAC::LocalAddrMAC(const uint8_t* mac)
     {
+        uint8_t macZeroes[MAC_LEN] = {};
         if (mac == nullptr) {
-            uint8_t mac[MAC_LEN];
-            memset(mac, 0x00, MAC_LEN);
+            mac = macZeroes;
         }
 
         // Internal representation
