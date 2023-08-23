@@ -1,5 +1,5 @@
 /**
- * @file espnow_ser_des.cpp
+ * @file spsp_espnow_ser_des.cpp
  * @author Dávid Benko (davidbenko@davidbenko.dev)
  * @brief ESP-NOW packet serializer and deserializer
  *

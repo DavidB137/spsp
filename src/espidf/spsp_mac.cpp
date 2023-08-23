@@ -1,5 +1,5 @@
 /**
- * @file spsp_mac.cpp
+ * @file spsp_spsp_mac.cpp
  * @author Dávid Benko (davidbenko@davidbenko.dev)
  * @brief MAC address
  *

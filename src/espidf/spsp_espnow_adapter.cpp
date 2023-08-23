@@ -1,5 +1,5 @@
 /**
- * @file espnow_esp_adapter.cpp
+ * @file spsp_espnow_esp_adapter.cpp
  * @author Dávid Benko (davidbenko@davidbenko.dev)
  * @brief ESP-NOW adapter for ESP platform
  *

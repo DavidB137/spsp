@@ -1,5 +1,5 @@
 /**
- * @file wifi_station.cpp
+ * @file spsp_wifi_station.cpp
  * @author Dávid Benko (davidbenko@davidbenko.dev)
  * @brief WiFi station for ESP platform
  *

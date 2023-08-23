@@ -1,5 +1,5 @@
 /**
- * @file mqtt.cpp
+ * @file spsp_mqtt_adapter.cpp
  * @author Dávid Benko (davidbenko@davidbenko.dev)
  * @brief MQTT far layer for SPSP
  *

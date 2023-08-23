@@ -1,5 +1,5 @@
 /**
- * @file timer.cpp
+ * @file spsp_timer.cpp
  * @author Dávid Benko (davidbenko@davidbenko.dev)
  * @brief Timer for SPSP purposes
  *
