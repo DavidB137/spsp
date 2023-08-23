@@ -36,6 +36,7 @@ TEST_CASE("Zeroes address", "[LocalAddrMAC]") {
     auto addr = LocalAddrMAC::zeroes();
 
     REQUIRE(addr.addr == std::vector<uint8_t>(mac, mac + MAC_LENGTH));
+    REQUIRE(addr.str == "000000000000");
 }
 
 TEST_CASE("Broadcast address", "[LocalAddrMAC]") {
@@ -43,6 +44,7 @@ TEST_CASE("Broadcast address", "[LocalAddrMAC]") {
     auto addr = LocalAddrMAC::broadcast();
 
     REQUIRE(addr.addr == std::vector<uint8_t>(mac, mac + MAC_LENGTH));
+    REQUIRE(addr.str == "ffffffffffff");
 }
 
 TEST_CASE("Not empty", "[LocalAddrMAC]") {
@@ -58,13 +60,11 @@ TEST_CASE("Not empty", "[LocalAddrMAC]") {
 TEST_CASE("Operator ==", "[LocalAddrMAC]") {
     uint8_t mac[MAC_LENGTH] = {1, 2, 3, 10, 5, 0xFF};
 
-    REQUIRE(LocalAddrMAC() == LocalAddrMAC());
-    REQUIRE(LocalAddrMAC() == LocalAddrMAC::zeroes());
-    REQUIRE(LocalAddrMAC(mac) == LocalAddrMAC(mac));
-    REQUIRE(LocalAddrMAC::local() == LocalAddrMAC::local());
-    REQUIRE(LocalAddrMAC::local() != LocalAddrMAC::zeroes());
-    REQUIRE(LocalAddrMAC::local() != LocalAddrMAC::broadcast());
-    REQUIRE(LocalAddrMAC::zeroes() != LocalAddrMAC::broadcast());
+    REQUIRE(static_cast<LocalAddr>(LocalAddrMAC()) == static_cast<LocalAddr>(LocalAddrMAC::zeroes()));
+    REQUIRE(static_cast<LocalAddr>(LocalAddrMAC(mac)) == static_cast<LocalAddr>(LocalAddrMAC(mac)));
+    REQUIRE(static_cast<LocalAddr>(LocalAddrMAC::local()) == static_cast<LocalAddr>(LocalAddrMAC::local()));
+    REQUIRE_FALSE(static_cast<LocalAddr>(LocalAddrMAC::local()) == static_cast<LocalAddr>(LocalAddrMAC::zeroes()));
+    REQUIRE_FALSE(static_cast<LocalAddr>(LocalAddrMAC::local()) == static_cast<LocalAddr>(LocalAddrMAC::broadcast()));
 }
 
 TEST_CASE("To MAC", "[LocalAddrMAC]") {
@@ -75,7 +75,7 @@ TEST_CASE("To MAC", "[LocalAddrMAC]") {
     addr1.toMAC(mac2);
     auto addr2 = LocalAddrMAC(mac2);
 
-    REQUIRE(addr1 == addr2);
+    REQUIRE(static_cast<LocalAddr>(addr1) == static_cast<LocalAddr>(addr2));
     REQUIRE(addr1.addr == addr2.addr);
     REQUIRE(addr1.str == addr2.str);
 }

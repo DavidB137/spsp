@@ -22,5 +22,8 @@ file(GLOB srcs CONFIGURE_DEPENDS
 add_executable(spsp_test ${srcs})
 
 set_property(TARGET spsp_test PROPERTY CXX_STANDARD 17)
+set(THREADS_PREFER_PTHREAD_FLAG ON)
 
+find_package(Threads REQUIRED)
+target_link_libraries(spsp_test PRIVATE Threads::Threads)
 target_link_libraries(spsp_test PRIVATE Catch2::Catch2WithMain)

@@ -15,8 +15,12 @@ namespace SPSP
     void getLocalMAC(uint8_t *mac)
     {
         if (mac != nullptr) {
-            Random rand;
-            rand.bytes(mac, MAC_LEN);
+            mac[0] = 1;
+            mac[1] = 2;
+            mac[2] = 3;
+            mac[3] = 4;
+            mac[4] = 5;
+            mac[5] = 6;
         }
     }
 } // namespace SPSP
