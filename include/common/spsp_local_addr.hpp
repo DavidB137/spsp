@@ -27,7 +27,7 @@ namespace SPSP
         std::vector<uint8_t> addr;  //!< Internal address representation
         std::string str;            //!< Printable string (also used in MQTT topic)
 
-        bool operator==(const LocalAddr &other) const
+        bool operator==(const LocalAddr& other) const
         {
             return addr == other.addr;
         }
