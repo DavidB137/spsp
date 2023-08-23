@@ -43,7 +43,7 @@ namespace SPSP::WiFi
         int maxTxPower = TX_POWER_DEFAULT;     //!< Maximum transmit power (in dBm)
 
         // Timing
-        std::chrono::seconds initTimeout = std::chrono::seconds(20);  //!< Timeout for connecting to AP
+        std::chrono::milliseconds initTimeout = std::chrono::seconds(20);  //!< Timeout for connecting to AP
     };
 
     /**
