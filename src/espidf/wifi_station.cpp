@@ -65,7 +65,7 @@ namespace SPSP::WiFi
         if (config.ssid.length() > 0) {
             auto future = m_connectingPromise.get_future();
 
-            SPSP_LOGI("Attempting connection with timeout %lld seconds",
+            SPSP_LOGI("Attempting connection with timeout %lld ms",
                       m_config.initTimeout.count());
 
             // Block
