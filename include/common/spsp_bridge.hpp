@@ -100,7 +100,7 @@ namespace SPSP::Nodes
          * @return true Message delivery successful
          * @return false Message delivery failed
          */
-        bool receiveFar(const std::string topic, const std::string payload)
+        bool receiveFar(const std::string& topic, const std::string& payload)
         {
             SPSP_LOGD("Received far msg: topic '%s', payload '%s'",
                       topic.c_str(), payload.c_str());
@@ -120,7 +120,7 @@ namespace SPSP::Nodes
          * @return true Delivery successful
          * @return false Delivery failed
          */
-        bool publish(const std::string topic, const std::string payload)
+        bool publish(const std::string& topic, const std::string& payload)
         {
             SPSP_LOGD("Publishing locally: topic '%s', payload '%s'",
                       topic.c_str(), payload.c_str());
@@ -140,7 +140,7 @@ namespace SPSP::Nodes
          * @return true Subscribe successful
          * @return false Subscribe failed
          */
-        bool subscribe(const std::string topic, SubscribeCb cb)
+        bool subscribe(const std::string& topic, SubscribeCb cb)
         {
             SPSP_LOGD("Subscribing locally to topic '%s'", topic.c_str());
 
@@ -162,7 +162,7 @@ namespace SPSP::Nodes
          * @return true Unsubscribe successful
          * @return false Unsubscribe failed
          */
-        bool unsubscribe(const std::string topic)
+        bool unsubscribe(const std::string& topic)
         {
             SPSP_LOGD("Unsubscribing locally from topic '%s'", topic.c_str());
 
@@ -179,7 +179,7 @@ namespace SPSP::Nodes
          * @return true Message delivery successful
          * @return false Message delivery failed
          */
-        bool processProbeReq(const LocalMessageT req,
+        bool processProbeReq(const LocalMessageT& req,
                              int rssi = NODE_RSSI_UNKNOWN)
         {
             LocalMessageT res = req;
@@ -214,7 +214,7 @@ namespace SPSP::Nodes
          * @return true Message delivery successful
          * @return false Message delivery failed
          */
-        bool processProbeRes(const LocalMessageT req,
+        bool processProbeRes(const LocalMessageT& req,
                              int rssi = NODE_RSSI_UNKNOWN) { return false; }
 
         /**
@@ -225,7 +225,7 @@ namespace SPSP::Nodes
          * @return true Message delivery successful
          * @return false Message delivery failed
          */
-        bool processPub(const LocalMessageT req,
+        bool processPub(const LocalMessageT& req,
                         int rssi = NODE_RSSI_UNKNOWN)
         {
             // Publish RSSI
@@ -245,7 +245,7 @@ namespace SPSP::Nodes
          * @return true Message delivery successful
          * @return false Message delivery failed
          */
-        bool processSubReq(const LocalMessageT req,
+        bool processSubReq(const LocalMessageT& req,
                            int rssi = NODE_RSSI_UNKNOWN)
         {
             // Publish RSSI
@@ -266,7 +266,7 @@ namespace SPSP::Nodes
          * @return true Message delivery successful
          * @return false Message delivery failed
          */
-        bool processSubData(const LocalMessageT req,
+        bool processSubData(const LocalMessageT& req,
                             int rssi = NODE_RSSI_UNKNOWN) { return false; }
 
         /**
@@ -277,7 +277,7 @@ namespace SPSP::Nodes
          * @return true Message delivery successful
          * @return false Message delivery failed
          */
-        bool processUnsub(const LocalMessageT req,
+        bool processUnsub(const LocalMessageT& req,
                           int rssi = NODE_RSSI_UNKNOWN)
         {
             // Publish RSSI
@@ -298,8 +298,8 @@ namespace SPSP::Nodes
          * @return true Message delivery successful
          * @return false Message delivery failed
          */
-        bool publishSubData(const LocalAddrT addr, const std::string topic,
-                            const std::string payload)
+        bool publishSubData(const LocalAddrT& addr, const std::string& topic,
+                            const std::string& payload)
         {
             SPSP_LOGD("Sending SUB_DATA to %s: topic '%s', payload '%s'",
                       addr.str.c_str(), topic.c_str(), payload.c_str());
@@ -320,7 +320,7 @@ namespace SPSP::Nodes
          * @return true Subscription successful
          * @return false Subscription failed
          */
-        bool subscribeFar(const std::string topic)
+        bool subscribeFar(const std::string& topic)
         {
             return this->getFarLayer()->subscribe(topic);
         }
@@ -332,7 +332,7 @@ namespace SPSP::Nodes
          * @return true Unsubscription successful
          * @return false Unsubscription failed
          */
-        bool unsubscribeFar(const std::string topic)
+        bool unsubscribeFar(const std::string& topic)
         {
             return this->getFarLayer()->unsubscribe(topic);
         }

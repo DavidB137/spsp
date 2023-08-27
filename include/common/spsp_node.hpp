@@ -27,19 +27,19 @@
 namespace SPSP
 {
     // Topics for reporting
-    const std::string NODE_REPORTING_TOPIC = "_report";
-    const std::string NODE_REPORTING_RSSI_SUBTOPIC = "rssi";
-    const std::string NODE_REPORTING_VERSION_SUBTOPIC = "version";
-    const std::string NODE_REPORTING_PROBE_PAYLOAD_SUBTOPIC = "probe_payload";
+    static const std::string NODE_REPORTING_TOPIC = "_report";
+    static const std::string NODE_REPORTING_RSSI_SUBTOPIC = "rssi";
+    static const std::string NODE_REPORTING_VERSION_SUBTOPIC = "version";
+    static const std::string NODE_REPORTING_PROBE_PAYLOAD_SUBTOPIC = "probe_payload";
 
-    const int NODE_RSSI_UNKNOWN = INT_MIN;  //!< RSSI "unknown" value
+    static const int NODE_RSSI_UNKNOWN = INT_MIN;  //!< RSSI "unknown" value
 
     /**
      * @brief Subscribe callback type
      *
      */
-    using SubscribeCb = std::function<void(const std::string topic,
-                                           const std::string payload)>;
+    using SubscribeCb = std::function<void(const std::string& topic,
+                                           const std::string& payload)>;
 
     /**
      * @brief Most generic node type of SPSP
@@ -68,7 +68,8 @@ namespace SPSP
          * @return true Delivery successful
          * @return false Delivery failed
          */
-        virtual bool publish(const std::string topic, const std::string payload) = 0;
+        virtual bool publish(const std::string& topic,
+                             const std::string& payload) = 0;
 
         /**
          * @brief Subscribes to topic
@@ -80,7 +81,7 @@ namespace SPSP
          * @return true Subscribe successful
          * @return false Subscribe failed
          */
-        virtual bool subscribe(const std::string topic, SubscribeCb cb) = 0;
+        virtual bool subscribe(const std::string& topic, SubscribeCb cb) = 0;
 
         /**
          * @brief Unsubscribes from topic
@@ -91,7 +92,7 @@ namespace SPSP
          * @return true Unsubscribe successful
          * @return false Unsubscribe failed
          */
-        virtual bool unsubscribe(const std::string topic) = 0;
+        virtual bool unsubscribe(const std::string& topic) = 0;
 
     protected:
         /**
@@ -145,7 +146,7 @@ namespace SPSP
          * @param msg Received message
          * @param rssi Received signal strength indicator (in dBm)
          */
-        void receiveLocal(const LocalMessageT msg, int rssi = NODE_RSSI_UNKNOWN)
+        void receiveLocal(const LocalMessageT& msg, int rssi = NODE_RSSI_UNKNOWN)
         {
             if (rssi != NODE_RSSI_UNKNOWN) {
                 SPSP_LOGI("Received local msg: %s (%d dBm)",
@@ -226,7 +227,7 @@ namespace SPSP
          * @return true Message delivery successful
          * @return false Message delivery failed
          */
-        bool sendLocal(const LocalMessageT msg)
+        bool sendLocal(const LocalMessageT& msg)
         {
             SPSP_LOGI("Sending local msg: %s", msg.toString().c_str());
 
@@ -256,7 +257,7 @@ namespace SPSP
          *
          * @param rssi Received signal strength indicator (in dBm)
          */
-        void publishRssi(const LocalAddrT addr, int rssi)
+        void publishRssi(const LocalAddrT& addr, int rssi)
         {
             if (rssi == NODE_RSSI_UNKNOWN) return;
 
@@ -279,7 +280,7 @@ namespace SPSP
          * @return true Message delivery successful
          * @return false Message delivery failed
          */
-        virtual bool processProbeReq(const LocalMessageT req,
+        virtual bool processProbeReq(const LocalMessageT& req,
                                      int rssi = NODE_RSSI_UNKNOWN) = 0;
 
         /**
@@ -290,7 +291,7 @@ namespace SPSP
          * @return true Message delivery successful
          * @return false Message delivery failed
          */
-        virtual bool processProbeRes(const LocalMessageT req,
+        virtual bool processProbeRes(const LocalMessageT& req,
                                      int rssi = NODE_RSSI_UNKNOWN) = 0;
 
         /**
@@ -301,7 +302,7 @@ namespace SPSP
          * @return true Message delivery successful
          * @return false Message delivery failed
          */
-        virtual bool processPub(const LocalMessageT req,
+        virtual bool processPub(const LocalMessageT& req,
                                 int rssi = NODE_RSSI_UNKNOWN) = 0;
 
         /**
@@ -312,7 +313,7 @@ namespace SPSP
          * @return true Message delivery successful
          * @return false Message delivery failed
          */
-        virtual bool processSubReq(const LocalMessageT req,
+        virtual bool processSubReq(const LocalMessageT& req,
                                    int rssi = NODE_RSSI_UNKNOWN) = 0;
 
         /**
@@ -323,7 +324,7 @@ namespace SPSP
          * @return true Message delivery successful
          * @return false Message delivery failed
          */
-        virtual bool processSubData(const LocalMessageT req,
+        virtual bool processSubData(const LocalMessageT& req,
                                     int rssi = NODE_RSSI_UNKNOWN) = 0;
 
         /**
@@ -334,7 +335,7 @@ namespace SPSP
          * @return true Message delivery successful
          * @return false Message delivery failed
          */
-        virtual bool processUnsub(const LocalMessageT req,
+        virtual bool processUnsub(const LocalMessageT& req,
                                   int rssi = NODE_RSSI_UNKNOWN) = 0;
     };
 
@@ -370,7 +371,8 @@ namespace SPSP
          * @return true Message delivery successful
          * @return false Message delivery failed
          */
-        virtual bool receiveFar(const std::string topic, const std::string payload) = 0;
+        virtual bool receiveFar(const std::string& topic,
+                                const std::string& payload) = 0;
 
         /**
          * @brief Resubscribes to all topics

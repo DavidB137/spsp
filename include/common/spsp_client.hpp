@@ -69,7 +69,7 @@ namespace SPSP::Nodes
          * @return true Delivery successful
          * @return false Delivery failed
          */
-        bool publish(const std::string topic, const std::string payload)
+        bool publish(const std::string& topic, const std::string& payload)
         {
             SPSP_LOGD("Publishing: topic '%s', payload '%s'",
                       topic.c_str(), payload.c_str());
@@ -96,7 +96,7 @@ namespace SPSP::Nodes
          * @return true Subscribe successful
          * @return false Subscribe failed
          */
-        bool subscribe(const std::string topic, SubscribeCb cb)
+        bool subscribe(const std::string& topic, SubscribeCb cb)
         {
             SPSP_LOGD("Subscribing to topic '%s'", topic.c_str());
 
@@ -121,7 +121,7 @@ namespace SPSP::Nodes
          * @return true Unsubscribe successful
          * @return false Unsubscribe failed
          */
-        bool unsubscribe(const std::string topic)
+        bool unsubscribe(const std::string& topic)
         {
             SPSP_LOGD("Unsubscribing from topic '%s'", topic.c_str());
 
@@ -148,7 +148,7 @@ namespace SPSP::Nodes
          * @return true Message delivery successful
          * @return false Message delivery failed
          */
-        bool processProbeReq(const LocalMessageT req,
+        bool processProbeReq(const LocalMessageT& req,
                              int rssi = NODE_RSSI_UNKNOWN) { return false; }
 
         /**
@@ -162,7 +162,7 @@ namespace SPSP::Nodes
          * @return true Message delivery successful
          * @return false Message delivery failed
          */
-        bool processProbeRes(const LocalMessageT req,
+        bool processProbeRes(const LocalMessageT& req,
                              int rssi = NODE_RSSI_UNKNOWN)
         {
             this->publishRssi(req.addr, rssi);
@@ -179,7 +179,7 @@ namespace SPSP::Nodes
          * @return true Message delivery successful
          * @return false Message delivery failed
          */
-        bool processPub(const LocalMessageT req,
+        bool processPub(const LocalMessageT& req,
                         int rssi = NODE_RSSI_UNKNOWN) { return false; }
 
         /**
@@ -192,7 +192,7 @@ namespace SPSP::Nodes
          * @return true Message delivery successful
          * @return false Message delivery failed
          */
-        bool processSubReq(const LocalMessageT req,
+        bool processSubReq(const LocalMessageT& req,
                            int rssi = NODE_RSSI_UNKNOWN) { return false; }
 
         /**
@@ -203,7 +203,7 @@ namespace SPSP::Nodes
          * @return true Message delivery successful
          * @return false Message delivery failed
          */
-        bool processSubData(const LocalMessageT req,
+        bool processSubData(const LocalMessageT& req,
                             int rssi = NODE_RSSI_UNKNOWN)
         {
             m_subDB.callCb(req.topic, req.payload);
@@ -218,7 +218,7 @@ namespace SPSP::Nodes
          * @return true Message delivery successful
          * @return false Message delivery failed
          */
-        bool processUnsub(const LocalMessageT req,
+        bool processUnsub(const LocalMessageT& req,
                           int rssi = NODE_RSSI_UNKNOWN) { return false; }
     };
 } // namespace SPSP::Nodes
