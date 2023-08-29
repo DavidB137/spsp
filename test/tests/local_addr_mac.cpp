@@ -7,6 +7,9 @@ using namespace SPSP;
 
 constexpr uint8_t MAC_LENGTH = 6;
 
+static uint8_t randomMac[MAC_LENGTH] = {1, 2, 3, 10, 5, 0xFF};
+static std::string randomMacStr = "0102030a05ff";
+
 TEST_CASE("Empty constructor", "[LocalAddrMAC]") {
     auto addr = LocalAddrMAC();
 
@@ -15,11 +18,10 @@ TEST_CASE("Empty constructor", "[LocalAddrMAC]") {
 }
 
 TEST_CASE("Parametrized constructor", "[LocalAddrMAC]") {
-    uint8_t mac[MAC_LENGTH] = {1, 2, 3, 10, 5, 0xFF};
-    auto addr = LocalAddrMAC(mac);
+    auto addr = LocalAddrMAC(randomMac);
 
-    REQUIRE(addr.addr == std::vector<uint8_t>(mac, mac + MAC_LENGTH));
-    REQUIRE(addr.str == "0102030a05ff");
+    REQUIRE(addr.addr == std::vector<uint8_t>(randomMac, randomMac + MAC_LENGTH));
+    REQUIRE(addr.str == randomMacStr);
 }
 
 TEST_CASE("Local address", "[LocalAddrMAC]") {
@@ -48,30 +50,25 @@ TEST_CASE("Broadcast address", "[LocalAddrMAC]") {
 }
 
 TEST_CASE("Not empty", "[LocalAddrMAC]") {
-    uint8_t mac[MAC_LENGTH] = {1, 2, 3, 10, 5, 0xFF};
-
     REQUIRE(!LocalAddrMAC().empty());
-    REQUIRE(!LocalAddrMAC(mac).empty());
+    REQUIRE(!LocalAddrMAC(randomMac).empty());
     REQUIRE(!LocalAddrMAC::local().empty());
     REQUIRE(!LocalAddrMAC::zeroes().empty());
     REQUIRE(!LocalAddrMAC::broadcast().empty());
 }
 
 TEST_CASE("Operator ==", "[LocalAddrMAC]") {
-    uint8_t mac[MAC_LENGTH] = {1, 2, 3, 10, 5, 0xFF};
-
     REQUIRE(static_cast<LocalAddr>(LocalAddrMAC()) == static_cast<LocalAddr>(LocalAddrMAC::zeroes()));
-    REQUIRE(static_cast<LocalAddr>(LocalAddrMAC(mac)) == static_cast<LocalAddr>(LocalAddrMAC(mac)));
+    REQUIRE(static_cast<LocalAddr>(LocalAddrMAC(randomMac)) == static_cast<LocalAddr>(LocalAddrMAC(randomMac)));
     REQUIRE(static_cast<LocalAddr>(LocalAddrMAC::local()) == static_cast<LocalAddr>(LocalAddrMAC::local()));
     REQUIRE_FALSE(static_cast<LocalAddr>(LocalAddrMAC::local()) == static_cast<LocalAddr>(LocalAddrMAC::zeroes()));
     REQUIRE_FALSE(static_cast<LocalAddr>(LocalAddrMAC::local()) == static_cast<LocalAddr>(LocalAddrMAC::broadcast()));
 }
 
 TEST_CASE("To MAC", "[LocalAddrMAC]") {
-    uint8_t mac1[MAC_LENGTH] = {1, 2, 3, 10, 5, 0xFF};
     uint8_t mac2[MAC_LENGTH] = {};
 
-    auto addr1 = LocalAddrMAC(mac1);
+    auto addr1 = LocalAddrMAC(randomMac);
     addr1.toMAC(mac2);
     auto addr2 = LocalAddrMAC(mac2);
 
