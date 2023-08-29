@@ -9,6 +9,7 @@
 
 #pragma once
 
+#include <memory>
 #include <queue>
 #include <string>
 #include <unordered_map>
@@ -37,10 +38,10 @@ namespace SPSP
          */
         struct Node
         {
-            TValue value;                                  //!< Value
-            size_t levelIndex;                             //!< Index of level
-            std::unordered_map<std::string, Node> childs;  //!< Children
-            bool isLeaf = false;                           //!< Whether is leaf node
+            TValue value;                                                   //!< Value
+            std::unordered_map<std::string, std::unique_ptr<Node>> childs;  //!< Children
+            size_t levelIndex;                                              //!< Index of level
+            bool isLeaf = false;                                            //!< Whether is leaf node
         };
 
         const std::string m_lSep;         //!< Level separator
@@ -70,20 +71,28 @@ namespace SPSP
          * @param key Key
          * @param value Value
          */
-        void insert(const std::string& key, const TValue& value) noexcept
+        void insert(const std::string& key, const TValue& value)
         {
-            Node& cur = m_root;
+            Node* cur = &m_root;
             auto levels = this->splitToLevels(key);
 
             // Get or create child on each level
-            for (auto& level : levels) {
-                cur = cur.childs.at(level);
+            for (size_t i = 0; i < levels.size(); i++) {
+                auto& level = levels[i];
+
+                // Create new child
+                if (cur->childs.find(level) == cur->childs.end()) {
+                    cur->childs[level] = std::make_unique<Node>();
+                    cur->childs[level]->levelIndex = i + 1;
+                }
+
+                // Move to next level
+                cur = cur->childs.at(level).get();
             }
 
             // Populate
-            cur.value = value;
-            cur.levelIndex = levels.size();
-            cur.isLeaf = true;
+            cur->value = value;
+            cur->isLeaf = true;
         }
 
         /**
@@ -93,35 +102,41 @@ namespace SPSP
          * @return true Node removed successfully
          * @return false Node doesn't exist
          */
-        bool remove(const std::string& key) noexcept
+        bool remove(const std::string& key)
         {
-            Node& cur = m_root;
+            Node* cur = &m_root;
             auto levels = this->splitToLevels(key);
-            std::vector<Node&> nodeStack;
+
+            std::vector<Node*> nodeStack;
 
             // Get node if exists
             for (auto& level : levels) {
                 nodeStack.push_back(cur);
 
-                if (!cur.childs.contains(level)) {
+                if (cur->childs.find(level) == cur->childs.end()) {
                     return false;
                 }
-                cur = cur.childs.at(level);
+                cur = cur->childs.at(level).get();
             }
 
             // Can't remove non-leaf node
-            if (!cur.isLeaf) {
+            if (!cur->isLeaf) {
                 return false;
             }
 
-            cur.isLeaf = false;
+            cur->isLeaf = false;
 
-            if (cur.childs.empty()) {
+            if (cur->childs.empty()) {
                 // Delete all redundant ancestors
-                for (size_t i = nodeStack.size() - 1; i >= 0; i--) {
-                    Node& node = nodeStack.at(i);
-                    if (node.isLeaf || node.childs.size() > 1) {
-                        node.childs.erase(levels.at(i));
+                // There is `int` instead of `size_t`, because we need signed type.
+                for (int i = nodeStack.size() - 1; i >= 0; i--) {
+                    Node* node = nodeStack.at(i);
+                    if (node->isLeaf || node->childs.size() > 1 ||
+                        node == &m_root) {
+                        node->childs.erase(levels.at(i));
+
+                        // Previous ancestors are no longer redundant 
+                        break;
                     }
                 }
             }
@@ -135,27 +150,53 @@ namespace SPSP
          * @param key Key
          * @return Vector of values from matching keys (empty if not found)
          */
-        const std::vector<const TValue&> find(const std::string& key) const noexcept
+        const std::vector<TValue> find(const std::string& key) const
         {
             auto levels = this->splitToLevels(key);
-            std::vector<const TValue&> values;
-            std::queue<const Node&> nodeQueue = {m_root};
+
+            std::vector<TValue> values;
+
+            // Queue for to-be-processed nodes
+            std::queue<const Node*> nodeQueue;
+            nodeQueue.push(&m_root);
 
             while (!nodeQueue.empty()) {
-                Node& node = nodeQueue.pop();
+                const Node* node = nodeQueue.front();
 
-                if (node.levelIndex == levels.size()) {
+                if (node->levelIndex == levels.size() && node->isLeaf) {
                     // Match
-                    values.push_back(node.value);
-                } else if (node.levelIndex < levels.size()) {
+                    values.push_back(node->value);
+                }
+                else if (node->levelIndex < levels.size()) {
                     // Enqueue relevant childs
-                    for (auto& child : node.childs) {
-                        if (child.first == levels.at(node.levelIndex)) {
-                            nodeQueue.push(child);
+                    for (auto& [childKey, childNode] : node->childs) {
+                        if (childKey == levels.at(node->levelIndex) ||
+                            childKey == m_lSingleWild) {
+                            // Key matches or has single-level wildcard
+                            nodeQueue.push(childNode.get());
+                        }
+                        else if (childKey == m_lMultiWild && childNode->isLeaf) {
+                            // Multi-level wildcard
+                            values.push_back(childNode->value);
                         }
                     }
                 }
+
+                nodeQueue.pop();
             }
+
+            return values;
+        }
+
+        /**
+         * @brief Empty predicate
+         *
+         * @return true Trie is empty
+         * @return false Trie is not empty
+         */
+        bool empty() const
+        {
+            return m_root.childs.empty();
         }
 
     protected:
@@ -172,10 +213,13 @@ namespace SPSP
             size_t curPos = 0, nextPos;
             std::vector<std::string> levels;
 
-            while ((nextPos = key.find(m_lSep)) != std::string::npos) {
-                levels.push_back(key.substr(curPos, nextPos));
-                curPos = nextPos;
+            while ((nextPos = key.find(m_lSep, curPos)) != std::string::npos) {
+                levels.push_back(key.substr(curPos, nextPos - curPos));
+                curPos = nextPos + m_lSep.length();
             }
+
+            // Add the rest
+            levels.push_back(key.substr(curPos));
 
             return levels;
         }
