@@ -61,9 +61,9 @@ namespace SPSP
          * @param singleLevelWildcard Single-level wildcard token
          * @param multiLevelWildcard Multi-level wildcard token
          */
-        WildcardTrie(const std::string& levelSeparator,
-                     const std::string& singleLevelWildcard,
-                     const std::string& multiLevelWildcard) noexcept
+        WildcardTrie(const std::string& levelSeparator = "/",
+                     const std::string& singleLevelWildcard = "+",
+                     const std::string& multiLevelWildcard = "#") noexcept
             : m_lSep{levelSeparator}, m_lSingleWild{singleLevelWildcard},
               m_lMultiWild{multiLevelWildcard}
         {}
