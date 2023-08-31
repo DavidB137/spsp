@@ -202,6 +202,9 @@ namespace SPSP
          * @brief Iterates through each item in trie and calls callback
          *        on each one
          *
+         * It is possible to modify value for key directly inside provided
+         * function.
+         *
          * @param f Function to call
          */
         void forEach(std::function<void(const std::string& key, TValue& value)> f)
