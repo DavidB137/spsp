@@ -9,17 +9,22 @@
 
 #pragma once
 
+#include <chrono>
 #include <mutex>
+#include <unordered_map>
 
-#include "spsp_client_sub_db.hpp"
 #include "spsp_logger.hpp"
 #include "spsp_node.hpp"
+#include "spsp_timer.hpp"
+#include "spsp_wildcard_trie.hpp"
 
 // Log tag
 #define SPSP_LOG_TAG "SPSP/Client"
 
 namespace SPSP::Nodes
 {
+    static const auto CLIENT_SUB_LIFETIME = std::chrono::minutes(10);  //!< Default subscribe lifetime
+
     /**
      * @brief Client node
      *
@@ -28,11 +33,19 @@ namespace SPSP::Nodes
     template <typename TLocalLayer>
     class Client : public ILocalNode<TLocalLayer>
     {
-        // Subscribe DB can access private members
-        friend class ClientSubDB<TLocalLayer>;
+        /**
+         * @brief Client subscribe database entry
+         *
+         * Single entry in subscribe database of a client.
+         */
+        struct SubDBEntry
+        {
+            std::chrono::minutes lifetime = CLIENT_SUB_LIFETIME;  //!< Lifetime in minutes
+            SPSP::SubscribeCb cb = nullptr;                       //!< Callback for incoming data
+        };
 
-    protected:
-        ClientSubDB<TLocalLayer> m_subDB;
+        WildcardTrie<SubDBEntry> m_subDB;
+        Timer m_subDBTimer;  //!< Sub DB timer
         std::mutex m_mutex;  //!< Mutex to prevent race conditions
 
     public:
@@ -44,7 +57,10 @@ namespace SPSP::Nodes
          *
          * @param ll Local layer
          */
-        Client(TLocalLayer* ll) : ILocalNode<TLocalLayer>{ll}, m_subDB{this}
+        Client(TLocalLayer* ll)
+            : ILocalNode<TLocalLayer>{ll}, m_subDB{},
+              m_subDBTimer{std::chrono::minutes(1),
+                           std::bind(&Client<TLocalLayer>::subDBTick, this)}
         {
             SPSP_LOGI("Initialized");
         }
@@ -100,16 +116,18 @@ namespace SPSP::Nodes
         {
             SPSP_LOGD("Subscribing to topic '%s'", topic.c_str());
 
-            LocalMessageT msg = {};
-            // msg.addr is empty => send to the bridge node
-            msg.type = LocalMessageType::SUB_REQ;
-            msg.topic = topic;
-            // msg.payload is empty
+            if (this->sendSubscribe(topic)) {
+                // Subscribe request delivered successfully
+                const std::lock_guard lock(m_mutex);
 
-            // Add to sub DB
-            m_subDB.insert(topic, cb);
+                // Add to sub DB
+                SubDBEntry subDBEntry = { .cb = cb };
+                m_subDB.insert(topic, subDBEntry);
 
-            return this->sendLocal(msg);
+                return true;
+            }
+
+            return false;
         }
 
         /**
@@ -134,7 +152,12 @@ namespace SPSP::Nodes
             // Remove from sub DB
             m_subDB.remove(topic);
 
-            return this->sendLocal(msg);
+            // Explicitly unsubscribe from bridge
+            // If this fails, the timeout on bridge will just expire in
+            // couple of minutes.
+            this->sendLocal(msg);
+
+            return true;
         }
 
     protected:
@@ -206,7 +229,19 @@ namespace SPSP::Nodes
         bool processSubData(const LocalMessageT& req,
                             int rssi = NODE_RSSI_UNKNOWN)
         {
-            m_subDB.callCb(req.topic, req.payload);
+            // Get matching entries
+            std::unordered_map<std::string, const SubDBEntry&> entries;
+            {
+                const std::lock_guard lock(m_mutex);
+                entries = m_subDB.find(req.topic);
+            }
+
+            for (auto& [topic, entry] : entries) {
+                SPSP_LOGD("Calling user callback for topic '%s'",
+                          topic.c_str());
+                cb(topic, req.payload);
+            }
+
             return true;
         }
 
@@ -220,6 +255,55 @@ namespace SPSP::Nodes
          */
         bool processUnsub(const LocalMessageT& req,
                           int rssi = NODE_RSSI_UNKNOWN) { return false; }
+
+        /**
+         * @brief Prepares and sends SUB_REQ message to local layer
+         *
+         * @param topic Topic
+         * @return true Message delivery successful
+         * @return false Message delivery failed
+         */
+        bool sendSubscribe(const std::string& topic)
+        {
+            LocalMessageT msg = {};
+            // msg.addr is empty => send to the bridge node
+            msg.type = LocalMessageType::SUB_REQ;
+            msg.topic = topic;
+            // msg.payload is empty
+
+            return this->sendLocal(msg);
+        }
+
+        /**
+         * @brief Subscribe DB timer tick callback
+         *
+         * Decrements subscribe database lifetimes.
+         * If any item expires, renews it.
+         */
+        void subDBTick()
+        {
+            const std::lock_guard lock(m_mutex);
+
+            SPSP_LOGD("Tick running");
+
+            m_subDB.forEach([this](std::string& topic, SubDBEntry& entry) {
+                entry.lifetime--;
+
+                if (entry.lifetime == 0) {
+                    SPSP_LOGD("Topic '%s' expired (renewing)", topic.c_str());
+
+                    bool extended = this->sendSubscribe(topic);
+                    if (!extended) {
+                        SPSP_LOGE("Topic '%s' can't be extended. Will try again in next tick.",
+                                  topic.c_str());
+
+                        entry.lifetime++;
+                    }
+                }
+            });
+
+            SPSP_LOGD("Tick done");
+        }
     };
 } // namespace SPSP::Nodes
 
