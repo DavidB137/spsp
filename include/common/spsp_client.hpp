@@ -33,6 +33,7 @@ namespace SPSP::Nodes
     template <typename TLocalLayer>
     class Client : public ILocalNode<TLocalLayer>
     {
+    protected:
         /**
          * @brief Client subscribe database entry
          *
@@ -286,7 +287,7 @@ namespace SPSP::Nodes
 
             SPSP_LOGD("Tick running");
 
-            m_subDB.forEach([this](std::string& topic, SubDBEntry& entry) {
+            m_subDB.forEach([this](const std::string& topic, SubDBEntry& entry) {
                 entry.lifetime--;
 
                 if (entry.lifetime == 0) {
