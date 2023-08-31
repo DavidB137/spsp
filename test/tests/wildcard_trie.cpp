@@ -2,9 +2,13 @@
 
 #include "spsp_wildcard_trie.hpp"
 
+#include <iostream>
+#include <unordered_map>
 #include <vector>
 
 using namespace SPSP;
+
+using FindReturnT = SPSP::WildcardTrie<int>::FindReturnT;
 
 TEST_CASE("Simple insert, remove, find in wildcard trie", "[WildcardTrie]") {
     WildcardTrie<int> trie("/", "+", "#");
@@ -36,16 +40,16 @@ TEST_CASE("Insert and find in wildcard trie", "[WildcardTrie]") {
 
     SECTION("Insert and find simple") {
         trie.insert("abc/def", 2);
-        REQUIRE(trie.find("abc/def") == std::vector<int>{2});
+        REQUIRE(trie.find("abc/def") == FindReturnT{{"abc/def", 2}});
         REQUIRE(trie.find("abc/def0").empty());
     }
 
     SECTION("Insert and find simple rewrite") {
         trie.insert("abc/def", 2);
-        REQUIRE(trie.find("abc/def") == std::vector<int>{2});
+        REQUIRE(trie.find("abc/def") == FindReturnT{{"abc/def", 2}});
         
         trie.insert("abc/def", 3);
-        REQUIRE(trie.find("abc/def") == std::vector<int>{3});
+        REQUIRE(trie.find("abc/def") == FindReturnT{{"abc/def", 3}});
     }
 
     SECTION("Insert and find empty key") {
@@ -55,14 +59,14 @@ TEST_CASE("Insert and find in wildcard trie", "[WildcardTrie]") {
 
     SECTION("Insert and find single-level wildcard at the end") {
         trie.insert("abc/+", 2);
-        REQUIRE(trie.find("abc/aaa") == std::vector<int>{2});
+        REQUIRE(trie.find("abc/aaa") == FindReturnT{{"abc/+", 2}});
         REQUIRE(trie.find("abc/aaa/1").empty());
         REQUIRE(trie.find("abc").empty());
     }
 
     SECTION("Insert and find single-level wildcard in the middle") {
         trie.insert("abc/+/def", 2);
-        REQUIRE(trie.find("abc/aaa/def") == std::vector<int>{2});
+        REQUIRE(trie.find("abc/aaa/def") == FindReturnT{{"abc/+/def", 2}});
         REQUIRE(trie.find("abc/aaa/def/1").empty());
         REQUIRE(trie.find("abc/1").empty());
         REQUIRE(trie.find("abc").empty());
@@ -70,30 +74,30 @@ TEST_CASE("Insert and find in wildcard trie", "[WildcardTrie]") {
 
     SECTION("Insert and find single-level wildcard at the beginning") {
         trie.insert("+/def", 2);
-        REQUIRE(trie.find("abc/def") == std::vector<int>{2});
+        REQUIRE(trie.find("abc/def") == FindReturnT{{"+/def", 2}});
         REQUIRE(trie.find("abc/def/1").empty());
         REQUIRE(trie.find("abc").empty());
     }
 
     SECTION("Insert and find single-level wildcard as only character") {
         trie.insert("+", 2);
-        REQUIRE(trie.find("abc") == std::vector<int>{2});
+        REQUIRE(trie.find("abc") == FindReturnT{{"+", 2}});
         REQUIRE(trie.find("abc/def").empty());
-        REQUIRE(trie.find("") == std::vector<int>{2});
+        REQUIRE(trie.find("") == FindReturnT{{"+", 2}});
     }
 
     SECTION("Insert and find multi-level wildcard at the end") {
         trie.insert("abc/#", 2);
-        REQUIRE(trie.find("abc/aaa") == std::vector<int>{2});
-        REQUIRE(trie.find("abc/aaa/1") == std::vector<int>{2});
+        REQUIRE(trie.find("abc/aaa") == FindReturnT{{"abc/#", 2}});
+        REQUIRE(trie.find("abc/aaa/1") == FindReturnT{{"abc/#", 2}});
         REQUIRE(trie.find("abc").empty());
     }
 
     SECTION("Insert and find multi-level wildcard as only character") {
         trie.insert("#", 2);
-        REQUIRE(trie.find("abc") == std::vector<int>{2});
-        REQUIRE(trie.find("abc/def") == std::vector<int>{2});
-        REQUIRE(trie.find("") == std::vector<int>{2});
+        REQUIRE(trie.find("abc") == FindReturnT{{"#", 2}});
+        REQUIRE(trie.find("abc/def") == FindReturnT{{"#", 2}});
+        REQUIRE(trie.find("") == FindReturnT{{"#", 2}});
     }
 }
 
@@ -123,7 +127,7 @@ TEST_CASE("Insert, remove and find in wildcard trie", "[WildcardTrie]") {
         REQUIRE(trie.find("aaa/bbb/ccc").empty());
     }
 
-    SECTION("Insert, remove and find two topics without common prefix") {
+    SECTION("Insert, remove and find two keys without common prefix") {
         trie.insert("aaa", 2);
         trie.insert("bbb", 3);
 
@@ -137,7 +141,7 @@ TEST_CASE("Insert, remove and find in wildcard trie", "[WildcardTrie]") {
         REQUIRE(trie.find("bbb").empty());
     }
 
-    SECTION("Insert, remove and find two topics with common prefix") {
+    SECTION("Insert, remove and find two keys with common prefix") {
         trie.insert("aaa/bbb", 2);
         trie.insert("aaa/ccc", 3);
 
@@ -157,7 +161,7 @@ TEST_CASE("Insert, remove and find in wildcard trie", "[WildcardTrie]") {
         REQUIRE(trie.find("aaa/ccc").empty());
     }
 
-    SECTION("Insert, remove and find topics with common leaf prefix") {
+    SECTION("Insert, remove and find keys with common leaf prefix") {
         trie.insert("aaa", 1);
         trie.insert("aaa/bbb", 2);
         trie.insert("aaa/ccc", 3);
@@ -182,7 +186,7 @@ TEST_CASE("Insert, remove and find in wildcard trie", "[WildcardTrie]") {
         REQUIRE(trie.find("aaa/ccc").empty());
     }
 
-    SECTION("Insert, remove and find topics with wildcards") {
+    SECTION("Insert, remove and find keys with wildcards") {
         trie.insert("aaa/+/ccc/#", 2);
         trie.insert("aaa/#", 3);
 
@@ -231,14 +235,49 @@ TEST_CASE("Find in wildcard trie", "[WildcardTrie]") {
     }
 
     SECTION("Find single-level wildcard") {
-        REQUIRE(trie.find("if/elseif/else") == std::vector<int>{7});
+        REQUIRE(trie.find("if/elseif/else") == FindReturnT{{"if/+/else", 7}});
     }
 
     SECTION("Find multi-level wildcard") {
-        REQUIRE(trie.find("other/123") == std::vector<int>{6});
+        REQUIRE(trie.find("other/123") == FindReturnT{{"other/#", 6}});
     }
 
     SECTION("Find multiple wildcards") {
         REQUIRE(trie.find("abc/def/xyz/h").size() == 2);
     }
+}
+
+TEST_CASE("For each in wildcard trie", "[WildcardTrie]") {
+    WildcardTrie<int> trie("/", "+", "#");
+
+    trie.insert("abc/#", 2);
+    trie.insert("abc/def", 3);
+    trie.insert("abc/def/g", 4);
+    trie.insert("abc/def/+/h", 5);
+    trie.insert("other/#", 6);
+    trie.insert("if/+/else", 7);
+
+    REQUIRE(!trie.empty());
+
+    std::unordered_map<std::string, int> values;
+
+    trie.forEach([&values](const std::string& key, int& value) {
+        // Somehow modify value
+        value++;
+
+        // Store keys and values
+        values[key] = value;
+    });
+
+    REQUIRE(values == std::unordered_map<std::string, int>{
+        {"abc/#", 3},
+        {"abc/def", 4},
+        {"abc/def/g", 5},
+        {"abc/def/+/h", 6},
+        {"other/#", 7},
+        {"if/+/else", 8},
+    });
+
+    // Check value was modified
+    REQUIRE(trie.find("if/1/else") == FindReturnT{{"if/+/else", 8}});
 }

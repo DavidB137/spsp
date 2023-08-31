@@ -9,6 +9,7 @@
 
 #pragma once
 
+#include <functional>
 #include <memory>
 #include <queue>
 #include <string>
@@ -23,8 +24,8 @@ namespace SPSP
      * Made specifically for MQTT-like topics, but it's reusable.
      *
      * Uses separators to distinguis "levels".
-     * Multi-level wildcard must be the last character in the topic.
-     * There are no exceptions and no topic validation. If topic is
+     * Multi-level wildcard must be the last character in the key.
+     * There are no exceptions and no key validation. If key is
      * semantically invalid, the item will just become inaccessible.
      *
      * @tparam TValue Type of value
@@ -33,16 +34,18 @@ namespace SPSP
     class WildcardTrie
     {
         /**
-         * @brief Internal node of topic trie
+         * @brief Internal node of wildcard trie
          *
          */
         struct Node
         {
             TValue value;                                                   //!< Value
             std::unordered_map<std::string, std::unique_ptr<Node>> childs;  //!< Children
-            size_t levelIndex;                                              //!< Index of level
+            size_t levelIndex = 0;                                          //!< Index of level
             bool isLeaf = false;                                            //!< Whether is leaf node
         };
+
+        using BFSQueueT = std::queue<std::pair<std::string, const Node*>>;
 
         const std::string m_lSep;         //!< Level separator
         const std::string m_lSingleWild;  //!< Single-level wildcard token
@@ -144,40 +147,47 @@ namespace SPSP
             return true;
         }
 
+        using FindReturnT = std::unordered_map<std::string, const TValue&>;
+
         /**
          * @brief Finds `key` in trie
          *
          * @param key Key
          * @return Vector of values from matching keys (empty if not found)
          */
-        const std::vector<TValue> find(const std::string& key) const
+        const FindReturnT find(const std::string& key) const
         {
             auto levels = this->splitToLevels(key);
 
-            std::vector<TValue> values;
+            FindReturnT values;
 
             // Queue for to-be-processed nodes
-            std::queue<const Node*> nodeQueue;
-            nodeQueue.push(&m_root);
+            BFSQueueT nodeQueue;
+            nodeQueue.push({ "", &m_root });
 
             while (!nodeQueue.empty()) {
-                const Node* node = nodeQueue.front();
+                auto [nodeKey, node] = nodeQueue.front();
 
                 if (node->levelIndex == levels.size() && node->isLeaf) {
                     // Match
-                    values.push_back(node->value);
+                    values.insert({ nodeKey, node->value });
                 }
                 else if (node->levelIndex < levels.size()) {
                     // Enqueue relevant childs
-                    for (auto& [childKey, childNode] : node->childs) {
-                        if (childKey == levels.at(node->levelIndex) ||
-                            childKey == m_lSingleWild) {
+                    for (auto& [childLevel, childNode] : node->childs) {
+                        std::string childKey = nodeKey == ""
+                            ? childLevel
+                            : nodeKey + m_lSep + childLevel;
+
+                        if (childLevel == levels.at(node->levelIndex) ||
+                            childLevel == m_lSingleWild) {
                             // Key matches or has single-level wildcard
-                            nodeQueue.push(childNode.get());
+                            nodeQueue.push({ childKey, childNode.get() });
                         }
-                        else if (childKey == m_lMultiWild && childNode->isLeaf) {
+                        else if (childLevel == m_lMultiWild &&
+                                 childNode->isLeaf) {
                             // Multi-level wildcard
-                            values.push_back(childNode->value);
+                            values.insert({ childKey, childNode->value });
                         }
                     }
                 }
@@ -186,6 +196,38 @@ namespace SPSP
             }
 
             return values;
+        }
+
+        /**
+         * @brief Iterates through each item in trie and calls callback
+         *        on each one
+         *
+         * @param f Function to call
+         */
+        void forEach(std::function<void(const std::string& key, TValue& value)> f)
+        {
+            // Queue for to-be-processed nodes
+            BFSQueueT nodeQueue;
+            nodeQueue.push({ "", &m_root });
+
+            while (!nodeQueue.empty()) {
+                auto [nodeKey, node] = nodeQueue.front();
+
+                // Call function
+                if (node->isLeaf) {
+                    f(nodeKey, const_cast<TValue&>(node->value));
+                }
+
+                // Enqueue children
+                for (auto& [childLevel, childNode] : node->childs) {
+                    std::string childKey = nodeKey == ""
+                        ? childLevel
+                        : nodeKey + m_lSep + childLevel;
+                    nodeQueue.push({ childKey, childNode.get() });
+                }
+
+                nodeQueue.pop();
+            }
         }
 
         /**
