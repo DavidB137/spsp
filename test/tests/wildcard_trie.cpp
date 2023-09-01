@@ -247,7 +247,7 @@ TEST_CASE("Find in wildcard trie", "[WildcardTrie]") {
     }
 }
 
-TEST_CASE("For each in wildcard trie", "[WildcardTrie]") {
+TEST_CASE("For each and [] in wildcard trie", "[WildcardTrie]") {
     WildcardTrie<int> trie("/", "+", "#");
 
     trie.insert("abc/#", 2);
@@ -261,9 +261,9 @@ TEST_CASE("For each in wildcard trie", "[WildcardTrie]") {
 
     std::unordered_map<std::string, int> values;
 
-    trie.forEach([&values](const std::string& key, int& value) {
+    trie.forEach([&trie, &values](const std::string& key, const int& value) {
         // Somehow modify value
-        value++;
+        trie[key] = value + 1;
 
         // Store keys and values
         values[key] = value;

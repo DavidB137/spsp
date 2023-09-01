@@ -69,12 +69,12 @@ namespace SPSP
         {}
 
         /**
-         * @brief Inserts (or updates) `key`-`value` pair
+         * @brief Gets/inserts current value of `key`
          *
          * @param key Key
-         * @param value Value
+         * @return Current value reference
          */
-        void insert(const std::string& key, const TValue& value)
+        TValue& operator[](const std::string& key)
         {
             Node* cur = &m_root;
             auto levels = this->splitToLevels(key);
@@ -93,9 +93,20 @@ namespace SPSP
                 cur = cur->childs.at(level).get();
             }
 
-            // Populate
-            cur->value = value;
             cur->isLeaf = true;
+
+            return cur->value;
+        }
+
+        /**
+         * @brief Inserts (or updates) `key`-`value` pair
+         *
+         * @param key Key
+         * @param value Value
+         */
+        void insert(const std::string& key, const TValue& value)
+        {
+            (*this)[key] = value;
         }
 
         /**
@@ -202,12 +213,9 @@ namespace SPSP
          * @brief Iterates through each item in trie and calls callback
          *        on each one
          *
-         * It is possible to modify value for key directly inside provided
-         * function.
-         *
          * @param f Function to call
          */
-        void forEach(std::function<void(const std::string& key, TValue& value)> f)
+        void forEach(std::function<void(const std::string& key, const TValue& value)> f)
         {
             // Queue for to-be-processed nodes
             BFSQueueT nodeQueue;
@@ -218,7 +226,7 @@ namespace SPSP
 
                 // Call function
                 if (node->isLeaf) {
-                    f(nodeKey, const_cast<TValue&>(node->value));
+                    f(nodeKey, node->value);
                 }
 
                 // Enqueue children
