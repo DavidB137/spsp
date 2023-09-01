@@ -9,6 +9,8 @@
 
 #pragma once
 
+#include <chrono>
+
 #include "spsp_local_addr_mac.hpp"
 #include "spsp_local_message.hpp"
 
@@ -25,5 +27,8 @@ namespace SPSP::LocalLayers::ESPNOW
     {
         uint32_t ssid;         //!< Numeric SSID
         std::string password;  //!< Password for packet payload encryption
+
+        //! How long to wait for responses from bridge before switching to another WiFi channel
+        std::chrono::milliseconds connectToBridgeChannelWaiting = std::chrono::milliseconds(100);
     };
 } // namespace SPSP::LocalLayers::ESPNOW

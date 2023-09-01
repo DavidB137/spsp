@@ -7,7 +7,6 @@
  *
  */
 
-#include <chrono>
 #include <cstring>
 #include <functional>
 #include <thread>
@@ -110,8 +109,6 @@ namespace SPSP::LocalLayers::ESPNOW
     bool ESPNOW::connectToBridge(BridgeConnInfoRTC* rtndBr,
                                  BridgeConnInfoRTC* connBr)
     {
-        using namespace std::chrono_literals;
-
         // Mutex
         const std::scoped_lock lock(m_mutex);
 
@@ -171,7 +168,7 @@ namespace SPSP::LocalLayers::ESPNOW
             m_sendingPromises[bucketId] = std::promise<bool>{};
 
             // Sleep
-            std::this_thread::sleep_for(100ms);
+            std::this_thread::sleep_for(m_conf.connectToBridgeChannelWaiting);
         }
 
         // No response
