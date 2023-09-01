@@ -98,12 +98,12 @@ namespace SPSP::LocalLayers::ESPNOW
             BridgeConnInfoRTC toRTC();
         };
 
+        std::mutex m_mutex;                        //!< Mutex to prevent race conditions
         const Config m_conf;                       //!< Configuration
         WiFi::IESPNOW& m_wifi;                     //!< WiFi instance
         Adapter m_adapter;                         //!< Low level ESP-NOW adapter
         SerDes m_serdes;                           //!< Packet serializer/deserializer
         BridgeConnInfoInternal m_bestBridge = {};  //!< Bridge with best signal
-        std::mutex m_mutex;                        //!< Mutex to prevent race conditions
         std::mutex m_bestBridgeMutex;              //!< Mutex for modifying m_bestBridge* attributes
 
         /**

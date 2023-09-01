@@ -45,9 +45,9 @@ namespace SPSP::Nodes
             SPSP::SubscribeCb cb = nullptr;                       //!< Callback for incoming data
         };
 
-        WildcardTrie<SubDBEntry> m_subDB;
-        Timer m_subDBTimer;  //!< Sub DB timer
-        std::mutex m_mutex;  //!< Mutex to prevent race conditions
+        std::mutex m_mutex;                //!< Mutex to prevent race conditions
+        WildcardTrie<SubDBEntry> m_subDB;  //!< Subscribe database
+        Timer m_subDBTimer;                //!< Sub DB timer
 
     public:
         using LocalAddrT = TLocalLayer::LocalAddrT;

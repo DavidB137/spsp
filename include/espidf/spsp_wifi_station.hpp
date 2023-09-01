@@ -60,11 +60,11 @@ namespace SPSP::WiFi
      */
     class Station : public IESPNOW
     {
+        std::mutex m_mutex;                      //!< Mutex to prevent race conditions (primarily for initialization)
         StationConfig m_config = {};             //!< Config
         esp_netif_t* m_netIf = nullptr;          //!< Network interface pointer
         bool m_initialized = false;              //!< Whether WiFi is initialized
         std::promise<void> m_connectingPromise;  //!< Promise to block until successful connection is made
-        std::mutex m_mutex;                      //!< Mutex to prevent race conditions (primarily for initialization)
 
     public:
         /**
