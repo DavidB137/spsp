@@ -285,17 +285,17 @@ namespace SPSP::Nodes
         {
             const std::lock_guard lock(m_mutex);
 
-            SPSP_LOGD("Tick running");
+            SPSP_LOGD("SubDB: Tick running");
 
             m_subDB.forEach([this](const std::string& topic, SubDBEntry& entry) {
                 entry.lifetime--;
 
                 if (entry.lifetime == 0) {
-                    SPSP_LOGD("Topic '%s' expired (renewing)", topic.c_str());
+                    SPSP_LOGD("SubDB: Topic '%s' expired (renewing)", topic.c_str());
 
                     bool extended = this->sendSubscribe(topic);
                     if (!extended) {
-                        SPSP_LOGE("Topic '%s' can't be extended. Will try again in next tick.",
+                        SPSP_LOGE("SubDB: Topic '%s' can't be extended. Will try again in next tick.",
                                   topic.c_str());
 
                         entry.lifetime++;
@@ -303,7 +303,7 @@ namespace SPSP::Nodes
                 }
             });
 
-            SPSP_LOGD("Tick done");
+            SPSP_LOGD("SubDB: Tick done");
         }
     };
 } // namespace SPSP::Nodes
