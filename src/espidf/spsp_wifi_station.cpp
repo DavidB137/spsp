@@ -25,7 +25,7 @@ namespace SPSP::WiFi
     Station::Station(const StationConfig& config)
     {
         // Mutex
-        const std::lock_guard<std::mutex> lock(m_mutex);
+        const std::scoped_lock<std::mutex> lock(m_mutex);
 
         m_config = config;
 
@@ -85,7 +85,7 @@ namespace SPSP::WiFi
     Station::~Station()
     {
         // Mutex
-        const std::lock_guard<std::mutex> lock(m_mutex);
+        const std::scoped_lock<std::mutex> lock(m_mutex);
 
         if (esp_wifi_stop() != ESP_OK) return;
         if (esp_wifi_deinit() != ESP_OK) return;
@@ -97,7 +97,7 @@ namespace SPSP::WiFi
     uint8_t Station::getChannel()
     {
         // Mutex
-        const std::lock_guard lock(m_mutex);
+        const std::scoped_lock lock(m_mutex);
 
         uint8_t ch;
         wifi_second_chan_t sec;
@@ -109,7 +109,7 @@ namespace SPSP::WiFi
     void Station::setChannel(uint8_t ch)
     {
         // Mutex
-        const std::lock_guard lock(m_mutex);
+        const std::scoped_lock lock(m_mutex);
 
         SPSP_ERROR_CHECK(esp_wifi_set_channel(ch, WIFI_SECOND_CHAN_NONE),
                          ConnectionError("Set WiFi channel failed"));
@@ -119,7 +119,7 @@ namespace SPSP::WiFi
     void Station::setChannelRestrictions(const ChannelRestrictions& rest)
     {
         // Mutex
-        const std::lock_guard lock(m_mutex);
+        const std::scoped_lock lock(m_mutex);
 
         wifi_country_t c = {};
         c.schan = rest.low;
@@ -134,7 +134,7 @@ namespace SPSP::WiFi
     const ChannelRestrictions Station::getChannelRestrictions()
     {
         // Mutex
-        const std::lock_guard lock(m_mutex);
+        const std::scoped_lock lock(m_mutex);
 
         wifi_country_t c;
         SPSP_ERROR_CHECK(esp_wifi_get_country(&c),

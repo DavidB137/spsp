@@ -23,7 +23,7 @@ namespace SPSP
     Timer::~Timer()
     {
         {
-            std::lock_guard lock{m_mutex};
+            std::scoped_lock lock{m_mutex};
             m_run = false;
         }
 

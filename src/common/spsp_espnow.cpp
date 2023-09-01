@@ -113,7 +113,7 @@ namespace SPSP::LocalLayers::ESPNOW
         using namespace std::chrono_literals;
 
         // Mutex
-        const std::lock_guard lock(m_mutex);
+        const std::scoped_lock lock(m_mutex);
 
         if (rtndBr != nullptr) {
             // Reconnect to retained bridge

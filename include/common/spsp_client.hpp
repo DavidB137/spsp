@@ -119,7 +119,7 @@ namespace SPSP::Nodes
 
             if (this->sendSubscribe(topic)) {
                 // Subscribe request delivered successfully
-                const std::lock_guard lock(m_mutex);
+                const std::scoped_lock lock(m_mutex);
 
                 // Add to sub DB
                 SubDBEntry subDBEntry = { .cb = cb };
@@ -233,7 +233,7 @@ namespace SPSP::Nodes
             // Get matching entries
             std::unordered_map<std::string, const SubDBEntry&> entries;
             {
-                const std::lock_guard lock(m_mutex);
+                const std::scoped_lock lock(m_mutex);
                 entries = m_subDB.find(req.topic);
             }
 
@@ -283,7 +283,7 @@ namespace SPSP::Nodes
          */
         void subDBTick()
         {
-            const std::lock_guard lock(m_mutex);
+            const std::scoped_lock lock(m_mutex);
 
             SPSP_LOGD("SubDB: Tick running");
 
