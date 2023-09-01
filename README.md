@@ -42,11 +42,6 @@ TODO
 
 You can find usage examples in `examples/` directory.
 
-### Known limitations
-
-- Subscription to topic which includes wildcards[^mqtt_wildcard] (`+`, `#`) is
-  not yet supported.
-
 
 ## Network architecture
 

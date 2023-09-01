@@ -10,17 +10,23 @@
 #pragma once
 
 #include <mutex>
+#include <unordered_map>
+#include <vector>
 
-#include "spsp_bridge_sub_db.hpp"
 #include "spsp_local_addr_mac.hpp"
 #include "spsp_logger.hpp"
 #include "spsp_node.hpp"
+#include "spsp_timer.hpp"
+#include "spsp_wildcard_trie.hpp"
 
 // Log tag
 #define SPSP_LOG_TAG "SPSP/Bridge"
 
 namespace SPSP::Nodes
 {
+    static const uint8_t BRIDGE_SUB_LIFETIME  = 15;         //!< Default subscribe lifetime
+    static const uint8_t BRIDGE_SUB_NO_EXPIRE = UINT8_MAX;  //!< Subscribe lifetime for no expire
+
     /**
      * @brief Bridge configuration
      *
@@ -50,18 +56,32 @@ namespace SPSP::Nodes
     template <typename TLocalLayer, typename TFarLayer>
     class Bridge : public ILocalAndFarNode<TLocalLayer, TFarLayer>
     {
-        // Subscribe DB can access private members
-        friend class BridgeSubDB<TLocalLayer, TFarLayer>;
-
-    protected:
-        BridgeConfig m_conf;
-        BridgeSubDB<TLocalLayer, TFarLayer> m_subDB;
-        std::mutex m_mutex;  //!< Mutex to prevent race conditions
-
     public:
         using LocalAddrT = TLocalLayer::LocalAddrT;
         using LocalMessageT = TLocalLayer::LocalMessageT;
 
+    protected:
+        /**
+         * @brief Bridge subscribe entry
+         *
+         * Single entry in subscribe database of a bridge.
+         *
+         * Empty addresses are treated as local to this node.
+         */
+        struct SubDBEntry
+        {
+            uint8_t lifetime = BRIDGE_SUB_LIFETIME;  //!< Lifetime in minutes
+            SPSP::SubscribeCb cb = nullptr;          //!< Callback for incoming data
+        };
+
+        using SubDBMapT = std::unordered_map<LocalAddrT, SubDBEntry>;
+
+        std::mutex m_mutex;               //!< Mutex to prevent race conditions
+        BridgeConfig m_conf;              //!< Configuration
+        WildcardTrie<SubDBMapT> m_subDB;  //!< Subscribe database
+        Timer m_subDBTimer;               //!< Sub DB timer
+
+    public:
         /**
          * @brief Construct a new bridge object
          *
@@ -71,7 +91,10 @@ namespace SPSP::Nodes
          */
         Bridge(TLocalLayer* ll, TFarLayer* fl, BridgeConfig conf = {})
             : ILocalAndFarNode<TLocalLayer, TFarLayer>{ll, fl},
-              m_conf{conf}, m_subDB{this}
+              m_conf{conf},
+              m_subDBTimer{std::chrono::minutes(1),
+                           std::bind(&Bridge<TLocalLayer, TFarLayer>::subDBTick,
+                           this)}
         {
             // Publish version
             if (conf.reporting.version) {
@@ -102,10 +125,31 @@ namespace SPSP::Nodes
          */
         bool receiveFar(const std::string& topic, const std::string& payload)
         {
+            const std::scoped_lock lock(m_mutex);
+
             SPSP_LOGD("Received far msg: topic '%s', payload '%s'",
                       topic.c_str(), payload.c_str());
 
-            m_subDB.callCbs(topic, payload);
+            // Get matching entries
+            auto entries = m_subDB.find(topic);
+
+            for (auto& [entryTopic, entryMap] : entries) {
+                for (auto& [addr, entry] : entryMap) {
+                    if (addr.empty()) {
+                        // This node's subscription - call callback
+                        SPSP_LOGD("Calling user callback for topic '%s' in new thread",
+                                  topic.c_str());
+                        std::thread t(entry.cb, topic, payload);
+                        t.detach();
+                    } else {
+                        // Local layer subscription
+                        std::thread t(&Bridge<TLocalLayer, TFarLayer>::publishSubData,
+                                      this, addr, topic, payload);
+                        t.detach();
+                    }
+                }
+            }
+
             return true;
         }
 
@@ -142,16 +186,32 @@ namespace SPSP::Nodes
          */
         bool subscribe(const std::string& topic, SubscribeCb cb)
         {
+            const std::scoped_lock lock(m_mutex);
+
             SPSP_LOGD("Subscribing locally to topic '%s'", topic.c_str());
 
-            return m_subDB.insert(topic, LocalAddrT{}, cb);
+            m_subDB[topic][LocalAddrT{}] = SubDBEntry{.cb = cb};
+
+            return true;
         }
 
         /**
          * @brief Resubscribes to all topics
          *
          */
-        void resubscribeAll() { m_subDB.resubscribeAll(); }
+        void resubscribeAll()
+        {
+            const std::scoped_lock lock(m_mutex);
+
+            m_subDB.forEach(
+                [this](const std::string& topic, const SubDBMapT& topicEntries) {
+                    if (!this->getFarLayer()->subscribe(topic)) {
+                        SPSP_LOGW("Resubscribe to topic %s failed",
+                                  topic.c_str());
+                    }
+                }
+            );
+        }
 
         /**
          * @brief Unsubscribes from topic
@@ -166,7 +226,14 @@ namespace SPSP::Nodes
         {
             SPSP_LOGD("Unsubscribing locally from topic '%s'", topic.c_str());
 
-            m_subDB.remove(topic, LocalAddrT{});
+            {
+                const std::scoped_lock lock(m_mutex);
+                m_subDB[topic].erase(LocalAddrT{});
+            }
+
+            // Remove unused topics
+            this->subDBRemoveUnusedTopics();
+
             return true;
         }
 
@@ -253,7 +320,12 @@ namespace SPSP::Nodes
                 this->publishRssi(req.addr, rssi);
             }
 
-            return m_subDB.insert(req.topic, req.addr, nullptr);
+            {
+                const std::scoped_lock lock(m_mutex);
+                m_subDB[req.topic][req.addr] = SubDBEntry{};
+            }
+
+            return true;
         }
 
         /**
@@ -285,7 +357,14 @@ namespace SPSP::Nodes
                 this->publishRssi(req.addr, rssi);
             }
 
-            m_subDB.remove(req.topic, req.addr);
+            {
+                const std::scoped_lock lock(m_mutex);
+                m_subDB[req.topic].erase(req.addr);
+            }
+
+            // Remove unused topics
+            this->subDBRemoveUnusedTopics();
+
             return true;
         }
 
@@ -314,27 +393,97 @@ namespace SPSP::Nodes
         }
 
         /**
-         * @brief Subscribes to topic on far layer (if connected)
+         * @brief Subscribe DB timer tick callback
          *
-         * @param topic Topic
-         * @return true Subscription successful
-         * @return false Subscription failed
+         * Decrements subscribe database lifetimes.
+         * Unsubscribes from unused topics.
          */
-        bool subscribeFar(const std::string& topic)
+        void subDBTick()
         {
-            return this->getFarLayer()->subscribe(topic);
+            SPSP_LOGD("SubDB: Tick running");
+
+            this->subDBDecrementLifetimes();
+            this->subDBRemoveExpiredEntries();
+            this->subDBRemoveUnusedTopics();
+
+            SPSP_LOGD("SubDB: Tick done");
         }
 
         /**
-         * @brief Unsubscribes from topic on far layer (if connected)
+         * @brief Decrements lifetimes of entries
          *
-         * @param topic Topic
-         * @return true Unsubscription successful
-         * @return false Unsubscription failed
          */
-        bool unsubscribeFar(const std::string& topic)
+        void subDBDecrementLifetimes()
         {
-            return this->getFarLayer()->unsubscribe(topic);
+            const std::scoped_lock lock(m_mutex);
+
+            m_subDB.forEach([this] (const std::string& topic,
+                                    const SubDBMapT& entryMap) {
+                for (auto& [addr, entry] : entryMap) {
+                    // Don't decrement entries with infinite lifetime
+                    if (entry.lifetime != BRIDGE_SUB_NO_EXPIRE) {
+                        m_subDB[topic][addr].lifetime--;
+                    }
+                }
+            });
+        }
+
+        /**
+         * @brief Removes expired entries
+         *
+         */
+        void subDBRemoveExpiredEntries()
+        {
+            const std::scoped_lock lock(m_mutex);
+
+            m_subDB.forEach([this] (const std::string& topic,
+                                    const SubDBMapT& entryMap) {
+                auto entryIt = entryMap.begin();
+                while (entryIt != entryMap.end()) {
+                    auto addr = entryIt->first;
+
+                    if (entryIt->second.lifetime == 0) {
+                        // Expired
+                        entryIt = m_subDB[topic].erase(entryIt);
+                        SPSP_LOGD("SubDB: Removed addr %s from topic '%s'",
+                                  addr.str.c_str(), topic.c_str());
+                    } else {
+                        // Continue
+                        entryIt++;
+                    }
+                }
+            });
+        }
+
+        /**
+         * @brief Removes and unsubscribes from unused topics
+         *
+         */
+        void subDBRemoveUnusedTopics()
+        {
+            const std::scoped_lock lock(m_mutex);
+
+            std::vector<std::string> unusedTopics;
+
+            // Get unused topics
+            m_subDB.forEach([&unusedTopics] (const std::string& topic,
+                                             const SubDBMapT& entryMap) {
+                if (entryMap.empty()) {
+                    unusedTopics.push_back(topic);
+                }
+            });
+
+            // Unsubscribe from them
+            for (auto& topic : unusedTopics) {
+                if (this->getFarLayer()->unsubscribe(topic)) {
+                    // Unsub successful, remove topic from sub DB
+                    m_subDB.remove(topic);
+                    SPSP_LOGD("SubDB: Removed unused topic '%s'", topic.c_str());
+                } else {
+                    SPSP_LOGE("SubDB: Topic '%s' can't be unsubscribed. Will try again in next tick.",
+                              topic.c_str());
+                }
+            }
         }
     };
 } // namespace SPSP::Nodes
