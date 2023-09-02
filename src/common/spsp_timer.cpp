@@ -37,17 +37,19 @@ namespace SPSP
     void Timer::handlerThread()
     {
         while (true) {
+            {
+                // Wait for `m_interval` or destructor notification again
+                std::unique_lock lock{m_mutex};
+                if (m_cv.wait_until(lock, m_nextExec, [this]() { return !m_run; })) {
+                    // Destructor has been called
+                    break;
+                }
+            }
+
             // Call callback
             m_cb();
 
             m_nextExec += m_interval;
-
-            // Wait for `m_interval` or destructor notification again
-            std::unique_lock lock{m_mutex};
-            if (m_cv.wait_until(lock, m_nextExec, [this]() { return !m_run; })) {
-                // Destructor has been called
-                break;
-            }
         }
     }
 }
