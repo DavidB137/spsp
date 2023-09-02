@@ -1,10 +1,9 @@
 #include <catch2/catch_test_macros.hpp>
 
-#include "spsp_wildcard_trie.hpp"
-
-#include <iostream>
 #include <unordered_map>
 #include <vector>
+
+#include "spsp_wildcard_trie.hpp"
 
 using namespace SPSP;
 
