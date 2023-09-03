@@ -50,8 +50,8 @@ namespace SPSP::Nodes
         Timer m_subDBTimer;                //!< Sub DB timer
 
     public:
-        using LocalAddrT = TLocalLayer::LocalAddrT;
-        using LocalMessageT = TLocalLayer::LocalMessageT;
+        using LocalAddrT = typename TLocalLayer::LocalAddrT;
+        using LocalMessageT = typename TLocalLayer::LocalMessageT;
 
         /**
          * @brief Constructs a new client node
