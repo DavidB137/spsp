@@ -38,16 +38,6 @@ namespace SPSP::FarLayers::MQTT
     {
     public:
         /**
-         * @brief Constructs adapter object
-         *
-         * This exists in interface purely to require constructor of
-         * implementing class to provide constructor with the same paramteter.
-         *
-         * @param conf Configuration
-         */
-        IAdapter(const Config& conf) {}
-
-        /**
          * @brief Publishes message coming from node
          *
          * This should not block (publish is very time sensitive).
