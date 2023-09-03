@@ -57,8 +57,8 @@ namespace SPSP::Nodes
     class Bridge : public ILocalAndFarNode<TLocalLayer, TFarLayer>
     {
     public:
-        using LocalAddrT = TLocalLayer::LocalAddrT;
-        using LocalMessageT = TLocalLayer::LocalMessageT;
+        using LocalAddrT = typename TLocalLayer::LocalAddrT;
+        using LocalMessageT = typename TLocalLayer::LocalMessageT;
 
     protected:
         /**
