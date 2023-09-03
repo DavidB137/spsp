@@ -23,6 +23,9 @@ namespace SPSP::LocalLayers::ESPNOW
      * Low level API for ESP-NOW communication.
      *
      * Implements `IAdapter` interface.
+     *
+     * Only one ESPNOW instance can use this at a time and
+     * there may be only one `Adapter` instance at a time.
      */
     class Adapter : public IAdapter
     {

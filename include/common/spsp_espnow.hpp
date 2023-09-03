@@ -15,7 +15,7 @@
 #include <mutex>
 #include <string>
 
-#include "spsp_espnow_adapter.hpp"
+#include "spsp_espnow_adapter_if.hpp"
 #include "spsp_espnow_packet.hpp"
 #include "spsp_espnow_ser_des.hpp"
 #include "spsp_espnow_types.hpp"
@@ -101,7 +101,7 @@ namespace SPSP::LocalLayers::ESPNOW
         std::mutex m_mutex;                        //!< Mutex to prevent race conditions
         const Config m_conf;                       //!< Configuration
         WiFi::IESPNOW& m_wifi;                     //!< WiFi instance
-        Adapter m_adapter;                         //!< Low level ESP-NOW adapter
+        IAdapter& m_adapter;                       //!< Low level ESP-NOW adapter
         SerDes m_serdes;                           //!< Packet serializer/deserializer
         BridgeConnInfoInternal m_bestBridge = {};  //!< Bridge with best signal
         std::mutex m_bestBridgeMutex;              //!< Mutex for modifying m_bestBridge* attributes
@@ -133,10 +133,11 @@ namespace SPSP::LocalLayers::ESPNOW
          *
          * Requires already initialized WiFi.
          *
-         * @param conf Configuration
-         * @param wifi WiFi instance
+         * @param conf    Configuration
+         * @param adapter ESP-NOW low-level adapter
+         * @param wifi    WiFi instance
          */
-        ESPNOW(const Config& conf, WiFi::IESPNOW& wifi);
+        ESPNOW(const Config& conf, IAdapter& adapter, WiFi::IESPNOW& wifi);
 
         /**
          * @brief Destroys ESP-NOW layer object

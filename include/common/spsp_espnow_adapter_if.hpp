@@ -34,8 +34,6 @@ namespace SPSP::LocalLayers::ESPNOW
      * @brief Interface for platform-dependent ESP-NOW adapter
      *
      * Low level API for ESP-NOW communication.
-     *
-     * Each platform should implement this interface in class `Adapter`.
      */
     class IAdapter
     {
