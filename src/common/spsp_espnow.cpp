@@ -21,7 +21,7 @@ static const char* SPSP_LOG_TAG = "SPSP/Local/ESPNOW";
 
 namespace SPSP::LocalLayers::ESPNOW
 {
-    ESPNOW::ESPNOW(const Config& conf, IAdapter& adapter, WiFi::IESPNOW& wifi)
+    ESPNOW::ESPNOW(IAdapter& adapter, WiFi::IESPNOW& wifi, const Config& conf)
         : m_conf{conf}, m_wifi{wifi}, m_adapter{adapter}, m_serdes{m_conf}
     {
         using namespace std::placeholders;

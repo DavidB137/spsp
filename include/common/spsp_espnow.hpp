@@ -133,11 +133,11 @@ namespace SPSP::LocalLayers::ESPNOW
          *
          * Requires already initialized WiFi.
          *
-         * @param conf    Configuration
          * @param adapter ESP-NOW low-level adapter
-         * @param wifi    WiFi instance
+         * @param wifi WiFi instance
+         * @param conf Configuration
          */
-        ESPNOW(const Config& conf, IAdapter& adapter, WiFi::IESPNOW& wifi);
+        ESPNOW(IAdapter& adapter, WiFi::IESPNOW& wifi, const Config& conf);
 
         /**
          * @brief Destroys ESP-NOW layer object
