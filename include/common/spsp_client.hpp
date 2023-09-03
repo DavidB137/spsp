@@ -23,7 +23,35 @@
 
 namespace SPSP::Nodes
 {
-    static const auto CLIENT_SUB_LIFETIME = std::chrono::minutes(10);  //!< Default subscribe lifetime
+    /**
+     * @brief Client configuration
+     *
+     * Everything here is optional.
+     */
+    struct ClientConfig
+    {
+        struct SubDB
+        {
+            /**
+             * How often to decrement subscription lifetimes, remove expired
+             * entries and unsubscribe from unnecessary topics.
+             * Should be at least 5× less than `subLifetime`.
+             *
+             * It's usually not necessary to change this.
+             */
+            std::chrono::milliseconds interval = std::chrono::minutes(1);
+
+            /**
+             * Lifetime of subscribe from client (client must renew
+             * the subscription before this timeout)
+             *
+             * It's usually not necessary to change this.
+             */
+            std::chrono::milliseconds subLifetime = std::chrono::minutes(10);
+        };
+
+        SubDB subDB;
+    };
 
     /**
      * @brief Client node
@@ -41,11 +69,12 @@ namespace SPSP::Nodes
          */
         struct SubDBEntry
         {
-            std::chrono::minutes lifetime = CLIENT_SUB_LIFETIME;  //!< Lifetime in minutes
-            SPSP::SubscribeCb cb = nullptr;                       //!< Callback for incoming data
+            std::chrono::milliseconds lifetime;  //!< Lifetime
+            SPSP::SubscribeCb cb = nullptr;      //!< Callback for incoming data
         };
 
         std::mutex m_mutex;                //!< Mutex to prevent race conditions
+        ClientConfig m_conf;               //!< Configuration
         WildcardTrie<SubDBEntry> m_subDB;  //!< Subscribe database
         Timer m_subDBTimer;                //!< Sub DB timer
 
@@ -57,10 +86,11 @@ namespace SPSP::Nodes
          * @brief Constructs a new client node
          *
          * @param ll Local layer
+         * @param conf Configuration
          */
-        Client(TLocalLayer* ll)
-            : ILocalNode<TLocalLayer>{ll}, m_subDB{},
-              m_subDBTimer{std::chrono::minutes(1),
+        Client(TLocalLayer* ll, ClientConfig conf = {})
+            : ILocalNode<TLocalLayer>{ll}, m_subDB{}, m_conf{conf},
+              m_subDBTimer{conf.subDB.interval,
                            std::bind(&Client<TLocalLayer>::subDBTick, this)}
         {
             SPSP_LOGI("Initialized");
@@ -122,7 +152,10 @@ namespace SPSP::Nodes
                 const std::scoped_lock lock(m_mutex);
 
                 // Add to sub DB
-                SubDBEntry subDBEntry = { .cb = cb };
+                SubDBEntry subDBEntry = {
+                    .lifetime = m_conf.subDB.subLifetime,
+                    .cb = cb
+                };
                 m_subDB.insert(topic, subDBEntry);
 
                 return true;
@@ -283,22 +316,24 @@ namespace SPSP::Nodes
          */
         void subDBTick()
         {
+            using namespace std::chrono_literals;
+
             const std::scoped_lock lock(m_mutex);
 
             SPSP_LOGD("SubDB: Tick running");
 
-            m_subDB.forEach([this](const std::string& topic, SubDBEntry& entry) {
-                entry.lifetime--;
+            m_subDB.forEach([this](const std::string& topic, const SubDBEntry& entry) {
+                m_subDB[topic].lifetime -= m_conf.subDB.interval;
 
-                if (entry.lifetime == 0) {
+                if (entry.lifetime <= 0ms) {
                     SPSP_LOGD("SubDB: Topic '%s' expired (renewing)", topic.c_str());
 
                     bool extended = this->sendSubscribe(topic);
-                    if (!extended) {
+                    if (extended) {
+                        m_subDB[topic].lifetime = m_conf.subDB.subLifetime;
+                    } else {
                         SPSP_LOGE("SubDB: Topic '%s' can't be extended. Will try again in next tick.",
                                   topic.c_str());
-
-                        entry.lifetime++;
                     }
                 }
             });

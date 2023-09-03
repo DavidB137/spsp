@@ -9,6 +9,7 @@
 
 #pragma once
 
+#include <chrono>
 #include <mutex>
 #include <unordered_map>
 #include <vector>
@@ -24,8 +25,8 @@
 
 namespace SPSP::Nodes
 {
-    static const uint8_t BRIDGE_SUB_LIFETIME  = 15;         //!< Default subscribe lifetime
-    static const uint8_t BRIDGE_SUB_NO_EXPIRE = UINT8_MAX;  //!< Subscribe lifetime for no expire
+    //! Subscribe lifetime for no expiration
+    static constexpr auto BRIDGE_SUB_NO_EXPIRE = std::chrono::milliseconds::max();
 
     /**
      * @brief Bridge configuration
@@ -44,7 +45,28 @@ namespace SPSP::Nodes
             bool rssiOnUnsub = true;   //!< Report RSSI on UNSUB
         };
 
+        struct SubDB
+        {
+            /**
+             * How often to decrement subscription lifetimes, remove expired
+             * entries and unsubscribe from unnecessary topics.
+             * Should be at least 5× less than `subLifetime`.
+             *
+             * It's usually not necessary to change this.
+             */
+            std::chrono::milliseconds interval = std::chrono::minutes(1);
+
+            /**
+             * Lifetime of subscribe from client (client must renew
+             * the subscription before this timeout)
+             *
+             * It's usually not necessary to change this.
+             */
+            std::chrono::milliseconds subLifetime = std::chrono::minutes(15);
+        };
+
         Reporting reporting;
+        SubDB subDB;
     };
 
     /**
@@ -70,8 +92,8 @@ namespace SPSP::Nodes
          */
         struct SubDBEntry
         {
-            uint8_t lifetime = BRIDGE_SUB_LIFETIME;  //!< Lifetime in minutes
-            SPSP::SubscribeCb cb = nullptr;          //!< Callback for incoming data
+            std::chrono::milliseconds lifetime;  //!< Lifetime
+            SPSP::SubscribeCb cb = nullptr;      //!< Callback for incoming data
         };
 
         using SubDBMapT = std::unordered_map<LocalAddrT, SubDBEntry>;
@@ -92,7 +114,7 @@ namespace SPSP::Nodes
         Bridge(TLocalLayer* ll, TFarLayer* fl, BridgeConfig conf = {})
             : ILocalAndFarNode<TLocalLayer, TFarLayer>{ll, fl},
               m_conf{conf},
-              m_subDBTimer{std::chrono::minutes(1),
+              m_subDBTimer{conf.subDB.interval,
                            std::bind(&Bridge<TLocalLayer, TFarLayer>::subDBTick,
                            this)}
         {
@@ -344,7 +366,10 @@ namespace SPSP::Nodes
                     }
                 }
 
-                entryMap[req.addr] = SubDBEntry{};
+                entryMap[req.addr] = SubDBEntry{
+                    .lifetime = m_conf.subDB.subLifetime,
+                    .cb = nullptr
+                };
             }
 
             return true;
@@ -444,7 +469,7 @@ namespace SPSP::Nodes
                 for (auto& [addr, entry] : entryMap) {
                     // Don't decrement entries with infinite lifetime
                     if (entry.lifetime != BRIDGE_SUB_NO_EXPIRE) {
-                        m_subDB[topic][addr].lifetime--;
+                        m_subDB[topic][addr].lifetime -= m_conf.subDB.interval;
                     }
                 }
             });
@@ -456,6 +481,8 @@ namespace SPSP::Nodes
          */
         void subDBRemoveExpiredEntries()
         {
+            using namespace std::chrono_literals;
+
             const std::scoped_lock lock(m_mutex);
 
             m_subDB.forEach([this] (const std::string& topic,
@@ -464,7 +491,7 @@ namespace SPSP::Nodes
                 while (entryIt != entryMap.end()) {
                     auto addr = entryIt->first;
 
-                    if (entryIt->second.lifetime == 0) {
+                    if (entryIt->second.lifetime <= 0ms) {
                         // Expired
                         entryIt = m_subDB[topic].erase(entryIt);
                         SPSP_LOGD("SubDB: Removed addr %s from topic '%s'",
