@@ -135,7 +135,7 @@ namespace SPSP::Nodes
 
             for (auto& [entryTopic, entryMap] : entries) {
                 for (auto& [addr, entry] : entryMap) {
-                    if (addr.empty()) {
+                    if (addr == LocalAddrT{}) {
                         // This node's subscription - call callback
                         SPSP_LOGD("Calling user callback for topic '%s' in new thread",
                                   topic.c_str());
@@ -190,7 +190,19 @@ namespace SPSP::Nodes
 
             SPSP_LOGD("Subscribing locally to topic '%s'", topic.c_str());
 
-            m_subDB[topic][LocalAddrT{}] = SubDBEntry{.cb = cb};
+            auto& entryMap = m_subDB[topic];
+
+            // Attempt to subscribe to new topic
+            if (entryMap.empty()) {
+                if (!this->getFarLayer()->subscribe(topic)) {
+                    return false;
+                }
+            }
+
+            entryMap[LocalAddrT{}] = SubDBEntry{
+                .lifetime = BRIDGE_SUB_NO_EXPIRE,
+                .cb = cb
+            };
 
             return true;
         }
@@ -322,7 +334,17 @@ namespace SPSP::Nodes
 
             {
                 const std::scoped_lock lock(m_mutex);
-                m_subDB[req.topic][req.addr] = SubDBEntry{};
+
+                auto& entryMap = m_subDB[req.topic];
+
+                // Attempt to subscribe to new topic
+                if (entryMap.empty()) {
+                    if (!this->getFarLayer()->subscribe(req.topic)) {
+                        return false;
+                    }
+                }
+
+                entryMap[req.addr] = SubDBEntry{};
             }
 
             return true;
