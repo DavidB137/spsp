@@ -184,7 +184,10 @@ namespace SPSP::Nodes
             // msg.payload is empty
 
             // Remove from sub DB
-            m_subDB.remove(topic);
+            {
+                const std::scoped_lock lock(m_mutex);
+                m_subDB.remove(topic);
+            }
 
             // Explicitly unsubscribe from bridge
             // If this fails, the timeout on bridge will just expire in
