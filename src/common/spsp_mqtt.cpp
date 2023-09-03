@@ -15,8 +15,8 @@ static const char* SPSP_LOG_TAG = "SPSP/Far/MQTT";
 
 namespace SPSP::FarLayers::MQTT
 {
-    MQTT::MQTT(const Config& conf)
-        : m_conf{conf}, m_adapter{m_conf}
+    MQTT::MQTT(IAdapter& adapter, const Config& conf)
+        : m_conf{conf}, m_adapter{adapter}
     {
         using namespace std::placeholders;
 

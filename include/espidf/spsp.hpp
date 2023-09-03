@@ -12,4 +12,5 @@
 #include "spsp_common.hpp"
 
 #include "spsp_espnow_adapter.hpp"
+#include "spsp_mqtt_adapter.hpp"
 #include "spsp_wifi_station.hpp"

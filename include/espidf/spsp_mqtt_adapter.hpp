@@ -20,6 +20,9 @@ namespace SPSP::FarLayers::MQTT
      * @brief MQTT adapter for ESP platform
      *
      * Doesn't check if connection was successfully established within time limit.
+     *
+     * Only one MQTT instance can use this at a time and
+     * there may be many `Adapter` instances at a time.
      */
     class Adapter : public IAdapter
     {

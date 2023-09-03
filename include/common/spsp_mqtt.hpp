@@ -12,7 +12,7 @@
 #include <future>
 
 #include "spsp_layers.hpp"
-#include "spsp_mqtt_adapter.hpp"
+#include "spsp_mqtt_adapter_if.hpp"
 #include "spsp_mqtt_types.hpp"
 #include "spsp_node.hpp"
 
@@ -25,7 +25,7 @@ namespace SPSP::FarLayers::MQTT
     class MQTT : public IFarLayer
     {
         Config m_conf;                           //!< Configuration
-        Adapter m_adapter;                       //!< Platform-specific MQTT adapter
+        IAdapter& m_adapter;                     //!< Platform-specific MQTT adapter
         bool m_initializing = true;              //!< Whether we are currently in initializing phase
         std::promise<void> m_connectingPromise;  //!< Promise to block until successful connection is made
 
@@ -35,11 +35,12 @@ namespace SPSP::FarLayers::MQTT
          *
          * Block until connection is successfully made.
          *
+         * @param adapter MQTT low-level adapter
          * @param conf Configuration
          * @throw AdapterError when adapter can't be constructed
          * @throw ConnectionError when connection can't be established
          */
-        MQTT(const Config& conf);
+        MQTT(IAdapter& adapter, const Config& conf);
 
         /**
          * @brief Destroys MQTT layer object
