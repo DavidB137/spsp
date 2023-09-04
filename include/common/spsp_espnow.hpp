@@ -88,7 +88,7 @@ namespace SPSP::LocalLayers::ESPNOW
              * @return true Bridge info is empty
              * @return false Bridge info is not empty
              */
-            bool empty() { return addr.empty(); }
+            bool empty() { return addr == LocalAddrT{}; }
 
             /**
              * @brief Convert internal info to RTC version

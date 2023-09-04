@@ -122,7 +122,7 @@ namespace SPSP::Nodes
                       topic.c_str(), payload.c_str());
 
             LocalMessageT msg = {};
-            // msg.addr is empty => send to the bridge node
+            // msg.addr is default => send to the bridge node
             msg.type = LocalMessageType::PUB;
             msg.topic = topic;
             msg.payload = payload;
@@ -178,7 +178,7 @@ namespace SPSP::Nodes
             SPSP_LOGD("Unsubscribing from topic '%s'", topic.c_str());
 
             LocalMessageT msg = {};
-            // msg.addr is empty => send to the bridge node
+            // msg.addr is default => send to the bridge node
             msg.type = LocalMessageType::UNSUB;
             msg.topic = topic;
             // msg.payload is empty
@@ -303,7 +303,7 @@ namespace SPSP::Nodes
         bool sendSubscribe(const std::string& topic)
         {
             LocalMessageT msg = {};
-            // msg.addr is empty => send to the bridge node
+            // msg.addr is default => send to the bridge node
             msg.type = LocalMessageType::SUB_REQ;
             msg.topic = topic;
             // msg.payload is empty

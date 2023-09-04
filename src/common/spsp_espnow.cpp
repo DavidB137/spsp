@@ -46,7 +46,7 @@ namespace SPSP::LocalLayers::ESPNOW
         LocalAddrT dst = msg.addr;
 
         // Process empty destination address
-        if (dst.empty()) {
+        if (dst == LocalAddrT{}) {
             // Client: check discovered bridge
             // Bridge: `dst` shouldn't be ever empty
 
@@ -89,7 +89,7 @@ namespace SPSP::LocalLayers::ESPNOW
         m_mutex.unlock();
 
         SPSP_LOGD("Send: waiting for %s (bucket %d) callback",
-                  dst.empty() ? "." : dst.str.c_str(), bucketId);
+                  dst == LocalAddrT{} ? "." : dst.str.c_str(), bucketId);
 
         // Wait for callback to finish
         bool delivered = future.get();
@@ -100,7 +100,7 @@ namespace SPSP::LocalLayers::ESPNOW
         m_sendingMutexes[bucketId].unlock();
 
         SPSP_LOGD("Send: %u bytes to %s: %s", dataLen,
-                  dst.empty() ? "." : dst.str.c_str(),
+                  dst == LocalAddrT{} ? "." : dst.str.c_str(),
                   delivered ? "success" : "fail");
 
         return delivered;
