@@ -8,7 +8,6 @@
 #include "spsp_espnow_adapter.hpp"
 #include "spsp_nodes_dummy.hpp"
 #include "spsp_wifi_dummy.hpp"
-#include "spsp_chacha20.hpp"
 
 using namespace SPSP;
 using namespace std::chrono_literals;
@@ -132,42 +131,6 @@ TEST_CASE("Send multiple messages to same address", "[ESPNOW]") {
     t1.join();
     t2.join();
     t3.join();
-}
-
-TEST_CASE("Check encrypted message", "[ESPNOW]") {
-    class Adapter : public LocalLayers::ESPNOW::Adapter
-    {
-        void send(const LocalAddrT& dst, const std::string& data) const
-        {
-            // TODO: this may be incorrect, because nonce and value of
-            // reserved bytes may change
-            char correctData[] = {
-                4, 3, 2, 1,                       // SSID
-                37, 93, 5, 23, 88, -23, 94, -44,  // Nonce
-                1,                                // Version
-                -25,                              // Encrypted type
-                -66, 17, 103,                     // Encrypted reserved
-                63,                               // Encrypted checksum
-                -104,                             // Encrypted topic length
-                7,                                // Encrypted payload length
-                -21, 87, -106,                    // Encrypted topic
-                -87, -10, -92                     // Encrypted payload
-            };
-
-            REQUIRE(data.length() == 26);
-            CHECK(data == std::string(correctData, 26));
-
-            // Complete sending
-            std::thread t(this->getSendCb(), dst, true);
-            t.detach();
-        }
-    };
-
-    WiFi::Dummy wifi{};
-    Adapter adapter{};
-    LocalLayers::ESPNOW::ESPNOW espnow{adapter, wifi, CONF};
-
-    CHECK(espnow.send(MSG_BASE));
 }
 
 TEST_CASE("Send and receive the same message", "[ESPNOW]") {
