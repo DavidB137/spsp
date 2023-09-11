@@ -23,7 +23,16 @@ const LocalMessageT MSG_BASE = {
     .payload = PAYLOAD
 };
 
-TEST_CASE("Serialize and deserialize same message", "[ESPNOW]") {
+TEST_CASE("Deserialize garbage", "[ESPNOW]") {
+    LocalLayers::ESPNOW::SerDes serdes(CONF);
+
+    std::string garbage = "garbage";
+    LocalMessageT deserialized;
+
+    REQUIRE(!serdes.deserialize(ADDR_PEER, garbage, deserialized));
+}
+
+TEST_CASE("Serialize and deserialize", "[ESPNOW]") {
     LocalLayers::ESPNOW::SerDes serdes(CONF);
 
     // Serialize
@@ -32,10 +41,34 @@ TEST_CASE("Serialize and deserialize same message", "[ESPNOW]") {
 
     // Deserialize
     LocalMessageT deserialized;
-    REQUIRE(serdes.deserialize(ADDR_PEER, serialized, deserialized));
 
-    CHECK(MSG_BASE.type == deserialized.type);
-    CHECK(static_cast<LocalAddr>(MSG_BASE.addr) == static_cast<LocalAddr>(deserialized.addr));
-    CHECK(MSG_BASE.topic == deserialized.topic);
-    CHECK(MSG_BASE.payload == deserialized.payload);
+    SECTION("Same (unmodified) message") {
+        REQUIRE(serdes.deserialize(ADDR_PEER, serialized, deserialized));
+
+        CHECK(MSG_BASE.type == deserialized.type);
+        CHECK(static_cast<LocalAddr>(MSG_BASE.addr) == static_cast<LocalAddr>(deserialized.addr));
+        CHECK(MSG_BASE.topic == deserialized.topic);
+        CHECK(MSG_BASE.payload == deserialized.payload);
+    }
+
+    SECTION("Prepend serialized string") {
+        serialized = " " + serialized;
+        REQUIRE(!serdes.deserialize(ADDR_PEER, serialized, deserialized));
+    }
+
+    SECTION("Append to serialized string") {
+        serialized += serialized + " ";
+        REQUIRE(!serdes.deserialize(ADDR_PEER, serialized, deserialized));
+    }
+
+    SECTION("Shorten serialized string") {
+        serialized.pop_back();
+        REQUIRE(!serdes.deserialize(ADDR_PEER, serialized, deserialized));
+    }
+
+    SECTION("Simulate bitflip") {
+        char orig = serialized[0];
+        serialized[0] = orig + 1;
+        REQUIRE(!serdes.deserialize(ADDR_PEER, serialized, deserialized));
+    }
 }
