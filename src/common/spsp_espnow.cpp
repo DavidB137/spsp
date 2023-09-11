@@ -191,30 +191,9 @@ namespace SPSP::LocalLayers::ESPNOW
         return true;
     }
 
-    void ESPNOW::sendRaw(const LocalAddrT& dst, const std::string& data)
-    {
-        // Register peer
-        m_adapter.addPeer(dst);
-
-        // Send
-        SPSP_LOGD("Send raw: %u bytes to %s", data.length(), dst.str.c_str());
-        m_adapter.send(dst, data);
-
-        // Unregister peer
-        m_adapter.removePeer(dst);
-    }
-
-    void ESPNOW::recvCb(const LocalAddrT src, std::string data, int rssi)
+    void ESPNOW::receive(const LocalAddrT& src, const LocalMessageT& msg, int rssi)
     {
         SPSP_LOGD("Receive: packet from %s", src.str.c_str());
-
-        // Deserialize message
-        LocalMessageT msg = {};
-        if (!m_serdes.deserialize(src, data, msg)) {
-            SPSP_LOGD("Receive: deserialization of packet from %s failed",
-                      src.str.c_str());
-            return;
-        }
 
         // Process probe requests internally
         if (msg.type == LocalMessageType::PROBE_RES) {
@@ -237,6 +216,32 @@ namespace SPSP::LocalLayers::ESPNOW
         if (this->nodeConnected()) {
             this->getNode()->receiveLocal(msg, rssi);
         }
+    }
+
+    void ESPNOW::sendRaw(const LocalAddrT& dst, const std::string& data)
+    {
+        // Register peer
+        m_adapter.addPeer(dst);
+
+        // Send
+        SPSP_LOGD("Send raw: %u bytes to %s", data.length(), dst.str.c_str());
+        m_adapter.send(dst, data);
+
+        // Unregister peer
+        m_adapter.removePeer(dst);
+    }
+
+    void ESPNOW::recvCb(const LocalAddrT src, std::string data, int rssi)
+    {
+        // Deserialize message
+        LocalMessageT msg = {};
+        if (!m_serdes.deserialize(src, data, msg)) {
+            SPSP_LOGD("Receive: deserialization of packet from %s failed",
+                      src.str.c_str());
+            return;
+        }
+
+        this->receive(src, msg, rssi);
     }
 
     void ESPNOW::sendCb(const LocalAddrT dst, bool delivered)
