@@ -62,7 +62,7 @@ namespace SPSP::LocalLayers::ESPNOW
         // Check length
         size_t dataLen = m_serdes.getPacketLength(msg);
         if (dataLen > MAX_PACKET_LENGTH) {
-            SPSP_LOGE("Send fail: packet too big (%u > %u bytes)",
+            SPSP_LOGE("Send fail: packet too big (%zu > %zu bytes)",
                       dataLen, MAX_PACKET_LENGTH);
             return false;
         }
@@ -99,7 +99,7 @@ namespace SPSP::LocalLayers::ESPNOW
 
         m_sendingMutexes[bucketId].unlock();
 
-        SPSP_LOGD("Send: %u bytes to %s: %s", dataLen,
+        SPSP_LOGD("Send: %zu bytes to %s: %s", dataLen,
                   dst == LocalAddrT{} ? "." : dst.str.c_str(),
                   delivered ? "success" : "fail");
 
@@ -222,7 +222,7 @@ namespace SPSP::LocalLayers::ESPNOW
         m_adapter.addPeer(dst);
 
         // Send
-        SPSP_LOGD("Send raw: %u bytes to %s", data.length(), dst.str.c_str());
+        SPSP_LOGD("Send raw: %zu bytes to %s", data.length(), dst.str.c_str());
         m_adapter.send(dst, data);
 
         // Unregister peer

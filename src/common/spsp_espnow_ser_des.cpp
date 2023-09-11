@@ -7,6 +7,7 @@
  *
  */
 
+#include <cinttypes>
 #include <cstring>
 
 #include "spsp_chacha20.hpp"
@@ -73,7 +74,7 @@ namespace SPSP::LocalLayers::ESPNOW
 
         // Check packet length
         if (dataLen < sizeof(Packet)) {
-            SPSP_LOGD("Deserialize failed: packet too short (%u < %u bytes)",
+            SPSP_LOGD("Deserialize failed: packet too short (%zu < %zu bytes)",
                       dataLen, sizeof(Packet));
             return false;
         }
@@ -141,7 +142,7 @@ namespace SPSP::LocalLayers::ESPNOW
     {
         // Check SSID
         if (p->header.ssid != m_conf.ssid) {
-            SPSP_LOGD("Deserialize failed: different SSID (0x%lx != 0x%lx)",
+            SPSP_LOGD("Deserialize failed: different SSID (0x%" PRIx32 " != 0x%" PRIx32 ")",
                       p->header.ssid, m_conf.ssid);
             return false;
         }
@@ -178,10 +179,10 @@ namespace SPSP::LocalLayers::ESPNOW
         }
 
         // Assert valid payload length
-        unsigned payloadTotalLen = sizeof(PacketPayload) + p->payload.topicLen
+        size_t payloadTotalLen = sizeof(PacketPayload) + p->payload.topicLen
                                  + p->payload.payloadLen;
         if (payloadTotalLen != dataLen) {
-            SPSP_LOGD("Deserialize failed: invalid total length without header (%u != %u bytes)",
+            SPSP_LOGD("Deserialize failed: invalid total length without header (%zu != %zu bytes)",
                       payloadTotalLen, dataLen);
             return false;
         }

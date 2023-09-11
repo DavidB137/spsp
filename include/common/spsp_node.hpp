@@ -10,6 +10,7 @@
 #pragma once
 
 #include <chrono>
+#include <cinttypes>
 #include <climits>
 #include <functional>
 #include <memory>
@@ -185,10 +186,10 @@ namespace SPSP
                                             - processingTimeBegin);
 
             if (processed) {
-                SPSP_LOGI("Message processed (%lld ms): %s",
+                SPSP_LOGI("Message processed (%" PRId64 " ms): %s",
                           processingDuration.count(), msg.toString().c_str());
             } else {
-                SPSP_LOGE("Message not processed (%lld ms): %s",
+                SPSP_LOGE("Message not processed (%" PRId64 " ms): %s",
                           processingDuration.count(), msg.toString().c_str());
             }
         }

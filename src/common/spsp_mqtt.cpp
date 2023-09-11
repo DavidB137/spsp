@@ -7,6 +7,8 @@
  *
  */
 
+#include <cinttypes>
+
 #include "spsp_logger.hpp"
 #include "spsp_mqtt.hpp"
 
@@ -28,7 +30,7 @@ namespace SPSP::FarLayers::MQTT
 
         // Wait until connected
         auto future = m_connectingPromise.get_future();
-        SPSP_LOGI("Attempting connection with timeout %lld ms",
+        SPSP_LOGI("Attempting connection with timeout %" PRId64 " ms",
                   m_conf.connection.timeout.count());
 
         // Block
