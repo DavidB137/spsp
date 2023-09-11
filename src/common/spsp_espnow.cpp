@@ -191,10 +191,8 @@ namespace SPSP::LocalLayers::ESPNOW
         return true;
     }
 
-    void ESPNOW::receive(const LocalAddrT& src, const LocalMessageT& msg, int rssi)
+    void ESPNOW::receive(const LocalMessageT& msg, int rssi)
     {
-        SPSP_LOGD("Receive: packet from %s", src.str.c_str());
-
         // Process probe requests internally
         if (msg.type == LocalMessageType::PROBE_RES) {
             m_bestBridgeMutex.lock();
@@ -233,6 +231,8 @@ namespace SPSP::LocalLayers::ESPNOW
 
     void ESPNOW::recvCb(const LocalAddrT src, std::string data, int rssi)
     {
+        SPSP_LOGD("Receive: packet from %s", src.str.c_str());
+
         // Deserialize message
         LocalMessageT msg = {};
         if (!m_serdes.deserialize(src, data, msg)) {
@@ -241,7 +241,7 @@ namespace SPSP::LocalLayers::ESPNOW
             return;
         }
 
-        this->receive(src, msg, rssi);
+        this->receive(msg, rssi);
     }
 
     void ESPNOW::sendCb(const LocalAddrT dst, bool delivered)

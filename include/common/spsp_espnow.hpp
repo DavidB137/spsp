@@ -186,11 +186,10 @@ namespace SPSP::LocalLayers::ESPNOW
          *
          * Separate from `recvCb` to allow simpler testing.
          *
-         * @param src Source address
          * @param msg Message
          * @param rssi Received signal strength indicator (in dBm)
          */
-        void receive(const LocalAddrT& src, const LocalMessageT& msg, int rssi);
+        void receive(const LocalMessageT& msg, int rssi);
 
         /**
          * @brief Sends raw packet to the underlaying library
