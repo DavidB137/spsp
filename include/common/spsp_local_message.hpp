@@ -86,5 +86,26 @@ namespace SPSP
                 (topic.length() > 0    ? topic   : "-") + " " +
                 (payload.length() > 0  ? payload : "-");
         }
+
+        bool operator==(const LocalMessage& other) const
+        {
+            return type == other.type
+                && addr == other.addr
+                && topic == other.topic
+                && payload == other.payload;
+        }
     };
 } // namespace SPSP
+
+// Define hasher function
+template <typename TLocalAddr>
+struct std::hash<SPSP::LocalMessage<TLocalAddr>>
+{
+    std::size_t operator()(SPSP::LocalMessage<TLocalAddr> const& msg) const noexcept
+    {
+        return std::hash<SPSP::LocalMessageType>{}(msg.type)
+             + std::hash<TLocalAddr>{}(msg.addr)
+             + std::hash<std::string>{}(msg.topic)
+             + std::hash<std::string>{}(msg.payload);
+    }
+};
