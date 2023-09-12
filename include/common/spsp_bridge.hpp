@@ -262,7 +262,10 @@ namespace SPSP::Nodes
 
             {
                 const std::scoped_lock lock(m_mutex);
-                m_subDB[topic].erase(LocalAddrT{});
+                if (!m_subDB[topic].erase(LocalAddrT{})) {
+                    // Entry doesn't exist
+                    return false;
+                }
             }
 
             // Remove unused topics
