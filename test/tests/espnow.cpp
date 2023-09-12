@@ -142,10 +142,7 @@ TEST_CASE("Send and receive the same message", "[ESPNOW]") {
                         int rssi = NODE_RSSI_UNKNOWN)
         {
             // Check same message was received
-            CHECK(req.type == MSG_BASE.type);
-            CHECK(req.addr == MSG_BASE.addr);
-            CHECK(req.topic == MSG_BASE.topic);
-            CHECK(req.payload == MSG_BASE.payload);
+            CHECK(req == MSG_BASE);
             return true;
         }
     };

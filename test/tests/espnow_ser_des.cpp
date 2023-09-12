@@ -44,11 +44,7 @@ TEST_CASE("Serialize and deserialize", "[ESPNOW]") {
 
     SECTION("Same (unmodified) message") {
         REQUIRE(serdes.deserialize(ADDR_PEER, serialized, deserialized));
-
-        CHECK(MSG_BASE.type == deserialized.type);
-        CHECK(static_cast<LocalAddr>(MSG_BASE.addr) == static_cast<LocalAddr>(deserialized.addr));
-        CHECK(MSG_BASE.topic == deserialized.topic);
-        CHECK(MSG_BASE.payload == deserialized.payload);
+        CHECK(deserialized == MSG_BASE);
     }
 
     SECTION("Prepend serialized string") {
