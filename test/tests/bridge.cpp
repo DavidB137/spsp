@@ -111,6 +111,13 @@ TEST_CASE("Subscribe", "[Bridge]") {
         CHECK(fl.getSubsLog() == SubsLogT{TOPIC_ML_WILD});
     }
 
+    SECTION("Empty topic") {
+        REQUIRE(!br.subscribe("", nullptr));
+
+        CHECK(fl.getSubs() == SubsSetT{});
+        CHECK(fl.getSubsLog() == SubsLogT{});
+    }
+
     CHECK(fl.getUnsubsLog() == SubsLogT{});
 }
 
@@ -186,6 +193,14 @@ TEST_CASE("Unsubscribe", "[Bridge]") {
 
     SECTION("Non-existing topic") {
         REQUIRE(!br.unsubscribe(TOPIC + "x"));
+
+        CHECK(fl.getSubs() == SubsSetT{TOPIC, TOPIC_SUFFIX, TOPIC_SL_WILD,
+                                      TOPIC_ML_WILD});
+        CHECK(fl.getUnsubsLog() == SubsLogT{});
+    }
+
+    SECTION("Empty topic") {
+        REQUIRE(!br.unsubscribe(""));
 
         CHECK(fl.getSubs() == SubsSetT{TOPIC, TOPIC_SUFFIX, TOPIC_SL_WILD,
                                       TOPIC_ML_WILD});
@@ -286,6 +301,29 @@ TEST_CASE("Receive from local layer", "[Bridge]") {
         CHECK(fl.getSubs() == SubsSetT{});
         CHECK(fl.getSubsLog() == SubsLogT{msg.topic});
         CHECK(fl.getUnsubsLog() == SubsLogT{msg.topic});
+    }
+
+    SECTION("PUB with empty topic") {
+        msg.type = LocalMessageType::PUB;
+        msg.topic = "";
+        ll.receiveDirect(msg);
+
+        std::this_thread::sleep_for(10ms);
+
+        CHECK(ll.getSentMsgs() == SentMsgsSetT{});
+        CHECK(fl.getPubs() == PubsSetT{});
+    }
+
+    SECTION("SUB_REQ with empty topic") {
+        msg.type = LocalMessageType::SUB_REQ;
+        msg.topic = "";
+        ll.receiveDirect(msg);
+
+        std::this_thread::sleep_for(10ms);
+
+        CHECK(ll.getSentMsgs() == SentMsgsSetT{});
+        CHECK(fl.getSubs() == SubsSetT{});
+        CHECK(fl.getSubsLog() == SubsLogT{});
     }
 }
 

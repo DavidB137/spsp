@@ -191,6 +191,11 @@ namespace SPSP::Nodes
             SPSP_LOGD("Publishing locally: topic '%s', payload '%s'",
                       topic.c_str(), payload.c_str());
 
+            if (topic.empty()) {
+                SPSP_LOGE("Can't publish to empty topic");
+                return false;
+            }
+
             return this->getFarLayer()->publish(LocalAddrMAC::local().str,
                                                 topic, payload);
         }
@@ -211,6 +216,11 @@ namespace SPSP::Nodes
             const std::scoped_lock lock(m_mutex);
 
             SPSP_LOGD("Subscribing locally to topic '%s'", topic.c_str());
+
+            if (topic.empty()) {
+                SPSP_LOGE("Can't subscribe to empty topic");
+                return false;
+            }
 
             auto& entryMap = m_subDB[topic];
 
@@ -260,10 +270,17 @@ namespace SPSP::Nodes
         {
             SPSP_LOGD("Unsubscribing locally from topic '%s'", topic.c_str());
 
+            if (topic.empty()) {
+                SPSP_LOGE("Can't unsubscribe from empty topic");
+                return false;
+            }
+
             {
                 const std::scoped_lock lock(m_mutex);
                 if (!m_subDB[topic].erase(LocalAddrT{})) {
                     // Entry doesn't exist
+                    SPSP_LOGD("Can't unsubscribe from not-subscribed topic '%s'",
+                              topic.c_str());
                     return false;
                 }
             }
@@ -337,6 +354,11 @@ namespace SPSP::Nodes
                 this->publishRssi(req.addr, rssi);
             }
 
+            if (req.topic.empty()) {
+                SPSP_LOGE("Can't publish to empty topic");
+                return false;
+            }
+
             return this->getFarLayer()->publish(req.addr.str, req.topic,
                                                 req.payload);
         }
@@ -355,6 +377,11 @@ namespace SPSP::Nodes
             // Publish RSSI
             if (m_conf.reporting.rssiOnSub) {
                 this->publishRssi(req.addr, rssi);
+            }
+
+            if (req.topic.empty()) {
+                SPSP_LOGE("Can't subscribe to empty topic");
+                return false;
             }
 
             {
@@ -405,6 +432,11 @@ namespace SPSP::Nodes
             // Publish RSSI
             if (m_conf.reporting.rssiOnUnsub) {
                 this->publishRssi(req.addr, rssi);
+            }
+
+            if (req.topic.empty()) {
+                SPSP_LOGE("Can't unsubscribe from empty topic");
+                return false;
             }
 
             {
