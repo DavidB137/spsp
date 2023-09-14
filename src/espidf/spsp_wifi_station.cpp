@@ -122,6 +122,8 @@ namespace SPSP::WiFi
         const std::scoped_lock lock(m_mutex);
 
         wifi_country_t c = {};
+        c.cc[0] = '0';
+        c.cc[1] = '1';
         c.schan = rest.low;
         c.nchan = rest.high - rest.low + 1;
 
