@@ -95,7 +95,7 @@ namespace SPSP::Nodes
          * @param conf Configuration
          */
         Client(TLocalLayer* ll, ClientConfig conf = {})
-            : ILocalNode<TLocalLayer>{ll}, m_subDB{}, m_conf{conf},
+            : ILocalNode<TLocalLayer>{ll}, m_conf{conf}, m_subDB{},
               m_subDBTimer{conf.subDB.interval,
                            std::bind(&Client<TLocalLayer>::subDBTick, this)}
         {
