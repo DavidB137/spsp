@@ -65,7 +65,7 @@ namespace SPSP::FarLayers::MQTT
     }
 
     Adapter::Adapter(const Config& conf)
-        : IAdapter{conf}, m_conf{conf}
+        : m_conf{conf}
     {
         // Client ID
         std::string clientId;
