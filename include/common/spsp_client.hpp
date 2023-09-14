@@ -30,6 +30,11 @@ namespace SPSP::Nodes
      */
     struct ClientConfig
     {
+        struct Reporting
+        {
+            bool rssiOnProbe = true;  //!< Report RSSI on PROBE_RES
+        };
+
         struct SubDB
         {
             /**
@@ -50,6 +55,7 @@ namespace SPSP::Nodes
             std::chrono::milliseconds subLifetime = std::chrono::minutes(10);
         };
 
+        Reporting reporting;
         SubDB subDB;
     };
 
@@ -121,6 +127,11 @@ namespace SPSP::Nodes
             SPSP_LOGD("Publishing: topic '%s', payload '%s'",
                       topic.c_str(), payload.c_str());
 
+            if (topic.empty()) {
+                SPSP_LOGE("Can't publish to empty topic");
+                return false;
+            }
+
             LocalMessageT msg = {};
             // msg.addr is default => send to the bridge node
             msg.type = LocalMessageType::PUB;
@@ -146,6 +157,11 @@ namespace SPSP::Nodes
         bool subscribe(const std::string& topic, SubscribeCb cb)
         {
             SPSP_LOGD("Subscribing to topic '%s'", topic.c_str());
+
+            if (topic.empty()) {
+                SPSP_LOGE("Can't subscribe to empty topic");
+                return false;
+            }
 
             if (this->sendSubscribe(topic)) {
                 // Subscribe request delivered successfully
@@ -177,6 +193,11 @@ namespace SPSP::Nodes
         {
             SPSP_LOGD("Unsubscribing from topic '%s'", topic.c_str());
 
+            if (topic.empty()) {
+                SPSP_LOGE("Can't unsubscribe from empty topic");
+                return false;
+            }
+
             LocalMessageT msg = {};
             // msg.addr is default => send to the bridge node
             msg.type = LocalMessageType::UNSUB;
@@ -186,7 +207,12 @@ namespace SPSP::Nodes
             // Remove from sub DB
             {
                 const std::scoped_lock lock(m_mutex);
-                m_subDB.remove(topic);
+                if (!m_subDB.remove(topic)) {
+                    // Not subscribed to this topic
+                    SPSP_LOGD("Can't unsubscribe from not-subscribed topic '%s'",
+                              topic.c_str());
+                    return false;
+                }
             }
 
             // Explicitly unsubscribe from bridge
@@ -225,7 +251,9 @@ namespace SPSP::Nodes
         bool processProbeRes(const LocalMessageT& req,
                              int rssi = NODE_RSSI_UNKNOWN)
         {
-            this->publishRssi(req.addr, rssi);
+            if (m_conf.reporting.rssiOnProbe) {
+                this->publishRssi(req.addr, rssi);
+            }
             return true;
         }
 
@@ -273,10 +301,10 @@ namespace SPSP::Nodes
                 entries = m_subDB.find(req.topic);
             }
 
-            for (auto& [topic, entry] : entries) {
+            for (auto& [subTopic, entry] : entries) {
                 SPSP_LOGD("Calling user callback for topic '%s'",
-                          topic.c_str());
-                cb(topic, req.payload);
+                          req.topic.c_str());
+                entry.cb(req.topic, req.payload);
             }
 
             return true;
