@@ -80,7 +80,7 @@ namespace SPSP::WiFi
          * @brief Disconnects from AP and destroys WiFi station
          *
          */
-        ~Station();
+        virtual ~Station();
 
         /**
          * @brief Gets current WiFi channel
