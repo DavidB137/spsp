@@ -1,7 +1,7 @@
 /**
  * @file spsp_logger.hpp
  * @author Dávid Benko (davidbenko@davidbenko.dev)
- * @brief Empty logger for testing
+ * @brief Logger for testing
  *
  * @copyright Copyright (c) 2023
  *
