@@ -33,6 +33,7 @@ namespace SPSP::LocalLayers
 
     protected:
         SentMsgsSetT m_sentMsgs;
+        size_t m_sentMsgsCount = 0;
 
     public:
         /**
@@ -47,6 +48,7 @@ namespace SPSP::LocalLayers
         virtual bool send(const LocalMessageT& msg)
         {
             m_sentMsgs.insert(msg);
+            m_sentMsgsCount++;
             return true;
         }
 
@@ -73,6 +75,16 @@ namespace SPSP::LocalLayers
         const SentMsgsSetT& getSentMsgs()
         {
             return m_sentMsgs;
+        }
+
+        /**
+         * @brief Returns count of sent messages
+         *
+         * @return Sent messages count
+         */
+        size_t getSentMsgsCount()
+        {
+            return m_sentMsgsCount;
         }
     };
 } // namespace SPSP::LocalLayers
