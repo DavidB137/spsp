@@ -16,7 +16,7 @@ namespace SPSP
     Timer::Timer(const std::chrono::milliseconds interval,
                  std::function<void()> cb)
         : m_interval{interval},
-          m_nextExec{std::chrono::system_clock::now() + interval},
+          m_nextExec{std::chrono::steady_clock::now() + interval},
           m_run{true}, m_cb{cb}, m_thread{&Timer::handlerThread, this}
     {}
 

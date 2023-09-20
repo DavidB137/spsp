@@ -28,7 +28,7 @@ namespace SPSP
     {
         std::mutex m_mutex;                                //!< Mutex for conditional variable
         std::chrono::milliseconds m_interval;              //!< Timer interval
-        std::chrono::system_clock::time_point m_nextExec;  //!< Next execution time point
+        std::chrono::steady_clock::time_point m_nextExec;  //!< Next execution time point
         bool m_run;                                        //!< Whether to continue running
         std::function<void()> m_cb;                        //!< Callback
         std::condition_variable m_cv;                      //!< Conditional variable (to sync destruction of handler thread)
