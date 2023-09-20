@@ -52,5 +52,11 @@ namespace SPSP::Nodes
 
         virtual bool processUnsub(const LocalMessageT& req,
                                   int rssi = NODE_RSSI_UNKNOWN) { return true; }
+
+        virtual bool processTimeReq(const LocalMessageT& req,
+                                     int rssi = NODE_RSSI_UNKNOWN) { return true; }
+
+        virtual bool processTimeRes(const LocalMessageT& req,
+                                     int rssi = NODE_RSSI_UNKNOWN) { return true; }
     };
 } // namespace SPSP::Nodes

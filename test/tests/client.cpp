@@ -34,6 +34,7 @@ const Nodes::ClientConfig CONF = {
         .interval = 10ms,
         .subLifetime = 100ms,
     },
+    .timeSyncTimeout = 100ms,
 };
 const LocalMessage<LocalAddr> MSG = {
     .type = LocalMessageType::PUB,
@@ -339,6 +340,14 @@ TEST_CASE("Receive from local layer", "[Client]") {
         msg.type = LocalMessageType::UNSUB;
     }
 
+    SECTION("TIME_REQ") {
+        msg.type = LocalMessageType::TIME_REQ;
+    }
+
+    SECTION("TIME_RES") {
+        msg.type = LocalMessageType::TIME_RES;
+    }
+
     ll.receiveDirect(msg);
 
     std::this_thread::sleep_for(10ms);
@@ -399,4 +408,54 @@ TEST_CASE("Receive subscription data", "[Client]") {
         CHECK(!localSub1Passed);
         CHECK(localSub2Passed);
     }
+}
+
+TEST_CASE("Time synchronization", "[Client]") {
+    LocalLayers::DummyLocalLayer ll{};
+    Nodes::Client cl{&ll, CONF};
+
+    auto msg = MSG;
+    msg.type = LocalMessageType::TIME_RES;
+    msg.topic = "";
+
+    SECTION("No response from bridge") {
+        CHECK(!cl.syncTime());
+    }
+
+    SECTION("Invalid time in response from bridge") {
+        std::thread t([&ll, &msg]() {
+            std::this_thread::sleep_for(10ms);
+
+            msg.payload = "123";
+            ll.receiveDirect(msg);
+        });
+
+        CHECK(!cl.syncTime());
+
+        t.join();
+    }
+
+    // Successful time change is not tested, because it requires root or user
+    // with CAP_SYS_TIME.
+    /*
+    SECTION("Successful") {
+        uint64_t timeSeconds = 1672531200;  // 2023-01-01 00:00:00
+
+        std::thread t([&ll, &msg, timeSeconds]() {
+            std::this_thread::sleep_for(10ms);
+
+            msg.payload = std::to_string(timeSeconds * 1000);
+            ll.receiveDirect(msg);
+        });
+
+        CHECK(cl.syncTime());
+
+        auto nowSeconds = std::chrono::duration_cast<std::chrono::seconds>(
+            std::chrono::system_clock::now().time_since_epoch()
+        ).count();
+        CHECK(nowSeconds < timeSeconds + 10);
+
+        t.join();
+    }
+    */
 }

@@ -10,8 +10,11 @@
 #pragma once
 
 #include <chrono>
+#include <cinttypes>
+#include <future>
 #include <mutex>
 #include <unordered_map>
+#include <sys/time.h>  // Unix and ESP
 
 #include "spsp_logger.hpp"
 #include "spsp_node.hpp"
@@ -57,6 +60,12 @@ namespace SPSP::Nodes
 
         Reporting reporting;
         SubDB subDB;
+
+        /**
+         * How long to wait for TIME_RES during time synchronization before
+         * giving up.
+         */
+        std::chrono::milliseconds timeSyncTimeout = std::chrono::seconds(2);
     };
 
     /**
@@ -79,10 +88,12 @@ namespace SPSP::Nodes
             SPSP::SubscribeCb cb = nullptr;      //!< Callback for incoming data
         };
 
-        std::mutex m_mutex;                //!< Mutex to prevent race conditions
-        ClientConfig m_conf;               //!< Configuration
-        WildcardTrie<SubDBEntry> m_subDB;  //!< Subscribe database
-        Timer m_subDBTimer;                //!< Sub DB timer
+        std::mutex m_mutex;                    //!< Mutex to prevent race conditions
+        ClientConfig m_conf;                   //!< Configuration
+        WildcardTrie<SubDBEntry> m_subDB;      //!< Subscribe database
+        Timer m_subDBTimer;                    //!< Sub DB timer
+        bool m_timeSyncOngoing = false;        //!< Whether time synchronization is ongoing
+        std::promise<bool> m_timeSyncPromise;  //!< Time synchronization promise
 
     public:
         using LocalAddrT = typename TLocalLayer::LocalAddrT;
@@ -223,6 +234,61 @@ namespace SPSP::Nodes
             return true;
         }
 
+        /**
+         * @brief Synchronizes clock with bridge
+         *
+         * @return true Synchronization successful
+         * @return false Synchronization failed
+         */
+        bool syncTime()
+        {
+            SPSP_LOGD("Time sync: start");
+
+            // Cleanup lambda to reset state
+            auto cleanup = [this]() {
+                const std::scoped_lock lock(m_mutex);
+                m_timeSyncOngoing = false;
+                m_timeSyncPromise = std::promise<bool>{};
+            };
+
+            LocalMessageT msg = {};
+            // msg.addr is default => send to the bridge node
+            msg.type = LocalMessageType::TIME_REQ;
+            // msg.topic is empty
+            // msg.payload is empty
+
+            // Set state and get future
+            std::future<bool> future;
+            {
+                const std::scoped_lock lock(m_mutex);
+                m_timeSyncOngoing = true;
+                future = m_timeSyncPromise.get_future();
+            }
+
+            // Try to send sync request
+            if (!this->sendLocal(msg)) {
+                cleanup();
+                SPSP_LOGE("Time sync: request can't be sent");
+                return false;
+            }
+
+            if (future.wait_for(m_conf.timeSyncTimeout) == std::future_status::timeout) {
+                cleanup();
+                SPSP_LOGE("Time sync: response timeout");
+                return false;
+            }
+
+            if (future.get() == false) {
+                cleanup();
+                SPSP_LOGE("Time sync: invalid bridge response");
+                return false;
+            }
+
+            cleanup();
+            SPSP_LOGD("Time sync: success");
+            return true;
+        }
+
     protected:
         /**
          * @brief Processes PROBE_REQ message
@@ -320,6 +386,67 @@ namespace SPSP::Nodes
          */
         bool processUnsub(const LocalMessageT& req,
                           int rssi = NODE_RSSI_UNKNOWN) { return false; }
+
+        /**
+         * @brief Processes TIME_REQ message
+         *
+         * Doesn't do anything.
+         *
+         * @param req Request message
+         * @param rssi Received signal strength indicator (in dBm)
+         * @return true Message delivery successful
+         * @return false Message delivery failed
+         */
+        bool processTimeReq(const LocalMessageT& req,
+                            int rssi = NODE_RSSI_UNKNOWN) { return false; }
+
+        /**
+         * @brief Processes TIME_RES message
+         *
+         * Synchronizes clock with time in received response.
+         *
+         * @param req Request message
+         * @param rssi Received signal strength indicator (in dBm)
+         * @return true Message delivery successful
+         * @return false Message delivery failed
+         */
+        bool processTimeRes(const LocalMessageT& req,
+                            int rssi = NODE_RSSI_UNKNOWN)
+        {
+            const std::scoped_lock lock(m_mutex);
+
+            auto nowMilliseconds = stoull(req.payload);
+
+            // No time sync ongoing now
+            if (!m_timeSyncOngoing) {
+                return false;
+            }
+
+            // Timestamp must have at least 13 digits
+            if (nowMilliseconds < 1e12) {
+                SPSP_LOGE("Time sync: invalid time received from bridge: '%s'",
+                          req.payload.c_str());
+                m_timeSyncPromise.set_value(false);
+                return false;
+            }
+
+            // Set current time
+            struct timeval tv = {
+                .tv_sec = static_cast<long int>(nowMilliseconds / 1000),
+                .tv_usec = static_cast<long int>((nowMilliseconds % 1000) * 1000),
+            };
+
+            if (settimeofday(&tv, nullptr) != 0) {
+                SPSP_LOGE("Time sync: settimeofday failed with '%s'", strerror(errno));
+                m_timeSyncPromise.set_value(false);
+                return false;
+            }
+
+            SPSP_LOGI("Time sync: set current time to %llu",
+                      nowMilliseconds);
+            m_timeSyncPromise.set_value(true);
+            return true;
+        }
 
         /**
          * @brief Prepares and sends SUB_REQ message to local layer

@@ -30,6 +30,8 @@ namespace SPSP
         SUB_REQ    = 30,
         SUB_DATA   = 31,
         UNSUB      = 32,
+        TIME_REQ   = 40,
+        TIME_RES   = 41,
     };
 
     /**
@@ -51,6 +53,8 @@ namespace SPSP
             case LocalMessageType::SUB_REQ: return "SUB_REQ";
             case LocalMessageType::SUB_DATA: return "SUB_DATA";
             case LocalMessageType::UNSUB: return "UNSUB";
+            case LocalMessageType::TIME_REQ: return "TIME_REQ";
+            case LocalMessageType::TIME_RES: return "TIME_RES";
             default: return "???";
         }
     }

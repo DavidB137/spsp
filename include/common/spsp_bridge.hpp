@@ -72,6 +72,10 @@ namespace SPSP::Nodes
     /**
      * @brief Bridge node
      *
+     * It is necessary to have synchronized clock with outside world before
+     * bridge construction (from SNTP server), because bridge serves time to
+     * clients.
+     *
      * @tparam TLocalLayer Type of local layer
      * @tparam TFarLayer   Type of far layer
      */
@@ -449,6 +453,44 @@ namespace SPSP::Nodes
 
             return true;
         }
+
+        /**
+         * @brief Processes TIME_REQ message
+         *
+         * Responds with TIME_RES message.
+         *
+         * @param req Request message
+         * @param rssi Received signal strength indicator (in dBm)
+         * @return true Message delivery successful
+         * @return false Message delivery failed
+         */
+        bool processTimeReq(const LocalMessageT& req,
+                            int rssi = NODE_RSSI_UNKNOWN)
+        {
+            // Get current time (millisecond accuracy)
+            auto now = std::chrono::system_clock::now().time_since_epoch();
+            auto nowMilliseconds =
+                std::chrono::duration_cast<std::chrono::milliseconds>(now);
+
+            LocalMessageT res = req;
+            res.type = LocalMessageType::TIME_RES;
+            res.payload = std::to_string(nowMilliseconds.count());
+
+            return this->sendLocal(res);
+        }
+
+        /**
+         * @brief Processes TIME_RES message
+         *
+         * Doesn't do anything.
+         *
+         * @param req Request message
+         * @param rssi Received signal strength indicator (in dBm)
+         * @return true Message delivery successful
+         * @return false Message delivery failed
+         */
+        bool processTimeRes(const LocalMessageT& req,
+                            int rssi = NODE_RSSI_UNKNOWN) { return false; }
 
         /**
          * @brief Publishes received subscription data to local layer node

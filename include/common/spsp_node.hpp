@@ -173,6 +173,8 @@ namespace SPSP
             case LocalMessageType::SUB_REQ: processed = processSubReq(msg, rssi); break;
             case LocalMessageType::SUB_DATA: processed = processSubData(msg, rssi); break;
             case LocalMessageType::UNSUB: processed = processUnsub(msg, rssi); break;
+            case LocalMessageType::TIME_REQ: processed = processTimeReq(msg, rssi); break;
+            case LocalMessageType::TIME_RES: processed = processTimeRes(msg, rssi); break;
             default:
                 SPSP_LOGW("Unprocessable message type %s (%d)",
                         localMessageTypeToStr(msg.type),
@@ -338,6 +340,28 @@ namespace SPSP
          */
         virtual bool processUnsub(const LocalMessageT& req,
                                   int rssi = NODE_RSSI_UNKNOWN) = 0;
+
+        /**
+         * @brief Processes TIME_REQ message
+         *
+         * @param req Request message
+         * @param rssi Received signal strength indicator (in dBm)
+         * @return true Message delivery successful
+         * @return false Message delivery failed
+         */
+        virtual bool processTimeReq(const LocalMessageT& req,
+                                    int rssi = NODE_RSSI_UNKNOWN) = 0;
+
+        /**
+         * @brief Processes TIME_RES message
+         *
+         * @param req Request message
+         * @param rssi Received signal strength indicator (in dBm)
+         * @return true Message delivery successful
+         * @return false Message delivery failed
+         */
+        virtual bool processTimeRes(const LocalMessageT& req,
+                                    int rssi = NODE_RSSI_UNKNOWN) = 0;
     };
 
     /**

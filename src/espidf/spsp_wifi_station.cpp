@@ -75,6 +75,22 @@ namespace SPSP::WiFi
                 m_mutex.unlock();
                 throw ConnectionError("Connection timeout");
             }
+
+            // Synchronize time
+            SPSP_LOGI("Attempting time sync with timeout %lld ms",
+                      m_config.timeSyncTimeout.count());
+
+            esp_sntp_config_t config = ESP_NETIF_SNTP_DEFAULT_CONFIG(
+                m_config.sntpServer.c_str()
+            );
+            esp_netif_sntp_init(&config);
+
+            // Block
+            if (esp_netif_sntp_sync_wait(
+                    pdMS_TO_TICKS(m_config.timeSyncTimeout.count())
+                ) != ESP_OK) {
+                throw ConnectionError("SNTP synchronization timeout");
+            }
         }
 
         m_initialized = true;
@@ -87,6 +103,7 @@ namespace SPSP::WiFi
         // Mutex
         const std::scoped_lock<std::mutex> lock(m_mutex);
 
+        esp_netif_sntp_deinit();
         if (esp_wifi_stop() != ESP_OK) return;
         if (esp_wifi_deinit() != ESP_OK) return;
         if (esp_event_loop_delete_default() != ESP_OK) return;

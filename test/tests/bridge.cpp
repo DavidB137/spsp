@@ -16,6 +16,8 @@
 using namespace SPSP;
 using namespace std::chrono_literals;
 
+using LocalMessageT = LocalMessage<LocalAddr>;
+
 using PubsSetT = typename FarLayers::DummyFarLayer::PubsSetT;
 using SubsSetT = typename FarLayers::DummyFarLayer::SubsSetT;
 using SubsLogT = typename FarLayers::DummyFarLayer::SubsLogT;
@@ -42,13 +44,13 @@ const Nodes::BridgeConfig CONF = {
         .subLifetime = 100ms,
     },
 };
-const LocalMessage<LocalAddr> MSG_SUB1 = {
+const LocalMessageT MSG_SUB1 = {
     .type = LocalMessageType::SUB_REQ,
     .addr = ADDR_PEER1,
     .topic = TOPIC,
     .payload = PAYLOAD
 };
-const LocalMessage<LocalAddr> MSG_SUB2 = {
+const LocalMessageT MSG_SUB2 = {
     .type = LocalMessageType::SUB_REQ,
     .addr = ADDR_PEER2,
     .topic = TOPIC,
@@ -324,6 +326,34 @@ TEST_CASE("Receive from local layer", "[Bridge]") {
         CHECK(ll.getSentMsgs() == SentMsgsSetT{});
         CHECK(fl.getSubs() == SubsSetT{});
         CHECK(fl.getSubsLog() == SubsLogT{});
+    }
+
+    SECTION("TIME_REQ") {
+        msg.type = LocalMessageType::TIME_REQ;
+        ll.receiveDirect(msg);
+
+        std::this_thread::sleep_for(10ms);
+
+        SentMsgsSetT sentMsgs = ll.getSentMsgs();
+        LocalMessageT msg;
+
+        for (const auto& sentMsg : sentMsgs) {
+            msg = sentMsg;
+        }
+
+        CHECK(sentMsgs.size() == 1);
+        CHECK(msg.type == LocalMessageType::TIME_RES);
+        CHECK(msg.addr == msg.addr);
+        CHECK(msg.payload.length() == 13);
+    }
+
+    SECTION("TIME_RES") {
+        msg.type = LocalMessageType::TIME_RES;
+        ll.receiveDirect(msg);
+
+        std::this_thread::sleep_for(10ms);
+
+        CHECK(ll.getSentMsgs() == SentMsgsSetT{});
     }
 }
 

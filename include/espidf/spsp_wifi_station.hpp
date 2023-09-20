@@ -36,14 +36,16 @@ namespace SPSP::WiFi
         uint8_t bssid[6];           //!< MAC address of AP
 
         // Network
-        std::string hostnamePrefix = "spsp-";  //!< Hostname prefix (followed by MAC address)
-        bool enableIPv6 = false;               //!< Whether to enable IPv6 addressing (waits for either IPv4 or *global* IPv6 address)
+        std::string hostnamePrefix = "spsp-";     //!< Hostname prefix (followed by MAC address)
+        std::string sntpServer = "pool.ntp.org";  //!< SNTP server address
+        bool enableIPv6 = false;                  //!< Whether to enable IPv6 addressing (waits for either IPv4 or *global* IPv6 address)
 
         // Signal
         int maxTxPower = TX_POWER_DEFAULT;     //!< Maximum transmit power (in dBm)
 
         // Timing
         std::chrono::milliseconds initTimeout = std::chrono::seconds(20);  //!< Timeout for connecting to AP
+        std::chrono::milliseconds sntpTimeout = std::chrono::seconds(5);   //!< Timeout for initial time synchronization using SNTP server
     };
 
     /**
@@ -57,6 +59,10 @@ namespace SPSP::WiFi
      * All roaming features and WPA3 are enabled by default.
      *
      * Implements ESP-NOW interface requirements.
+     *
+     * Time is synchronized using SNTP server automatically during construction
+     * if connection to AP is established successfully (typically on bridge
+     * node).
      */
     class Station : public IESPNOW
     {
