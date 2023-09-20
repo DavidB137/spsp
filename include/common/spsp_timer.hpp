@@ -43,7 +43,6 @@ namespace SPSP
          *
          * @param interval Interval of timer
          * @param cb Callback (`std::bind` can be used)
-         * @param cbInNewThread Whether to call callback in new thread (prevents stack overflows)
          */
         Timer(const std::chrono::milliseconds interval,
               std::function<void()> cb);
