@@ -25,9 +25,9 @@ namespace SPSP::FarLayers::MQTT
     class MQTT : public IFarLayer
     {
         Config m_conf;                           //!< Configuration
-        IAdapter& m_adapter;                     //!< Platform-specific MQTT adapter
         bool m_initializing = true;              //!< Whether we are currently in initializing phase
         std::promise<void> m_connectingPromise;  //!< Promise to block until successful connection is made
+        IAdapter& m_adapter;                     //!< Platform-specific MQTT adapter
 
     public:
         /**
