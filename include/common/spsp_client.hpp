@@ -437,7 +437,7 @@ namespace SPSP::Nodes
             };
 
             if (settimeofday(&tv, nullptr) != 0) {
-                SPSP_LOGE("Time sync: settimeofday failed with '%s'", strerror(errno));
+                SPSP_LOGE("Time sync: settimeofday failed");
                 m_timeSyncPromise.set_value(false);
                 return false;
             }
