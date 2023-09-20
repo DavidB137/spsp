@@ -10,6 +10,7 @@
 #include <cstring>
 
 #include "esp_mac.h"
+#include "esp_netif_sntp.h"
 #include "esp_wifi.h"
 #include "nvs_flash.h"
 
@@ -78,16 +79,19 @@ namespace SPSP::WiFi
 
             // Synchronize time
             SPSP_LOGI("Attempting time sync with timeout %lld ms",
-                      m_config.timeSyncTimeout.count());
+                      m_config.sntpTimeout.count());
 
-            esp_sntp_config_t config = ESP_NETIF_SNTP_DEFAULT_CONFIG(
-                m_config.sntpServer.c_str()
-            );
-            esp_netif_sntp_init(&config);
+            esp_sntp_config_t sntpConfig = {};  // ESP_NETIF_SNTP_DEFAULT_CONFIG doesn't work
+            sntpConfig.wait_for_sync = true;
+            sntpConfig.start = true;
+            sntpConfig.num_of_servers = 1;
+            sntpConfig.servers[0] = m_config.sntpServer.c_str();
+
+            esp_netif_sntp_init(&sntpConfig);
 
             // Block
             if (esp_netif_sntp_sync_wait(
-                    pdMS_TO_TICKS(m_config.timeSyncTimeout.count())
+                    pdMS_TO_TICKS(m_config.sntpTimeout.count())
                 ) != ESP_OK) {
                 throw ConnectionError("SNTP synchronization timeout");
             }

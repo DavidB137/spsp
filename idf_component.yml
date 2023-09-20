@@ -2,4 +2,4 @@ description: Simple publish-subscribe protocol. Connects low power IoT clients t
 url: https://github.com/DavidB137/spsp
 dependencies:
   idf:
-    version: ">=5.0"
+    version: ">=5.1"

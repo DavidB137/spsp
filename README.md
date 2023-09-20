@@ -31,7 +31,7 @@ an access point serving "standard" devices as well as all of IoT.
 ### Dependencies
 
 - C++ 17 or newer (C++ 20 is going to be required soon)
-- ESP-IDF[^espidf] 5.x
+- ESP-IDF[^espidf] 5.1
 - optionally PlatformIO[^platformio]
 
 ### Setup
