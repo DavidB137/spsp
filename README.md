@@ -176,6 +176,58 @@ ESP-NOW[^espnow] it's lowercase MAC address without separators)
 
 Topics for *subscribing* are not prepended or modified in any way.
 
+### Message types
+
+Message types are generic for current and any future protocols.
+
+#### Bridge discovery
+
+- **Probe request (`PROBE_REQ`)**: *Client* attempts *bridge* discovery by
+  broadcasting `PROBE_REQ` messages on all available channels.
+- **Probe response (`PROBE_RES`)**: *Bridge* response to received `PROBE_REQ`
+  from a *client*.
+  *Client* listens for `PROBE_RES` messages and chooses the one with
+  the strongest signal.
+  Address of that *bridge* is stored and all communication is routed to
+  that address.
+
+#### Publish and subscribe
+
+- **Publish (`PUB`)**: *Client* sends `PUB` message to discovered *bridge* to
+  publish payload to topic. *Bridge* forwards it to *far layer* (i.e. MQTT).
+- **Subscribe request (`SUB_REQ`)**: Client sends `SUB_REQ` message to
+  discovered *bridge* to subscribe to topic. This subscription is requested on
+  *far layer* and valid for 15 minutes.
+  The *client* can extend the lifetime by sending another `SUB_REQ` (it's done
+  automatically).
+- **Subscribe data (`SUB_DATA`)**: When *bridge* receives data from far layer,
+  it sends `SUB_DATA` messages to all *clients* that are subscribed to
+  given topic.
+- **Unsubscribe request (`UNSUB`)**: *Client* can (and should) notify
+  the discovered *bridge* when it doesn't need subscription anymore by sending
+  explicit `UNSUB` message.
+
+#### Time
+
+Many applications require current time information.
+*Bridge* nodes automatically sync time using SNTP and then provide it to
+*clients*.
+
+- **Time request (`TIME_REQ`)**: *Client* sends `TIME_REQ` when
+  `Client::syncTime()` method is called.
+- **Time response (`TIME_RES`)**: *Bridge* responds to `TIME_REQ` by sending
+  `TIME_RES` with current timestamp as payload.
+  The timestamp has milliseconds precision, but link latency between *bridge*
+  and *client* is not compensated.
+
+#### Other
+
+Currently unused, but may be in the future.
+
+- **OK (`OK`)**: Generic OK message (typically for success responses).
+- **Failure (`FAIL`)**: Generic failure message (typically for failure
+  responses).
+
 
 [^mqtt]: MQTT https://mqtt.org
 [^mqtt_wildcard]: MQTT wildcard: http://docs.oasis-open.org/mqtt/mqtt/v3.1.1/os/mqtt-v3.1.1-os.html#_Toc398718107
