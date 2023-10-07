@@ -1,7 +1,4 @@
-#include "spsp_bridge.hpp"
-#include "spsp_espnow.hpp"
-#include "spsp_mqtt.hpp"
-#include "spsp_wifi.hpp"
+#include "spsp.hpp"
 
 extern "C" void app_main()
 {
@@ -10,7 +7,7 @@ extern "C" void app_main()
      */
 
     // WiFi config
-    SPSP::WiFiConfig wifiConfig = {};
+    SPSP::WiFi::StationConfig wifiConfig = {};
     wifiConfig.ssid = "SSID";
     wifiConfig.password = "PASSWORD";
 
@@ -20,7 +17,7 @@ extern "C" void app_main()
     espnowConfig.password = "12345678123456781234567812345678";
 
     // MQTT config
-    SPSP::FarLayers::MQTT::ClientConfig mqttConfig = {};
+    SPSP::FarLayers::MQTT::Config mqttConfig = {};
     mqttConfig.connection.uri = "mqtt://example.com";
     mqttConfig.connection.qos = 1;
 
@@ -30,11 +27,13 @@ extern "C" void app_main()
      */
 
     // Initialize WiFi
-    SPSP::WiFi::getInstance().init(wifiConfig);
+    static SPSP::WiFi::Station wifi{wifiConfig};
 
     // Create layers
-    static SPSP::LocalLayers::ESPNOW::Layer ll{espnowConfig};
-    static SPSP::FarLayers::MQTT::Layer fl{mqttConfig};
+    static SPSP::LocalLayers::ESPNOW::Adapter llAdapter{};
+    static SPSP::LocalLayers::ESPNOW::ESPNOW ll{llAdapter, wifi, espnowConfig};
+    static SPSP::FarLayers::MQTT::Adapter flAdapter{mqttConfig};
+    static SPSP::FarLayers::MQTT::MQTT fl{flAdapter, mqttConfig};
 
     // Create bridge
     static SPSP::Nodes::Bridge spsp{&ll, &fl};

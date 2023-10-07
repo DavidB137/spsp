@@ -1,6 +1,4 @@
-#include "spsp_client.hpp"
-#include "spsp_espnow.hpp"
-#include "spsp_wifi.hpp"
+#include "spsp.hpp"
 
 extern "C" void app_main()
 {
@@ -19,10 +17,11 @@ extern "C" void app_main()
      */
 
     // Initialize WiFi
-    SPSP::WiFi::getInstance().init();
+    static SPSP::WiFi::Station wifi{{}};  // empty SSID -> doesn't connect to AP
 
     // Create local layer
-    static SPSP::LocalLayers::ESPNOW::Layer ll{espnowConfig};
+    static SPSP::LocalLayers::ESPNOW::Adapter llAdapter{};
+    static SPSP::LocalLayers::ESPNOW::ESPNOW ll{llAdapter, wifi, espnowConfig};
 
     // Create bridge
     static SPSP::Nodes::Client spsp{&ll};
@@ -41,4 +40,6 @@ extern "C" void app_main()
     } else {
         // ...
     }
+
+    // Also see: spsp.subscribe(), spsp.unsubscribe()
 }
