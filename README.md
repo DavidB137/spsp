@@ -4,17 +4,13 @@ SPSP connects low power IoT clients to MQTT[^mqtt] or other protocols.
 
 It's an extensible framework for publish-subscribe pattern.
 
-### Reliability
+Main goal is to create highly reliable platform for message delivery from and
+to IoT devices while taking into account protocol-specific, performance and
+power restrictions.
 
-As reliability is important, the whole system aims to be a highly reliable
-platform while taking into account protocol-specific and performance
-restrictions. There's not a 100 % guarantee of message delivery from client
-to the MQTT[^mqtt] broker, but with correct settings, you can get extremely
-close.
-
-No retrasmission logic between *nodes* is implemented, because it's highly
-application-specific, but the *node* always knows whether data have or have not
-beed delivered, so you can implement it yourself.
+This project is currently in initial development phase,
+there's not yet a stable version and API may change.
+There shouldn't be drastic changes, however.
 
 
 ## Usage
@@ -36,7 +32,23 @@ an access point serving "standard" devices as well as all of IoT.
 
 ### Setup
 
-TODO
+1. Create ESP-IDF[^espidf] project.
+2. Create `idf_component.yml` file inside `main` project directory:
+   ```yml
+   dependencies:
+     spsp:
+        git: https://github.com/DavidB137/spsp.git
+   ```
+3. Rename `main.c` to `main.cpp` file inside `main` project directory
+   and change it's content to:
+   ```cpp
+   #include "spsp.hpp"
+
+   extern "C" void app_main()
+   {
+       // ...
+   }
+   ```
 
 ### Examples
 
@@ -75,7 +87,7 @@ For debugging purposes, client also publishes signal strength when it receives
 #### Bridge
 
 Bridge **connects *clients* on *local layer* and *far layer***.
-You can think of bridge as a IP network router.
+You can think of bridge as a router or gateway.
 
 All received *publish* messages are forwarded to upstream *far layer*
 (typically MQTT[^mqtt]). When *subscribe* request is received from a client, topic of
@@ -108,27 +120,32 @@ More will come later.
 
 ESP-NOW local layer protocol is a wrapper around Espressif's ESP-NOW[^espnow].
 It's basically a WiFi without any state management (connecting to AP,...)
-whatsoever. Just a quick setup, send of single packet, receive of delivery
+whatsoever. Just a quick setup, sending of single packet, receiving of delivery
 confirmation – all over WiFi MAC.
+
+It's built-in all ESP32 SOCs. You don't need any additional hardware –
+drastically saving cost, labour and enabling usage on third-party devices.
 
 This implemenation includes built-in encryption using **ChaCha20** with 256-bit
 password and 64-bit nonce.
 To allow multiple separate networks without much interference, 32-bit SSID
 must be set.
 
-Each packet is checked for delivery status.
+Each packet is checked for delivery status, but not resent when delivery fails!
 Internally, Espressif's implemenation does some sort of retransmission, but
 generally, it's not guaranteed that data will be delivered, so custom
-implementation of retransmission may be needed if required by your use-case.
+implementation of retransmission may be needed if required by your use-case
+(support is implemented).
 
 ##### Clients using ESP-NOW
 
 *Clients* search for *bridges* to connect to using **probes**.
 During this process, the *client* iterates through all WiFi channels allowed by
-country restrictions (see `WiFi::setCountryRestrictions`) and broadcasts probe
-requests to the broadcast address. *Bridges* on the same SSID with the correct
-password will decrypt the request and send back probe response. The *client*
-then chooses *bridge* with the best signal strength.
+country restrictions (see `WiFi::Station::setChannelRestrictions`) and
+broadcasts probe requests to the broadcast address.
+*Bridges* on the same SSID with the correct password will decrypt the request
+and send back probe response. The *client* then chooses *bridge* with
+the strongest signal.
 
 ### Far layer protocols
 
