@@ -37,7 +37,7 @@ an access point serving "standard" devices as well as all of IoT.
    ```yml
    dependencies:
      spsp:
-        git: https://github.com/DavidB137/spsp.git
+       git: https://github.com/DavidB137/spsp.git
    ```
 3. Rename `main.c` to `main.cpp` file inside `main` project directory
    and change it's content to:
