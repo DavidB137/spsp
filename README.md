@@ -116,7 +116,7 @@ Local layer protocols are used for local communication between nodes
 There's just one local layer protocol: ESP-NOW.
 More will come later.
 
-#### ESP-NOW
+#### ESP-NOW local layer
 
 ESP-NOW local layer protocol is a wrapper around Espressif's ESP-NOW[^espnow].
 It's basically a WiFi without any state management (connecting to AP,...)
@@ -155,7 +155,7 @@ data published by clients and provide data from other sources.
 There's just one far layer protocol: MQTT.
 More will come later.
 
-#### MQTT
+#### MQTT far layer
 
 Wrapper for most well known publish-subscribe IoT protocol – MQTT[^mqtt].
 
@@ -180,7 +180,7 @@ Topics for *subscribing* are not prepended or modified in any way.
 
 Message types are generic for current and any future protocols.
 
-#### Bridge discovery
+#### Bridge discovery message types
 
 - **Probe request (`PROBE_REQ`)**: *Client* attempts *bridge* discovery by
   broadcasting `PROBE_REQ` messages on all available channels.
@@ -191,7 +191,7 @@ Message types are generic for current and any future protocols.
   Address of that *bridge* is stored and all communication is routed to
   that address.
 
-#### Publish and subscribe
+#### Publish and subscribe message types
 
 - **Publish (`PUB`)**: *Client* sends `PUB` message to discovered *bridge* to
   publish payload to topic. *Bridge* forwards it to *far layer* (i.e. MQTT).
@@ -207,7 +207,7 @@ Message types are generic for current and any future protocols.
   the discovered *bridge* when it doesn't need subscription anymore by sending
   explicit `UNSUB` message.
 
-#### Time
+#### Time message types
 
 Many applications require current time information.
 *Bridge* nodes automatically sync time using SNTP and then provide it to
@@ -220,7 +220,7 @@ Many applications require current time information.
   The timestamp has milliseconds precision, but link latency between *bridge*
   and *client* is not compensated.
 
-#### Other
+#### Other message types
 
 Currently unused, but may be in the future.
 
