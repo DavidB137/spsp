@@ -19,16 +19,15 @@
 #include "spsp_wifi_station.hpp"
 
 // Log tag
-static const char* SPSP_LOG_TAG = "SPSP/WiFi";
+static const char* SPSP_LOG_TAG = "SPSP/WiFi/Station";
 
 namespace SPSP::WiFi
 {
     Station::Station(const StationConfig& config)
+        : m_config{config}
     {
         // Mutex
         const std::scoped_lock<std::mutex> lock(m_mutex);
-
-        m_config = config;
 
         // Create event loop
         SPSP_ERROR_CHECK(esp_event_loop_create_default(),
@@ -43,7 +42,8 @@ namespace SPSP::WiFi
 
         // Init configuration
         wifi_init_config_t cfg = WIFI_INIT_CONFIG_DEFAULT();
-        SPSP_ERROR_CHECK(esp_wifi_init(&cfg), ConnectionError("WiFi init failed"));
+        SPSP_ERROR_CHECK(esp_wifi_init(&cfg),
+                         ConnectionError("WiFi init failed"));
         SPSP_ERROR_CHECK(esp_wifi_set_storage(WIFI_STORAGE_RAM),
                          ConnectionError("Set WiFi storage failed"));
         SPSP_ERROR_CHECK(esp_wifi_set_mode(WIFI_MODE_STA),
@@ -53,7 +53,8 @@ namespace SPSP::WiFi
         this->initWiFiConfig();
 
         // Start WiFi
-        SPSP_ERROR_CHECK(esp_wifi_start(), ConnectionError("WiFi start failed"));
+        SPSP_ERROR_CHECK(esp_wifi_start(),
+                         ConnectionError("WiFi start failed"));
 
         // Set TX power
         if (config.maxTxPower != TX_POWER_DEFAULT) {
@@ -63,7 +64,7 @@ namespace SPSP::WiFi
 
         // Wait until IP is received (only if SSID is not empty - i.e. this is
         // bridge node)
-        if (config.ssid.length() > 0) {
+        if (!config.ssid.empty()) {
             auto future = m_connectingPromise.get_future();
 
             SPSP_LOGI("Attempting connection with timeout %lld ms",
@@ -108,9 +109,9 @@ namespace SPSP::WiFi
         const std::scoped_lock<std::mutex> lock(m_mutex);
 
         esp_netif_sntp_deinit();
-        if (esp_wifi_stop() != ESP_OK) return;
-        if (esp_wifi_deinit() != ESP_OK) return;
-        if (esp_event_loop_delete_default() != ESP_OK) return;
+        esp_wifi_stop();
+        esp_wifi_deinit();
+        esp_event_loop_delete_default();
 
         SPSP_LOGI("Deinitialized");
     }
@@ -198,7 +199,7 @@ namespace SPSP::WiFi
     void Station::initNetIf()
     {
         // Don't do anything if SSID is empty
-        if (m_config.ssid.length() == 0) return;
+        if (m_config.ssid.empty()) return;
 
         SPSP_ERROR_CHECK(esp_netif_init(),
                          ConnectionError("Network interface init failed"));
@@ -236,14 +237,15 @@ namespace SPSP::WiFi
     void Station::initWiFiConfig()
     {
         // SSID is not empty (this is bridge node)
-        if (m_config.ssid.length() > 0) {
+        if (!m_config.ssid.empty()) {
             wifi_config_t espWiFiConfig = {};
             strcpy((char*) espWiFiConfig.sta.ssid, m_config.ssid.c_str());
             strcpy((char*) espWiFiConfig.sta.password, m_config.password.c_str());
 
             // BSSID
             espWiFiConfig.sta.bssid_set = m_config.lockBssid;
-            memcpy(espWiFiConfig.sta.bssid, m_config.bssid, sizeof(m_config.bssid));
+            memcpy(espWiFiConfig.sta.bssid, m_config.bssid,
+                   sizeof(m_config.bssid));
 
             // Do full scan - connect to AP with strongest signal
             espWiFiConfig.sta.scan_method = WIFI_ALL_CHANNEL_SCAN;
@@ -267,7 +269,7 @@ namespace SPSP::WiFi
     }
 
     void Station::eventHandlerWiFi(void* ctx, esp_event_base_t eventBase,
-                                    int32_t eventId, void* eventData)
+                                   int32_t eventId, void* eventData)
     {
         // Get "this"
         Station* inst = static_cast<Station*>(ctx);
@@ -275,7 +277,9 @@ namespace SPSP::WiFi
         switch (eventId) {
         case WIFI_EVENT_STA_START:
         case WIFI_EVENT_STA_DISCONNECTED:
-            esp_wifi_connect();
+            if (!inst->m_config.ssid.empty()) {
+                esp_wifi_connect();
+            }
             break;
 
         case WIFI_EVENT_STA_CONNECTED:

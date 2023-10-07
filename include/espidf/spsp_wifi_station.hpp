@@ -119,6 +119,7 @@ namespace SPSP::WiFi
          */
         const ChannelRestrictions getChannelRestrictions();
 
+    private:
         /**
          * @brief Creates IPv6 link-local address
          *
@@ -126,7 +127,6 @@ namespace SPSP::WiFi
          */
         void createIPv6LinkLocal();
 
-    private:
         /**
          * @brief Initializes NVS
          *
