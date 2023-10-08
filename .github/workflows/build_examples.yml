@@ -1,11 +1,11 @@
-name: Build ESP-IDF examples
+name: Build examples
 
 on:
   push:
     branches: ["*"]
 
 jobs:
-  test:
+  build_espidf_examples:
     runs-on: ubuntu-latest
     steps:
 
