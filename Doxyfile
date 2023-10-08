@@ -1,0 +1,8 @@
+PROJECT_NAME = "SPSP"
+PROJECT_BRIEF = "Simple publish-subscribe protocol. Connects low power IoT clients to MQTT."
+OUTPUT_DIRECTORY = "docs_doxygen"
+FULL_PATH_NAMES = NO
+INPUT = "include"
+GENERATE_LATEX = NO
+RECURSIVE = YES
+SOURCE_BROWSER = YES
