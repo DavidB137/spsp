@@ -39,7 +39,15 @@ an access point serving "standard" devices as well as all of IoT.
      spsp:
        git: https://github.com/DavidB137/spsp.git
    ```
-3. Rename `main.c` to `main.cpp` file inside `main` project directory
+3. Create `sdkconfig.defaults` file incide root project directory:
+   ```
+   CONFIG_COMPILER_OPTIMIZATION_SIZE=y
+   CONFIG_COMPILER_CXX_EXCEPTIONS=y
+   ```
+   SPSP uses exceptions, so they need to be enabled in the build process.
+   It may be also necessary to enable size optimalization depending on
+   the flash size.
+4. Rename `main.c` to `main.cpp` file inside `main` project directory
    and change it's content to:
    ```cpp
    #include "spsp.hpp"
@@ -52,7 +60,7 @@ an access point serving "standard" devices as well as all of IoT.
 
 ### Examples
 
-You can find usage examples in `examples/` directory.
+You can find usage examples in [`examples/`](examples/) directory.
 
 
 ### Code documentation
