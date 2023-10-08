@@ -37,4 +37,30 @@ extern "C" void app_main()
 
     // Create bridge
     static SPSP::Nodes::Bridge spsp{&ll, &fl};
+
+    /**
+     * Publish and subscribe
+     * API is the same as for the client.
+     * Typically, you publish and subscribe on clients only,
+     * but you can do the same on bridges too.
+     */
+
+    bool delivered = spsp.publish("topic", "payload");
+
+    if (delivered) {
+        // ...
+    } else {
+        // ...
+    }
+
+    delivered = spsp.subscribe(
+        "topic2",
+        [](const std::string& topic, const std::string& payload) {
+            // Do something when data on `topic2` are received
+            // ...
+        }
+    );
+
+    // We don't need this subscription anymore
+    delivered = spsp.unsubscribe("topic2");
 }
