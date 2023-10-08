@@ -1,0 +1,38 @@
+name: Build ESP-IDF examples
+
+on:
+  push:
+    branches: ["*"]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+
+    - name: Install dependencies
+      run: sudo apt update && sudo apt-get install -y git wget flex bison gperf python3 python3-pip python3-venv cmake ninja-build ccache libffi-dev libssl-dev dfu-util libusb-1.0-0
+
+    - name: Checkout
+      uses: actions/checkout@v3
+
+    - name: Clone ESP-IDF
+      run: git clone -b v5.1.1 --recursive https://github.com/espressif/esp-idf.git .espidf
+
+    - name: Install ESP-IDF
+      run: .espidf/install.sh esp32
+
+    - name: Build examples
+      run: |
+        ROOT=$(pwd)
+
+        source .espidf/export.sh
+
+        for d in examples/espidf/*/
+        do
+          cd $d
+          echo "🏗️ Building in $d..."
+          idf.py set-target esp32
+          idf.py build
+          echo "🚀 Built firmware in $d"
+          cd $ROOT
+        done
