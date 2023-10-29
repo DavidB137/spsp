@@ -166,7 +166,7 @@ the strongest signal.
 Far layer protocols are used by *bridges* as concentrators. They collect all
 data published by clients and provide data from other sources.
 
-There's just one far layer protocol: MQTT.
+There are two far layer protocols: MQTT and local broker.
 More will come later.
 
 #### MQTT far layer
@@ -187,6 +187,20 @@ Default topic structure for *publishing* is `{PREFIX}/{ADDR}/{TOPIC}` where:
 - `ADDR` is node's address as reasonably-formatted string (in case of
 ESP-NOW[^espnow] it's lowercase MAC address without separators)
 - `TOPIC` is topic received in message (e.g. `temperature`)
+
+Topics for *subscribing* are not prepended or modified in any way.
+
+#### Local broker far layer
+
+Basically local MQTT-like broker.
+
+Functions just like MQTT, supports wildcards, but is hosted on the *bridge*
+itself.
+Handy if you only need communication between nearby IoT devices over single
+*bridge* (no IP connectivity required).
+
+Default topic structure for *publishing* is `{PREFIX}/{ADDR}/{TOPIC}`
+(see [MQTT topic structure](#mqtt-far-layer) above).
 
 Topics for *subscribing* are not prepended or modified in any way.
 
