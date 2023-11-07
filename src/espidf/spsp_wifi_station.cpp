@@ -88,14 +88,14 @@ namespace SPSP::WiFi
             sntpConfig.num_of_servers = 1;
             sntpConfig.servers[0] = m_config.sntpServer.c_str();
 
-            esp_netif_sntp_init(&sntpConfig);
+            SPSP_ERROR_CHECK(esp_netif_sntp_init(&sntpConfig),
+                             ConnectionError("SNTP init failed"));
 
             // Block
-            if (esp_netif_sntp_sync_wait(
-                    pdMS_TO_TICKS(m_config.sntpTimeout.count())
-                ) != ESP_OK) {
-                throw ConnectionError("SNTP synchronization timeout");
-            }
+            SPSP_ERROR_CHECK(
+                esp_netif_sntp_sync_wait(pdMS_TO_TICKS(m_config.sntpTimeout.count())),
+                ConnectionError("SNTP synchronization timeout")
+            );
         }
 
         m_initialized = true;

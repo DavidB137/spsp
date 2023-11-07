@@ -45,7 +45,7 @@ namespace SPSP::WiFi
 
         // Timing
         std::chrono::milliseconds initTimeout = std::chrono::seconds(20);  //!< Timeout for connecting to AP
-        std::chrono::milliseconds sntpTimeout = std::chrono::seconds(5);   //!< Timeout for initial time synchronization using SNTP server
+        std::chrono::milliseconds sntpTimeout = std::chrono::seconds(20);  //!< Timeout for initial time synchronization using SNTP server
     };
 
     /**
