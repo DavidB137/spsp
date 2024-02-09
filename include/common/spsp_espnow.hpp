@@ -171,6 +171,8 @@ namespace SPSP::LocalLayers::ESPNOW
          *
          * `rtndBr` and `connBr` may be the same pointers.
          *
+         * Automatically resubscribes to all topics.
+         *
          * @param rtndBr Retained bridge peer info (for reconnection)
          * @param connBr Connected bridge peer info storage (if connection
          *               successful and `connBr` != nullptr)

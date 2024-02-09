@@ -109,83 +109,89 @@ namespace SPSP::LocalLayers::ESPNOW
     bool ESPNOW::connectToBridge(BridgeConnInfoRTC* rtndBr,
                                  BridgeConnInfoRTC* connBr)
     {
-        // Mutex
-        const std::scoped_lock lock(m_mutex);
+        {   // Mutex
+            const std::scoped_lock lock(m_mutex);
 
-        if (rtndBr != nullptr) {
-            // Reconnect to retained bridge
-            m_bestBridge = *rtndBr;
-            m_wifi.setChannel(m_bestBridge.ch);
+            if (rtndBr != nullptr) {
+                // Reconnect to retained bridge
+                m_bestBridge = *rtndBr;
+                m_wifi.setChannel(m_bestBridge.ch);
 
-            if (connBr != nullptr) {
-                *connBr = *rtndBr;
+                if (connBr != nullptr) {
+                    *connBr = *rtndBr;
+                }
+
+                SPSP_LOGI("Reconnected to bridge: %s",
+                          m_bestBridge.addr.str.c_str());
+
+                return true;
             }
 
-            SPSP_LOGI("Reconnected to bridge: %s",
-                      m_bestBridge.addr.str.c_str());
+            SPSP_LOGD("Connect to bridge: connecting...");
 
-            return true;
-        }
+            // Get country restrictions
+            auto channelRestrictions = m_wifi.getChannelRestrictions();
+            uint8_t lowCh = channelRestrictions.low;
+            uint8_t highCh = channelRestrictions.high;
 
-        SPSP_LOGD("Connect to bridge: connecting...");
+            SPSP_LOGI("Connect to bridge: channels %u - %u", lowCh, highCh);
 
-        // Get country restrictions
-        auto channelRestrictions = m_wifi.getChannelRestrictions();
-        uint8_t lowCh = channelRestrictions.low;
-        uint8_t highCh = channelRestrictions.high;
+            // Clear previous results
+            m_bestBridge = {};
 
-        SPSP_LOGI("Connect to bridge: channels %u - %u", lowCh, highCh);
+            // Prepare message
+            LocalMessageT msg = {};
+            msg.addr = LocalAddrT::broadcast();
+            msg.type = LocalMessageType::PROBE_REQ;
+            msg.payload = SPSP::VERSION;
 
-        // Clear previous results
-        m_bestBridge = {};
+            // Convert to raw data
+            std::string data;
+            m_serdes.serialize(msg, data);
 
-        // Prepare message
-        LocalMessageT msg = {};
-        msg.addr = LocalAddrT::broadcast();
-        msg.type = LocalMessageType::PROBE_REQ;
-        msg.payload = SPSP::VERSION;
+            // Promise/mutex bucket
+            auto bucketId = this->getBucketIdFromLocalAddr(msg.addr);
 
-        // Convert to raw data
-        std::string data;
-        m_serdes.serialize(msg, data);
+            // Probe all channels
+            for (uint8_t ch = lowCh; ch <= highCh; ch++) {
+                auto future = m_sendingPromises[bucketId].get_future();
 
-        // Promise/mutex bucket
-        auto bucketId = this->getBucketIdFromLocalAddr(msg.addr);
+                m_wifi.setChannel(ch);
+                this->sendRaw(msg.addr, data);
 
-        // Probe all channels
-        for (uint8_t ch = lowCh; ch <= highCh; ch++) {
-            auto future = m_sendingPromises[bucketId].get_future();
+                SPSP_LOGD("Connect to bridge: waiting for callback");
 
-            m_wifi.setChannel(ch);
-            this->sendRaw(msg.addr, data);
+                // Wait for callback to finish
+                future.get();
 
-            SPSP_LOGD("Connect to bridge: waiting for callback");
+                // Reset promise
+                m_sendingPromises[bucketId] = std::promise<bool>{};
 
-            // Wait for callback to finish
-            future.get();
+                // Sleep
+                std::this_thread::sleep_for(m_conf.connectToBridgeChannelWaiting);
+            }
 
-            // Reset promise
-            m_sendingPromises[bucketId] = std::promise<bool>{};
+            // No response
+            if (m_bestBridge.empty()) {
+                SPSP_LOGE("Connect to bridge: no response from bridge");
+                return false;
+            }
 
-            // Sleep
-            std::this_thread::sleep_for(m_conf.connectToBridgeChannelWaiting);
-        }
+            // New best bridge is available - switch to it's channel
+            m_wifi.setChannel(m_bestBridge.ch);
 
-        // No response
-        if (m_bestBridge.empty()) {
-            SPSP_LOGE("Connect to bridge: no response from bridge");
-            return false;
-        }
+            SPSP_LOGI("Connected to bridge: %s on channel %u (%d dBm)",
+                      m_bestBridge.addr.str.c_str(), m_bestBridge.ch,
+                      m_bestBridge.rssi);
 
-        // New best bridge is available - switch to it's channel
-        m_wifi.setChannel(m_bestBridge.ch);
+            if (connBr != nullptr) {
+                *connBr = m_bestBridge.toRTC();
+            }
+        }  // Mutex
 
-        SPSP_LOGI("Connected to bridge: %s on channel %u (%d dBm)",
-                  m_bestBridge.addr.str.c_str(), m_bestBridge.ch,
-                  m_bestBridge.rssi);
-
-        if (connBr != nullptr) {
-            *connBr = m_bestBridge.toRTC();
+        // Resubscribe to all topics
+        if (this->nodeConnected()) {
+            this->getNode()->resubscribeAll();
         }
 
         return true;
