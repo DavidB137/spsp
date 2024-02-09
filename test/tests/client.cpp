@@ -309,6 +309,39 @@ TEST_CASE("Unsubscribe actually removes topic from resubscribing", "[Client]") {
     });
 }
 
+TEST_CASE("Resubscribe", "[Client]") {
+    LocalLayers::DummyLocalLayer ll{};
+    Nodes::Client cl{&ll, CONF};
+
+    REQUIRE(cl.subscribe(TOPIC, nullptr));
+    REQUIRE(cl.subscribe(TOPIC_SUFFIX, nullptr));
+    REQUIRE(cl.subscribe(TOPIC_SL_WILD, nullptr));
+
+    cl.resubscribeAll();
+
+    CHECK(ll.getSentMsgsCount() == 6);
+    CHECK(ll.getSentMsgs() == SentMsgsSetT{
+        {
+            .type = LocalMessageType::SUB_REQ,
+            .addr = LocalAddr{},
+            .topic = TOPIC,
+            .payload = ""
+        },
+        {
+            .type = LocalMessageType::SUB_REQ,
+            .addr = LocalAddr{},
+            .topic = TOPIC_SUFFIX,
+            .payload = ""
+        },
+        {
+            .type = LocalMessageType::SUB_REQ,
+            .addr = LocalAddr{},
+            .topic = TOPIC_SL_WILD,
+            .payload = ""
+        },
+    });
+}
+
 TEST_CASE("Receive from local layer", "[Client]") {
     LocalLayers::DummyLocalLayer ll{};
     Nodes::Client cl{&ll, CONF};

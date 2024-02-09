@@ -95,6 +95,12 @@ namespace SPSP
          */
         virtual bool unsubscribe(const std::string& topic) = 0;
 
+        /**
+         * @brief Resubscribes to all topics
+         *
+         */
+        virtual void resubscribeAll() = 0;
+
     protected:
         /**
          * @brief Publishes version of this node
@@ -398,12 +404,6 @@ namespace SPSP
          */
         virtual bool receiveFar(const std::string& topic,
                                 const std::string& payload) = 0;
-
-        /**
-         * @brief Resubscribes to all topics
-         *
-         */
-        virtual void resubscribeAll() = 0;
 
     protected:
         /**

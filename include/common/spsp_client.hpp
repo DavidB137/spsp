@@ -235,6 +235,21 @@ namespace SPSP::Nodes
         }
 
         /**
+         * @brief Resubscribes to all topics
+         *
+         */
+        void resubscribeAll()
+        {
+            const std::scoped_lock lock(m_mutex);
+
+            m_subDB.forEach([this](const std::string& topic, const SubDBEntry&) {
+                if (!this->sendSubscribe(topic)) {
+                    SPSP_LOGW("Resubscribe to topic %s failed", topic.c_str());
+                }
+            });
+        }
+
+        /**
          * @brief Synchronizes clock with bridge
          *
          * @return true Synchronization successful

@@ -34,6 +34,8 @@ namespace SPSP::Nodes
 
         virtual bool unsubscribe(const std::string& topic) { return true; }
 
+        virtual void resubscribeAll() {}
+
     protected:
         virtual bool processProbeReq(const LocalMessageT& req,
                                      int rssi = NODE_RSSI_UNKNOWN) { return true; }
