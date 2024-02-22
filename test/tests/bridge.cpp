@@ -32,7 +32,6 @@ const std::string TOPIC_ML_WILD = "abc/#";
 const std::string PAYLOAD = "123";
 const Nodes::BridgeConfig CONF = {
     .reporting = {
-        .version = false,
         .probePayload = false,
         .rssiOnProbe = false,
         .rssiOnPub = false,
@@ -227,7 +226,7 @@ TEST_CASE("Receive from local layer", "[Bridge]") {
             .type = LocalMessageType::PROBE_RES,
             .addr = msg.addr,
             .topic = msg.topic,  // Topic is preserved
-            .payload = VERSION,
+            .payload = "",
         }});
     }
 

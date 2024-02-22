@@ -115,13 +115,12 @@ client at the same time.
 ##### Reporting
 
 Bridge reports (topics don't include far layer prefix):
-- **signal strength** to *client* nodes: Reported to `_report/rssi/{CLIENT_ADDR}` topic.
+- **Signal strength** to *client* nodes: Reported to `_report/rssi/{CLIENT_ADDR}` topic.
 - **Probe request payload**: Reported to `_report/probe_payload/{CLIENT_ADDR}`
   topic if it's not empty.
   By default it's empty on ESP-NOW clients, but you can set the value in
   `SPSP::LocalLayers::ESPNOW::Config::probePayload`.
   This feature is targeted for firmware version reporting.
-- **SPSP version**: Reported on startup to `_report/version` topic.
 
 Reporting can be configured or completely disabled in bridge configuration.
 

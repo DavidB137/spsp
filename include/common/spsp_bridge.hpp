@@ -37,7 +37,6 @@ namespace SPSP::Nodes
     {
         struct Reporting
         {
-            bool version = true;       //!< Report SPSP version during construction
             bool probePayload = true;  //!< Report non-empty payload of PROBE_REQ
             bool rssiOnProbe = true;   //!< Report RSSI on PROBE_REQ
             bool rssiOnPub = true;     //!< Report RSSI on PUB
@@ -122,11 +121,6 @@ namespace SPSP::Nodes
                            std::bind(&Bridge<TLocalLayer, TFarLayer>::subDBTick,
                            this)}
         {
-            // Publish version
-            if (conf.reporting.version) {
-                this->publishVersion();
-            }
-
             SPSP_LOGI("Initialized");
         }
 
@@ -309,7 +303,7 @@ namespace SPSP::Nodes
         {
             LocalMessageT res = req;
             res.type = LocalMessageType::PROBE_RES;
-            res.payload = SPSP::VERSION;
+            res.payload = "";
 
             // Publish RSSI
             if (m_conf.reporting.rssiOnProbe) {
