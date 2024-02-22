@@ -163,6 +163,16 @@ implementation of retransmission may be needed if required by your use-case
 > Packet fragmentation is not currently implemented in SPSP.
 > Binary payload is supported.
 
+> [!NOTE]
+> Espressif's ESP-NOW implementation limits number of paired devices to 20.
+> SPSP, however, isn't limited by this count, because we dynamically add and
+> remove paired device just before and after sending a single message (packet)
+> to that device. In SPSP, this only limits number of devices concurently
+> waiting for delivery confirmation. In theory, you can connect infinitely many
+> *clients* to single *bridge*.
+> Moreover, encryption is handled internally by SPSP, not by Espressif's
+> ESP-NOW implementation.
+
 ##### Clients using ESP-NOW
 
 *Clients* search for *bridges* to connect to using **probes**.
