@@ -30,5 +30,10 @@ namespace SPSP::LocalLayers::ESPNOW
 
         //! How long to wait for responses from bridge before switching to another WiFi channel
         std::chrono::milliseconds connectToBridgeChannelWaiting = std::chrono::milliseconds(100);
+
+        //! Payload of PROBE_REQ message
+        //! (gets reported to MQTT if `config.reporting.probePayload = true` on bridge)
+        //! You probably want to put compile date or firmware version here.
+        std::string probePayload = "";
     };
 } // namespace SPSP::LocalLayers::ESPNOW

@@ -143,7 +143,7 @@ namespace SPSP::LocalLayers::ESPNOW
             LocalMessageT msg = {};
             msg.addr = LocalAddrT::broadcast();
             msg.type = LocalMessageType::PROBE_REQ;
-            msg.payload = SPSP::VERSION;
+            msg.payload = m_conf.probePayload;
 
             // Convert to raw data
             std::string data;
