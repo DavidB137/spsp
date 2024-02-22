@@ -168,8 +168,8 @@ implementation of retransmission may be needed if required by your use-case
 > SPSP, however, isn't limited by this count, because we dynamically add and
 > remove paired device just before and after sending a single message (packet)
 > to that device. In SPSP, this only limits number of devices concurently
-> waiting for delivery confirmation. In theory, you can connect infinitely many
-> *clients* to single *bridge*.
+> waiting for delivery confirmation. In theory, you could connect infinitely
+> many *clients* to single *bridge*.
 > Moreover, encryption is handled internally by SPSP, not by Espressif's
 > ESP-NOW implementation.
 
