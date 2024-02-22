@@ -8,9 +8,10 @@ Main goal is to create highly reliable platform for message delivery from and
 to IoT devices while taking into account protocol-specific, performance and
 power restrictions.
 
-This project is currently in initial development phase,
-there's not yet a stable version and API may change.
-There shouldn't be drastic changes, however.
+> [!NOTE]
+> I personally have been running dozens of ESP32 devices on SPSP framework
+> using ESP-NOW[^espnow] and MQTT[^mqtt] since mid 2023 without any stability
+> issues.
 
 
 ## Usage
@@ -18,7 +19,8 @@ There shouldn't be drastic changes, however.
 ### Platform
 
 Implemenation is based on **ESP-IDF**[^espidf] framework, so all ESP32[^esp32]
-devices are supported and they are a key target of this project.
+devices (including subtypes) are supported and they are a key target of this
+project.
 
 Future plans include port to **OpenWrt**[^openwrt] (or other Linux based
 systems) – primarily for the *bridge* nodes as it's convenient to have
@@ -152,6 +154,14 @@ Internally, Espressif's implemenation does some sort of retransmission, but
 generally, it's not guaranteed that data will be delivered, so custom
 implementation of retransmission may be needed if required by your use-case
 (support is implemented).
+
+> [!IMPORTANT]
+> ESP-NOW is limited to 250 bytes of payload. SPSP's header is 20 bytes long,
+> so `len(topic) + len(payload)` must be at most 230 bytes!
+> You have to take that into account when sending data.
+> In other words, make data you publish and/or subscribe to short.
+> Packet fragmentation is not currently implemented in SPSP.
+> Binary payload is supported.
 
 ##### Clients using ESP-NOW
 
