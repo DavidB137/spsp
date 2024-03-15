@@ -1,0 +1,25 @@
+name: Build Linux library and binaries
+
+on:
+  push:
+    branches: ["*"]
+
+jobs:
+  build_linux:
+    runs-on: ubuntu-latest
+    steps:
+
+    - name: Install dependencies
+      run: sudo apt update && sudo apt-get install -y git make cmake
+
+    - name: Checkout
+      uses: actions/checkout@v3
+
+    - name: Configure
+      run: cd linux && mkdir build && cd build && cmake ..
+
+    - name: Build
+      run: cd linux/build && make
+
+    - name: Install to system
+      run: cd linux/build && sudo make install
