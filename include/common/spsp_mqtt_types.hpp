@@ -10,6 +10,7 @@
 #pragma once
 
 #include <chrono>
+#include <cstdint>
 
 #include "spsp_exception.hpp"
 
@@ -46,9 +47,9 @@ namespace SPSP::FarLayers::MQTT
              */
             std::string verifyCrt;
 
-            int keepalive = 120;    //!< Keepalive interval in seconds (set to 0 to disable keepalive)
-            int qos = 0;            //!< QoS for sent messages
-            bool retain = false;    //!< Retain flag for sent messages
+            uint32_t keepalive = 120;  //!< Keepalive interval in seconds (set to 0 to disable keepalive)
+            int qos = 0;               //!< QoS for sent messages and subscriptions
+            bool retain = false;       //!< Retain flag for sent messages
 
             std::chrono::milliseconds timeout = std::chrono::seconds(10);  //!< Connection timeout
         };
