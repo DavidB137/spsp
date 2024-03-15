@@ -84,7 +84,7 @@ namespace SPSP::LocalLayers::ESPNOW
          * @throw AdapterError when call to send function fails
          *        (not when packet undelivered)
          */
-        void send(const LocalAddrT& dst, const std::string& data) const;
+        void send(const LocalAddrT& dst, const std::string& data);
 
         /**
          * @brief Adds peer to peer list

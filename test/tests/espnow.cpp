@@ -46,7 +46,7 @@ const LocalMessageT MSG_BASE_PROBE_RES2 = {
 
 class AdapterSendSuccess : public LocalLayers::ESPNOW::Adapter
 {
-    void send(const LocalAddrT& dst, const std::string& data) const
+    void send(const LocalAddrT& dst, const std::string& data)
     {
         std::thread t(this->getSendCb(), dst, true);
         t.detach();
@@ -55,7 +55,7 @@ class AdapterSendSuccess : public LocalLayers::ESPNOW::Adapter
 
 class AdapterSendSuccessWait : public LocalLayers::ESPNOW::Adapter
 {
-    void send(const LocalAddrT& dst, const std::string& data) const
+    void send(const LocalAddrT& dst, const std::string& data)
     {
         std::thread t([this, &dst]() {
             std::this_thread::sleep_for(10ms);
@@ -67,7 +67,7 @@ class AdapterSendSuccessWait : public LocalLayers::ESPNOW::Adapter
 
 class AdapterSendFail : public LocalLayers::ESPNOW::Adapter
 {
-    void send(const LocalAddrT& dst, const std::string& data) const
+    void send(const LocalAddrT& dst, const std::string& data)
     {
         std::thread t(this->getSendCb(), dst, false);
         t.detach();
@@ -149,7 +149,7 @@ TEST_CASE("Send and receive the same message", "[ESPNOW]") {
 
     class Adapter : public LocalLayers::ESPNOW::Adapter
     {
-        void send(const LocalAddrT& dst, const std::string& data) const
+        void send(const LocalAddrT& dst, const std::string& data)
         {
             // Confirm delivery
             std::thread t1(this->getSendCb(), dst, true);

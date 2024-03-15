@@ -94,7 +94,7 @@ namespace SPSP::LocalLayers::ESPNOW
         return m_sendCb;
     }
 
-    void Adapter::send(const LocalAddrT& dst, const std::string& data) const
+    void Adapter::send(const LocalAddrT& dst, const std::string& data)
     {
         // Get MAC address
         esp_now_peer_info_t peerInfo = {};
