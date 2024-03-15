@@ -12,6 +12,19 @@ jobs:
     - name: Install dependencies
       run: sudo apt update && sudo apt-get install -y git make cmake
 
+    - name: Install Paho MQTT C library
+      run: |
+        git clone -b v1.3.13 https://github.com/eclipse/paho.mqtt.c.git /tmp/paho
+        mkdir /tmp/paho-build
+        cd /tmp/paho-build
+        cmake \
+          -DPAHO_WITH_SSL=TRUE \
+          -DPAHO_ENABLE_TESTING=FALSE \
+          -DPAHO_BUILD_SAMPLES=FALSE \
+          /tmp/paho
+        make
+        sudo make install
+
     - name: Checkout
       uses: actions/checkout@v3
 
