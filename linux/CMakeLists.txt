@@ -52,3 +52,8 @@ install(FILES
   "${CMAKE_CURRENT_BINARY_DIR}/spspConfigVersion.cmake"
   DESTINATION "${CMAKE_INSTALL_LIBDIR}/cmake/spsp"
 )
+
+# ESP-NOW bridge binary
+add_executable(spsp_bridge_espnow bridge_espnow.cpp)
+target_link_libraries(spsp_bridge_espnow PRIVATE spsp Threads::Threads)
+install(TARGETS spsp_bridge_espnow DESTINATION "${CMAKE_INSTALL_BINDIR}")

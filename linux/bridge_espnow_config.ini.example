@@ -1,0 +1,82 @@
+; Far layer
+; One of: mqtt, local_broker
+far_layer=mqtt
+
+; Logging verbosity
+; One of: debug, info, warn, error, off
+; Default: info
+log_level=info
+
+[espnow]
+; Wireless interface for ESP-NOW (must be in monitor mode - 802.11 radiotap)
+interface=phy0-mon0
+
+; SSID (32-bit unsigned number)
+ssid=1234567890
+
+; Password (must be 32 bytes long)
+password=X6SONhP6xNHtj5niA3F1ojXLcx5sccTk
+
+[mqtt]
+; URI of MQTT server
+uri=mqtts://test.mosquitto.org
+
+; Path to server verification certificate (CA)
+verify_crt=/etc/spsp/ca.crt
+
+; Keepalive interval in seconds (0 to disable keepalive)
+; Default: 120
+keepalive=120
+
+; QoS for sent messages and subscriptions
+; One of: 0, 1, 2
+; Default: 0
+qos=0
+
+; Retain flag for sent messages
+; Default: false
+retain=false
+
+; Connection timeout in ms
+; Default: 10000
+conn_timeout=10
+
+; Username
+username=user
+
+; Password
+password=pass
+
+; Client ID
+; Default: `spsp_xxx`, where `xxx` is MAC address.
+client_id=client001
+
+; Path to authentication TLS certificate
+crt=/etc/spsp/client.crt
+
+; Path to private key for TLS authentication
+crt_key=/etc/spsp/client.key
+
+; Last Will topic
+lwt_topic=last_will
+
+; Last Will message
+lwt_msg=Hello!
+
+; Last Will QoS
+; One of: 0, 1, 2
+; Default: 0
+lwt_qos=0
+
+; Last Will retain flag
+; Default: false
+lwt_retain=false
+
+; Topic prefix for publishing
+; Default: spsp
+topic_prefix=spsp
+
+[local_broker]
+; Topic prefix for publishing
+; Default: spsp
+topic_prefix=spsp
