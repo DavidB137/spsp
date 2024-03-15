@@ -47,7 +47,8 @@ namespace SPSP::FarLayers::MQTT
                                clientId.c_str(), MQTTCLIENT_PERSISTENCE_NONE,
                                nullptr);
         if (ret != MQTTASYNC_SUCCESS) {
-            throw AdapterError("MQTT handle create failed");
+            throw AdapterError(std::string("MQTT handle create failed: ") +
+                               MQTTAsync_strerror(ret));
         }
 
         // Set callbacks
@@ -55,7 +56,8 @@ namespace SPSP::FarLayers::MQTT
                                      &Adapter::subMsgCb, nullptr);
         if (ret != MQTTASYNC_SUCCESS) {
             MQTTAsync_destroy(&m_mqtt);
-            throw AdapterError("Set underlaying callbacks failed");
+            throw AdapterError(std::string("Set underlaying callbacks failed: ") +
+                               MQTTAsync_strerror(ret));
         }
 
         // Establish connection
@@ -99,7 +101,11 @@ namespace SPSP::FarLayers::MQTT
         connOpts.context = this;
 
         // Connect
-        return MQTTAsync_connect(m_mqtt, &connOpts) == MQTTASYNC_SUCCESS;
+        auto ret = MQTTAsync_connect(m_mqtt, &connOpts);
+        if (ret != MQTTASYNC_SUCCESS) {
+            SPSP_LOGE("Connect: %s", MQTTAsync_strerror(ret));
+        }
+        return ret == MQTTASYNC_SUCCESS;
     }
 
     bool Adapter::publish(const std::string& topic, const std::string& payload)
@@ -182,7 +188,8 @@ namespace SPSP::FarLayers::MQTT
 
     void Adapter::connFailureCb(void* ctx, MQTTAsync_failureData* resp)
     {
-        SPSP_LOGE("Connection failed");
+        SPSP_LOGE("Connection failed: %s (%s)", MQTTAsync_strerror(resp->code),
+                  resp->message ? resp->message : "no additional info");
     }
 
     void Adapter::connLostCb(void* ctx, char* cause)
