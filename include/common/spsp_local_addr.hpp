@@ -32,6 +32,11 @@ namespace SPSP
             return addr == other.addr;
         }
 
+        bool operator!=(const LocalAddr& other) const
+        {
+            return !this->operator==(other);
+        }
+
         /**
          * @brief Checks whether the address is empty
          *

@@ -60,7 +60,7 @@ namespace SPSP::LocalLayers::ESPNOW
          * @param dst Destination address
          * @param data Raw data to be sent
          */
-        virtual void send(const LocalAddrT& dst, const std::string& data) const = 0;
+        virtual void send(const LocalAddrT& dst, const std::string& data) = 0;
 
         /**
          * @brief Adds peer to peer list

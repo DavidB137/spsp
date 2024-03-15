@@ -37,7 +37,15 @@ namespace SPSP::FarLayers::MQTT
         {
             std::string uri;        //!< Complete URI to connect to broker
                                     //!< e.g. mqtt://username:password@mqtt.eclipseprojects.io:1884/path
-            std::string verifyCrt;  //!< Verification TLS certificate (if TLS is used)
+
+            /**
+             * Verification TLS certificate (if TLS is used)
+             *
+             * On ESP platform, certificate content is expected.
+             * On Linux platform, path to certificate file is expected.
+             */
+            std::string verifyCrt;
+
             int keepalive = 120;    //!< Keepalive interval in seconds (set to 0 to disable keepalive)
             int qos = 0;            //!< QoS for sent messages
             bool retain = false;    //!< Retain flag for sent messages
@@ -49,10 +57,34 @@ namespace SPSP::FarLayers::MQTT
         {
             std::string username;  //!< Username for connection (can also be set by URI)
             std::string password;  //!< Password for connection (can also be set by URI)
-            std::string clientId;  //!< Client ID (default is: `spsp_xxx`, where `xxx` is MAC address)
-            std::string crt;       //!< Authentication TLS certificate (if needed).
-                                   //!< If set, also `authKey` must be provided.
-            std::string crtKey;    //!< Private key for TLS authentication
+
+            /**
+             * Client ID
+             *
+             * Default is: `spsp_xxx`, where `xxx` is MAC address.
+             * Be aware that on Linux platform, MAC address is 00:00:00:00:00:00
+             * by default and the real interface MAC address is set by
+             * constructor of `SPSP::LocalLayers::ESPNOW::Adapter`.
+             */
+            std::string clientId;
+
+            /**
+             * Authentication TLS certificate (if needed).
+             * 
+             * If set, also `authKey` must be provided.
+             *
+             * On ESP platform, certificate content is expected.
+             * On Linux platform, path to certificate file is expected.
+             */
+            std::string crt;
+
+            /**
+             * Private key for TLS authentication
+             *
+             * On ESP platform, certificate content is expected.
+             * On Linux platform, path to certificate file is expected.
+             */
+            std::string crtKey;
         };
 
         struct LastWill
@@ -63,9 +95,15 @@ namespace SPSP::FarLayers::MQTT
             bool retain = false;  //!< LWT retain flag
         };
 
-        std::string pubTopicPrefix = "spsp";  //!< Topic format for publishing is:
-                                              //!< %TOPIC_PREFIX%/%ADDR%/%MSG_TOPIC%
-                                              //!< TODO: use C++20 format
+        /**
+         * Topic prefix
+         *
+         * Topic format for publishing is: %TOPIC_PREFIX%/%ADDR%/%MSG_TOPIC%
+         *
+         * TODO: use C++20 format
+         */
+        std::string pubTopicPrefix = "spsp";
+
         Connection connection;
         Auth auth;
         LastWill lastWill;

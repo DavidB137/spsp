@@ -11,8 +11,19 @@
 
 #include <cstdlib>
 
+#include "spsp_exception.hpp"
+
 namespace SPSP
 {
+    /**
+     * @brief Random generator error
+     *
+     */
+    class RandomGeneratorError : public SPSP::Exception
+    {
+        using SPSP::Exception::Exception;
+    };
+
     /**
      * @brief Random generator interface
      *
@@ -28,7 +39,8 @@ namespace SPSP
          *
          * @param buf Buffer
          * @param len Length
+         * @throw RandomGeneratorError Random generator error if generation fails.
          */
-        virtual void bytes(void* buf, size_t len) const noexcept = 0;
+        virtual void bytes(void* buf, size_t len) const = 0;
     };
 } // namespace SPSP

@@ -36,3 +36,6 @@
 
 # Doxygen
 docs_doxygen
+
+# Build directories
+build/
