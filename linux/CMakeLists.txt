@@ -23,7 +23,7 @@ add_library(spsp SHARED ${lib_srcs})
 set_target_properties(spsp PROPERTIES
     VERSION ${PROJECT_VERSION}
     SOVERSION ${PROJECT_VERSION_MAJOR})
-target_compile_definitions(spsp PUBLIC SPSP_LOG_NO_COLORS=${SPSP_LOG_NO_COLORS})
+target_compile_definitions(spsp PUBLIC SPSP_LOG_NO_COLORS=$<BOOL:${SPSP_LOG_NO_COLORS}>)
 target_include_directories(spsp PUBLIC
   "$<BUILD_INTERFACE:${CMAKE_CURRENT_LIST_DIR}/../include/common>"
   "$<BUILD_INTERFACE:${CMAKE_CURRENT_LIST_DIR}/../include/linux>")
