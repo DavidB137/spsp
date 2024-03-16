@@ -17,7 +17,6 @@
 namespace SPSP::LocalLayers::ESPNOW::IEEE80211
 {
     static constexpr uint8_t FRAME_TYPE_ACTION = 0xD0;
-    static constexpr uint8_t FRAME_TYPE_ACK = 0xD4;
 
     //! Length of radiotap fields
     using RadiotapTSFT = uint64_t;
@@ -149,6 +148,7 @@ namespace SPSP::LocalLayers::ESPNOW::IEEE80211
         TXRadiotap radiotap;
         ActionFrame action;
     };
+    #pragma pack(pop)
 
     //! Maximum size of packet including payload
     //! Just exaggerated approximation

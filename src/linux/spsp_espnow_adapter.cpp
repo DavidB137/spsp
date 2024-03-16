@@ -64,8 +64,7 @@ namespace SPSP::LocalLayers::ESPNOW
         close(fd);
     }
 
-    Adapter::Adapter(const std::string& ifname, uint8_t retransmits)
-        : m_retransmits{retransmits}
+    Adapter::Adapter(const std::string& ifname)
     {
         int ret;
 
@@ -159,42 +158,35 @@ namespace SPSP::LocalLayers::ESPNOW
             { 0x07, 0, 0, 0x00000000 },
             { 0x50, 0, 0, 0x00000000 },
             { 0x54, 0, 0, 0x000000FC },
-            { 0x15, 0, 28, 0x000000D0 },
+            { 0x15, 0, 29, 0x000000D0 },
             { 0x50, 0, 0, 0x00000000 },
-            { 0x45, 34, 0, 0x00000004 },
+            { 0x45, 27, 0, 0x00000004 },
             { 0x45, 0, 9, 0x00000008 },
             { 0x50, 0, 0, 0x00000001 },
             { 0x45, 0, 7, 0x00000001 },
             { 0x40, 0, 0, 0x00000012 },
             { 0x15, 0, 2, macPart2 },
             { 0x48, 0, 0, 0x00000010 },
-            { 0x15, 10, 27, macPart1 },
-            { 0x15, 0, 26, 0xFFFFFFFF },
+            { 0x15, 10, 20, macPart1 },
+            { 0x15, 0, 19, 0xFFFFFFFF },
             { 0x48, 0, 0, 0x00000010 },
-            { 0x15, 7, 24, 0x0000FFFF },
+            { 0x15, 7, 17, 0x0000FFFF },
             { 0x40, 0, 0, 0x00000006 },
             { 0x15, 0, 2, macPart2 },
             { 0x48, 0, 0, 0x00000004 },
-            { 0x15, 3, 20, macPart1 },
-            { 0x15, 0, 19, 0xFFFFFFFF },
+            { 0x15, 3, 13, macPart1 },
+            { 0x15, 0, 12, 0xFFFFFFFF },
             { 0x48, 0, 0, 0x00000004 },
-            { 0x15, 0, 17, 0x0000FFFF },
+            { 0x15, 0, 10, 0x0000FFFF },
             { 0x40, 0, 0, 0x00000018 },
-            { 0x15, 0, 15, 0x7F18FE34 },
+            { 0x15, 0, 8, 0x7F18FE34 },
             { 0x50, 0, 0, 0x00000020 },
-            { 0x15, 0, 13, 0x000000DD },
+            { 0x15, 0, 6, 0x000000DD },
             { 0x40, 0, 0, 0x00000021 },
             { 0x54, 0, 0, 0x00FFFFFF },
-            { 0x15, 0, 10, 0x0018FE34 },
+            { 0x15, 0, 3, 0x0018FE34 },
             { 0x50, 0, 0, 0x00000025 },
-            { 0x15, 7, 8, 0x00000004 },
-            { 0x50, 0, 0, 0x00000000 },
-            { 0x54, 0, 0, 0x000000FC },
-            { 0x15, 0, 5, 0x000000D4 },
-            { 0x40, 0, 0, 0x00000006 },
-            { 0x15, 0, 3, macPart2 },
-            { 0x48, 0, 0, 0x00000004 },
-            { 0x15, 0, 1, macPart1 },
+            { 0x15, 0, 1, 0x00000004 },
             { 0x06, 0, 0, 0x00040000 },
             { 0x06, 0, 0, 0x00000000 },
         };
@@ -228,33 +220,27 @@ namespace SPSP::LocalLayers::ESPNOW
         // Copy payload
         memcpy(packet->action.content.payload, data.c_str(), data.length());
 
-        bool delivered;
-        size_t deliveryAttempts = 0;
-        do {
-            {   // Lock
-                std::unique_lock lock{m_mutex};
+        SPSP_LOGD("Send: sending %zu bytes on 802.11", len);
 
-                SPSP_LOGD("Send: sending %zu bytes on 802.11, attempt %zu",
-                          len, deliveryAttempts);
+        // Write to send buffer
+        if (write(m_sock.fd, buf, len) < 0) {
+            throw AdapterError(std::string("Send: ") + strerror(errno));
+        }
 
-                // Write to send buffer
-                if (write(m_sock.fd, buf, len) < 0) {
-                    throw AdapterError(std::string("Send: ") + strerror(errno));
-                }
-
-                // Wait for delivery confirmation
-                delivered = m_ackCV.wait_for(lock, 50ms) == std::cv_status::no_timeout;
-            }
-
-            if (delivered) {
-                break;
-            } else {
-                deliveryAttempts++;
-            }
-        } while (deliveryAttempts < m_retransmits);
-
+        // Mark packet as delivered successfully
+        // TODO: check delivery status
+        // I'm not aware of reasonable method for querying delivery status
+        // (whether acknowledgement frame for this action frame has been
+        // received).
+        // Waiting for ACK with timeout is inefficient, because it blocks
+        // the interface for too long when many frames are lost.
+        // For now, I'll stick to unconfirmed delivery, as Linux post is
+        // primarily meant for bridge nodes and there's no logic for
+        // retransmissions anyway.
+        // Reference for future self:
+        // https://www.kernel.org/doc/html/v6.8/networking/mac80211-injection.html
         if (this->getSendCb() != nullptr) {
-            std::thread t(this->getSendCb(), dst, delivered);
+            std::thread t(this->getSendCb(), dst, true);
             t.detach();
         }
     }
@@ -322,9 +308,6 @@ namespace SPSP::LocalLayers::ESPNOW
         switch (frame->type) {
         case FRAME_TYPE_ACTION:
             this->processIEEE80211RawAction(data, len, rpf.rssi);
-            break;
-        case FRAME_TYPE_ACK:
-            this->processIEEE80211RawAck(data, len, rpf.rssi);
             break;
         default:
             SPSP_LOGD("Receive raw: received unknown frame type: 0x%x",
@@ -442,11 +425,5 @@ namespace SPSP::LocalLayers::ESPNOW
 
         // Run independently
         t.detach();
-    }
-
-    void Adapter::processIEEE80211RawAck(const uint8_t* data, size_t len, int rssi)
-    {
-        SPSP_LOGD("Receive raw ACK");
-        m_ackCV.notify_one();
     }
 } // namespace SPSP::LocalLayers::ESPNOW

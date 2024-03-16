@@ -9,9 +9,7 @@
 
 #pragma once
 
-#include <condition_variable>
 #include <functional>
-#include <mutex>
 #include <string>
 #include <thread>
 
@@ -55,12 +53,9 @@ namespace SPSP::LocalLayers::ESPNOW
             ~EventFD();
         };
 
-        std::mutex m_mutex;                             //!< Mutex to prevent race conditions
-        std::condition_variable m_ackCV;                //!< Conditional variable for ACKs
         RawSocket m_sock;                               //!< Socket
         EventFD m_eventFd;                              //!< Epoll event file descriptor
         int m_epollFd;                                  //!< Epoll file descriptor
-        uint8_t m_retransmits;                          //!< Number of maximum retries to deliver the packet
         LocalAddrT m_localAddr;                         //!< Cached local MAC address
         AdapterRecvCb m_recvCb = nullptr;               //!< Receive callback
         AdapterSendCb m_sendCb = nullptr;               //!< Send callback
@@ -73,11 +68,10 @@ namespace SPSP::LocalLayers::ESPNOW
          * Starts packet capture on 802.11 interface identified by `ifname`.
          *
          * @param ifname Interface name (must be in monitor mode)
-         * @param retransmits Number of maximum retries to deliver the packet
          *
          * @throw AdapterError when any call to underlaying library fails
          */
-        Adapter(const std::string& ifname, uint8_t retransmits = 5);
+        Adapter(const std::string& ifname);
 
         /**
          * @brief Destroys the adapter
