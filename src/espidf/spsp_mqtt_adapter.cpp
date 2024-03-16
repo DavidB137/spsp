@@ -39,7 +39,7 @@ namespace SPSP::FarLayers::MQTT
             break;
 
         case MQTT_EVENT_DISCONNECTED:
-            SPSP_LOGD("Disconnected, MQTT will reconnect automatically...");
+            SPSP_LOGW("Disconnected, MQTT will reconnect automatically...");
             break;
 
         case MQTT_EVENT_DATA:

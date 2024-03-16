@@ -139,7 +139,7 @@ namespace SPSP::Nodes
                       topic.c_str(), payload.c_str());
 
             if (topic.empty()) {
-                SPSP_LOGE("Can't publish to empty topic");
+                SPSP_LOGW("Can't publish to empty topic");
                 return false;
             }
 
@@ -170,7 +170,7 @@ namespace SPSP::Nodes
             SPSP_LOGD("Subscribing to topic '%s'", topic.c_str());
 
             if (topic.empty()) {
-                SPSP_LOGE("Can't subscribe to empty topic");
+                SPSP_LOGW("Can't subscribe to empty topic");
                 return false;
             }
 
@@ -205,7 +205,7 @@ namespace SPSP::Nodes
             SPSP_LOGD("Unsubscribing from topic '%s'", topic.c_str());
 
             if (topic.empty()) {
-                SPSP_LOGE("Can't unsubscribe from empty topic");
+                SPSP_LOGW("Can't unsubscribe from empty topic");
                 return false;
             }
 
@@ -220,7 +220,7 @@ namespace SPSP::Nodes
                 const std::scoped_lock lock(m_mutex);
                 if (!m_subDB.remove(topic)) {
                     // Not subscribed to this topic
-                    SPSP_LOGD("Can't unsubscribe from not-subscribed topic '%s'",
+                    SPSP_LOGW("Can't unsubscribe from not-subscribed topic '%s'",
                               topic.c_str());
                     return false;
                 }

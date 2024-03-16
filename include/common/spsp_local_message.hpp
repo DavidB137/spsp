@@ -86,9 +86,9 @@ namespace SPSP
         std::string toString() const
         {
             return std::string{localMessageTypeToStr(type)} + " " +
-                (addr.str.length() > 0 ? addr.str : ".") + " " +
-                (topic.length() > 0    ? topic   : "-") + " " +
-                (payload.length() > 0  ? payload : "-");
+                (addr.str.length() > 0 ? addr.str : "(no addr)") + " " +
+                (topic.length() > 0    ? topic   : "(no topic)") + " " +
+                "(" + std::to_string(payload.length()) + " B payload)";
         }
 
         bool operator==(const LocalMessage& other) const

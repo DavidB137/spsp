@@ -135,7 +135,7 @@ namespace SPSP::WiFi
 
         SPSP_ERROR_CHECK(esp_wifi_set_channel(ch, WIFI_SECOND_CHAN_NONE),
                          ConnectionError("Set WiFi channel failed"));
-        SPSP_LOGI("Set channel %d", ch);
+        SPSP_LOGD("Set channel %d", ch);
     }
 
     void Station::setChannelRestrictions(const ChannelRestrictions& rest)
@@ -193,7 +193,7 @@ namespace SPSP::WiFi
 
         SPSP_ERROR_CHECK(nvsInitCode, ConnectionError("NVS init failed"));
 
-        SPSP_LOGI("NVS initialized");
+        SPSP_LOGD("NVS initialized");
     }
 
     void Station::initNetIf()
@@ -216,7 +216,7 @@ namespace SPSP::WiFi
         hostname += macStr;
         esp_netif_set_hostname(m_netIf, hostname.c_str());
 
-        SPSP_LOGI("Network interface initialized");
+        SPSP_LOGD("Network interface initialized");
     }
 
     void Station::registerEventHandlers()

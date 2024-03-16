@@ -190,7 +190,7 @@ namespace SPSP::Nodes
                       topic.c_str(), payload.c_str());
 
             if (topic.empty()) {
-                SPSP_LOGE("Can't publish to empty topic");
+                SPSP_LOGW("Can't publish to empty topic");
                 return false;
             }
 
@@ -216,7 +216,7 @@ namespace SPSP::Nodes
             SPSP_LOGD("Subscribing locally to topic '%s'", topic.c_str());
 
             if (topic.empty()) {
-                SPSP_LOGE("Can't subscribe to empty topic");
+                SPSP_LOGW("Can't subscribe to empty topic");
                 return false;
             }
 
@@ -269,7 +269,7 @@ namespace SPSP::Nodes
             SPSP_LOGD("Unsubscribing locally from topic '%s'", topic.c_str());
 
             if (topic.empty()) {
-                SPSP_LOGE("Can't unsubscribe from empty topic");
+                SPSP_LOGW("Can't unsubscribe from empty topic");
                 return false;
             }
 
@@ -353,7 +353,7 @@ namespace SPSP::Nodes
             }
 
             if (req.topic.empty()) {
-                SPSP_LOGE("Can't publish to empty topic");
+                SPSP_LOGW("Can't publish to empty topic");
                 return false;
             }
 
@@ -378,7 +378,7 @@ namespace SPSP::Nodes
             }
 
             if (req.topic.empty()) {
-                SPSP_LOGE("Can't subscribe to empty topic");
+                SPSP_LOGW("Can't subscribe to empty topic");
                 return false;
             }
 
@@ -433,7 +433,7 @@ namespace SPSP::Nodes
             }
 
             if (req.topic.empty()) {
-                SPSP_LOGE("Can't unsubscribe from empty topic");
+                SPSP_LOGW("Can't unsubscribe from empty topic");
                 return false;
             }
 
@@ -498,8 +498,8 @@ namespace SPSP::Nodes
         bool publishSubData(const LocalAddrT& addr, const std::string& topic,
                             const std::string& payload)
         {
-            SPSP_LOGD("Sending SUB_DATA to %s: topic '%s', payload '%s'",
-                      addr.str.c_str(), topic.c_str(), payload.c_str());
+            SPSP_LOGD("Sending SUB_DATA to %s: topic '%s'",
+                      addr.str.c_str(), topic.c_str());
 
             LocalMessageT msg = {};
             msg.addr = addr;
@@ -600,7 +600,7 @@ namespace SPSP::Nodes
                     m_subDB.remove(topic);
                     SPSP_LOGD("SubDB: Removed unused topic '%s'", topic.c_str());
                 } else {
-                    SPSP_LOGE("SubDB: Topic '%s' can't be unsubscribed. Will try again in next tick.",
+                    SPSP_LOGW("SubDB: Topic '%s' can't be unsubscribed. Will try again in next tick.",
                               topic.c_str());
                 }
             }

@@ -196,7 +196,7 @@ namespace SPSP::FarLayers::MQTT
     {
         auto inst = static_cast<Adapter*>(ctx);
 
-        SPSP_LOGI("Connection lost. Attempting reconnection...");
+        SPSP_LOGW("Connection lost. Attempting reconnection...");
         inst->connect();
     }
 
