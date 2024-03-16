@@ -150,16 +150,6 @@ namespace SPSP::LocalLayers::ESPNOW::IEEE80211
         ActionFrame action;
     };
 
-    /**
-     * @brief Whole packet structure of ACK frame over radiotap
-     */
-    struct ACKFrameWithRadiotap
-    {
-        TXRadiotap radiotap;
-        GenericFrame ack;
-    };
-    #pragma pack(pop)
-
     //! Maximum size of packet including payload
     //! Just exaggerated approximation
     static constexpr size_t MAX_PACKET_SIZE = 512;

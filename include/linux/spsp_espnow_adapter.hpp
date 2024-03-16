@@ -196,15 +196,5 @@ namespace SPSP::LocalLayers::ESPNOW
          * @param rssi Received signal strength indicator (in dBm)
          */
         void processIEEE80211RawAck(const uint8_t* data, size_t len, int rssi);
-
-        /**
-         * @brief Sends acknowledgement packet
-         *
-         * Injects IEEE 802.11 ACK packet onto the packet capture interface.
-         * Called internally after each received action packet.
-         *
-         * @param dst Destination address
-         */
-        void sendACK(const LocalAddrT& dst);
     };
 } // namespace SPSP::LocalLayers::ESPNOW

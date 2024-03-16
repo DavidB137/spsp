@@ -259,31 +259,6 @@ namespace SPSP::LocalLayers::ESPNOW
         }
     }
 
-    void Adapter::sendACK(const LocalAddrT& dst)
-    {
-        uint8_t buf[MAX_PACKET_SIZE] = {};
-        auto packet = reinterpret_cast<ACKFrameWithRadiotap*>(buf);
-        size_t len = sizeof(ACKFrameWithRadiotap);
-
-        // Populate defaults
-        *packet = ACKFrameWithRadiotap{};
-
-        // Populate fields
-        packet->ack.type = FRAME_TYPE_ACK;
-        dst.toMAC(packet->ack.addr1);
-
-        {
-            std::unique_lock lock{m_mutex};
-
-            // Write to send buffer
-            if (write(m_sock.fd, buf, len) < 0) {
-                SPSP_LOGE("Send ACK: failed");
-            } else {
-                SPSP_LOGD("Send ACK: sent");
-            }
-        }
-    }
-
     void Adapter::handlerThread()
     {
         constexpr size_t EVENTS_LEN = 1;
@@ -451,12 +426,6 @@ namespace SPSP::LocalLayers::ESPNOW
         if (len < sizeof(ActionFrame) + payloadLen) {
             SPSP_LOGD("Receive raw action: packet with payload has invalid size");
             return;
-        }
-
-        // Send ACK if message isn't broadcast
-        LocalAddrT dst{action->dst};
-        if (dst != LocalAddrT::broadcast()) {
-            this->sendACK(action->src);
         }
 
         auto cb = this->getRecvCb();
