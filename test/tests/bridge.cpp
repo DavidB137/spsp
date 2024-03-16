@@ -246,7 +246,8 @@ TEST_CASE("Receive from local layer", "[Bridge]") {
         std::this_thread::sleep_for(10ms);
 
         CHECK(ll.getSentMsgs() == SentMsgsSetT{});
-        CHECK(fl.getPubs() == PubsSetT{msg.toString()});
+        CHECK(fl.getPubs() == PubsSetT{"PUB " + msg.addr.str + " " +
+                                       msg.topic + " " + msg.payload });
     }
 
     SECTION("SUB_REQ") {
