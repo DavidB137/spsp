@@ -175,10 +175,10 @@ namespace SPSP
                                             - processingTimeBegin);
 
             if (processed) {
-                SPSP_LOGI("Message processed (%" PRId64 " ms): %s",
+                SPSP_LOGD("Message processed (%" PRId64 " ms): %s",
                           processingDuration.count(), msg.toString().c_str());
             } else {
-                SPSP_LOGE("Message not processed (%" PRId64 " ms): %s",
+                SPSP_LOGW("Message not processed (%" PRId64 " ms): %s",
                           processingDuration.count(), msg.toString().c_str());
             }
         }
@@ -225,9 +225,9 @@ namespace SPSP
             bool delivered = m_ll->send(msg);
 
             if (delivered) {
-                SPSP_LOGI("Message delivered: %s", msg.toString().c_str());
+                SPSP_LOGD("Message delivered: %s", msg.toString().c_str());
             } else {
-                SPSP_LOGE("Message not delivered: %s", msg.toString().c_str());
+                SPSP_LOGW("Message not delivered: %s", msg.toString().c_str());
             }
 
             // Call receive/send callback
