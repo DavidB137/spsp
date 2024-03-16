@@ -56,8 +56,12 @@ namespace SPSP::FarLayers::MQTT
         SPSP_LOGD("Publish: payload '%s' to topic '%s' from %s",
                   payload.c_str(), topic.c_str(), src.c_str());
 
-        std::string topicExtended = m_conf.pubTopicPrefix + "/" + src + "/"
-                                  + topic;
+        std::string topicPrefix = "";
+        if (m_conf.pubTopicPrefix.length() > 0) {
+            topicPrefix = m_conf.pubTopicPrefix + "/";
+        }
+
+        std::string topicExtended = topicPrefix + src + "/" + topic;
 
         return m_adapter.publish(topicExtended, payload);
     }

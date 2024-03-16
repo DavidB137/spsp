@@ -19,6 +19,42 @@ const std::string TOPIC_PUBLISH = TOPIC_PREFIX + "/" + SRC + "/" + TOPIC;
 const std::string TOPIC_PUBLISH_WILDCARD = TOPIC_PREFIX + "/" + SRC + "/" + TOPIC_FOR_WILDCARD;
 const std::string TOPIC_WILDCARD = TOPIC_PREFIX + "/" + SRC + "/+/" + TOPIC;
 
+class Node : IFarNode<FarLayers::LocalBroker::LocalBroker>
+{
+public:
+    bool called = false;
+    std::string receivedTopic;
+    std::string receivedPayload;
+
+    using IFarNode::IFarNode;
+
+    virtual bool publish(const std::string& topic,
+                         const std::string& payload)
+    {
+        return true;
+    }
+
+    virtual bool subscribe(const std::string& topic, SubscribeCb cb)
+    {
+        return true;
+    }
+
+    virtual bool unsubscribe(const std::string& topic) {
+        return true;
+    }
+
+    virtual bool receiveFar(const std::string& topic,
+                            const std::string& payload)
+    {
+        called = true;
+        receivedTopic = topic;
+        receivedPayload = payload;
+        return true;
+    }
+
+    virtual void resubscribeAll() {}
+};
+
 TEST_CASE("Check return values", "[LocalBroker]") {
     FarLayers::LocalBroker::LocalBroker lb{TOPIC_PREFIX};
 
@@ -50,42 +86,6 @@ TEST_CASE("Check return values", "[LocalBroker]") {
 }
 
 TEST_CASE("Receive subscription data", "[LocalBroker]") {
-    class Node : IFarNode<FarLayers::LocalBroker::LocalBroker>
-    {
-    public:
-        bool called = false;
-        std::string receivedTopic;
-        std::string receivedPayload;
-
-        using IFarNode::IFarNode;
-
-        virtual bool publish(const std::string& topic,
-                             const std::string& payload)
-        {
-            return true;
-        }
-
-        virtual bool subscribe(const std::string& topic, SubscribeCb cb)
-        {
-            return true;
-        }
-
-        virtual bool unsubscribe(const std::string& topic) {
-            return true;
-        }
-
-        virtual bool receiveFar(const std::string& topic,
-                                const std::string& payload)
-        {
-            called = true;
-            receivedTopic = topic;
-            receivedPayload = payload;
-            return true;
-        }
-
-        virtual void resubscribeAll() {}
-    };
-
     FarLayers::LocalBroker::LocalBroker lb{TOPIC_PREFIX};
     Node node{&lb};
 
@@ -128,4 +128,16 @@ TEST_CASE("Receive subscription data", "[LocalBroker]") {
         std::this_thread::sleep_for(10ms);
         CHECK(!node.called);
     }
+}
+
+TEST_CASE("Check empty topic prefix", "[LocalBroker]") {
+    FarLayers::LocalBroker::LocalBroker lb{""};
+    Node node{&lb};
+
+    CHECK(lb.subscribe(SRC + "/" + TOPIC));
+    CHECK(lb.publish(SRC, TOPIC, PAYLOAD));
+    std::this_thread::sleep_for(10ms);
+    CHECK(node.called);
+    CHECK(node.receivedTopic == SRC + "/" + TOPIC);
+    CHECK(node.receivedPayload == PAYLOAD);
 }

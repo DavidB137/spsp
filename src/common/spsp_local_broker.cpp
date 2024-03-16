@@ -34,7 +34,12 @@ namespace SPSP::FarLayers::LocalBroker
         SPSP_LOGD("Publish: payload '%s' to topic '%s' from %s",
                   payload.c_str(), topic.c_str(), src.c_str());
 
-        std::string topicExtended = m_topicPrefix + "/" + src + "/" + topic;
+        std::string topicPrefix = "";
+        if (m_topicPrefix.length() > 0) {
+            topicPrefix = m_topicPrefix + "/";
+        }
+
+        std::string topicExtended = topicPrefix + src + "/" + topic;
 
         // Check if node is subscribed to this topic
         bool subscribed;
