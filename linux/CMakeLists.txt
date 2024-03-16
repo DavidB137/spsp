@@ -7,6 +7,8 @@ set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_THREAD_PREFER_PTHREAD TRUE)
 set(THREADS_PREFER_PTHREAD_FLAG TRUE)
 
+set(SPSP_LOG_NO_COLORS FALSE CACHE BOOL "Don't use colored logger output")
+
 file(GLOB lib_srcs CONFIGURE_DEPENDS
   "../src/common/*.cpp"
   "../src/linux/*.cpp"
@@ -21,6 +23,7 @@ add_library(spsp SHARED ${lib_srcs})
 set_target_properties(spsp PROPERTIES
     VERSION ${PROJECT_VERSION}
     SOVERSION ${PROJECT_VERSION_MAJOR})
+target_compile_definitions(spsp PUBLIC SPSP_LOG_NO_COLORS=${SPSP_LOG_NO_COLORS})
 target_include_directories(spsp PUBLIC
   "$<BUILD_INTERFACE:${CMAKE_CURRENT_LIST_DIR}/../include/common>"
   "$<BUILD_INTERFACE:${CMAKE_CURRENT_LIST_DIR}/../include/linux>")
