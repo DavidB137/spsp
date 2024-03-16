@@ -1,5 +1,6 @@
 ; Far layer
 ; One of: mqtt, local_broker
+; Required
 far_layer=mqtt
 
 ; Logging verbosity
@@ -9,12 +10,17 @@ log_level=info
 
 [espnow]
 ; Wireless interface for ESP-NOW (must be in monitor mode - 802.11 radiotap)
+; Required
 interface=phy0-mon0
 
-; SSID (32-bit unsigned number)
+; SSID (32-bit unsigned integer)
+; Used to separate near-by SPSP networks
+; Default: 0
 ssid=1234567890
 
 ; Password (must be 32 bytes long)
+; Pre-shared key used for encryption of ESP-NOW communication
+; Default: 32 bytes of null byte
 password=X6SONhP6xNHtj5niA3F1ojXLcx5sccTk
 
 [mqtt]
@@ -48,7 +54,7 @@ username=user
 password=pass
 
 ; Client ID
-; Default: `spsp_xxx`, where `xxx` is MAC address.
+; Default: `spsp_xxx`, where `xxx` is MAC address
 client_id=client001
 
 ; Path to authentication TLS certificate
