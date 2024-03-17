@@ -8,11 +8,6 @@ Main goal is to create highly reliable platform for message delivery from and
 to IoT devices while taking into account protocol-specific, performance and
 power restrictions.
 
-> [!NOTE]
-> I personally have been running dozens of ESP32 devices on SPSP framework
-> using ESP-NOW[^espnow] and MQTT[^mqtt] since mid 2023 without any stability
-> issues.
-
 
 ## Usage
 
@@ -22,17 +17,21 @@ Implemenation is based on **ESP-IDF**[^espidf] framework, so all ESP32[^esp32]
 devices (including subtypes) are supported and they are a key target of this
 project.
 
-Future plans include port to **OpenWrt**[^openwrt] (or other Linux based
-systems) – primarily for the *bridge* nodes as it's convenient to have
-an access point serving "standard" devices as well as all of IoT.
+You can also run SPSP *bridge* node on **Linux** platform and
+**OpenWrt**[^openwrt], so you can have an access point serving both regular
+WiFi clients and IoT devices.
 
 ### Dependencies
 
-- C++ 17 or newer (C++ 20 is going to be required soon)
-- ESP-IDF[^espidf] 5.1
-- optionally PlatformIO[^platformio]
+This project currently requires C++ 17 or newer.
 
-### Setup
+If you want to use SPSP in your ESP-IDF-based firmware, ESP-IDF[^espidf] v5.1
+or newer is required. PlatformIO[^platformio] development is also supported.
+
+If you want to use SPSP on Linux, you will need CMake and WiFi card with
+support for monitor mode and packet injection.
+
+### Setup for ESP-IDF
 
 1. Create ESP-IDF[^espidf] project.
 2. Create `idf_component.yml` file inside `main` project directory:
@@ -60,10 +59,64 @@ an access point serving "standard" devices as well as all of IoT.
    }
    ```
 
+### Setup for Linux
+
+1. Install build tools. On Debian based systems:
+   ```sh
+   sudo apt update
+   sudo apt-get install make cmake build-essential git cmake ccache libffi-dev libssl-dev
+   ```
+2. Create build directory:
+   ```sh
+   mkdir linux/build
+   ```
+3. Build the binaries:
+   ```sh
+   cd linux/build
+   cmake ..
+   make
+   ```
+4. Optionally install it (systemwide):
+   ```sh
+   sudo make install
+   ```
+
+#### Monitor mode
+
+To run SPSP bridge, you will need a WiFi card with support for monitor mode and
+packet injection. To put it into monitor mode and enable the interface, use:
+
+```sh
+# Replace `IFACE` with your WiFi card's interface name.
+sudo ip link set IFACE down
+sudo iw IFACE set monitor none
+sudo ip link set IFACE up
+```
+
+#### Configuration
+
+You will need to adjust the configuration. Example is provided in
+`linux/bridge_espnow_config.ini.example` file.
+
+#### Run
+
+Finally, to run SPSP ESP-NOW bridge:
+
+```sh
+sudo spsp_bridge_espnow PATH_TO_YOUR_CONFIG.ini
+```
+
+### Setup for OpenWrt
+
+See OpenWrt feed repository for SPSP: https://github.com/DavidB137/spsp-openwrt
+
+Generally, [Linux process](#setup-for-linux) applies.
+SPSP binaries, however, come packaged, so you will only need to setup network
+interface and adjust the configuration.
+
 ### Examples
 
 You can find usage examples in [`examples/`](examples/) directory.
-
 
 ### Code documentation
 
