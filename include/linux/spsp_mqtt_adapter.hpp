@@ -9,9 +9,6 @@
 
 #pragma once
 
-#include <future>
-#include <mutex>
-
 #include "MQTTAsync.h"
 
 #include "spsp_mqtt_adapter_if.hpp"
@@ -27,8 +24,6 @@ namespace SPSP::FarLayers::MQTT
      */
     class Adapter : public IAdapter
     {
-        std::mutex m_subUnsubMutex;                  //!< Mutex for conditional variable
-        std::promise<bool> m_subUnsubStatePromise;   //!< Promise for (un)sub state sync
         Config m_conf;                               //!< Configuration
         MQTTAsync m_mqtt;                            //!< MQTT client instance
         AdapterSubDataCb m_subDataCb = nullptr;      //!< Subscription data callback
@@ -117,22 +112,22 @@ namespace SPSP::FarLayers::MQTT
 
     protected:
         /**
-         * @brief Connects or reconnects to MQTT server
+         * @brief Connects to MQTT server
          *
-         * @return true Connection successful
+         * @return true Connection process started successfully
          * @return false Connection failed
          */
         bool connect();
 
         /**
-         * @brief Connection successful callback
+         * @brief Connected callback
          *
          * Passed to underlaying library.
          *
          * @param ctx Context
-         * @param resp Response
+         * @param cause Cause
          */
-        static void connSuccessCb(void* ctx, MQTTAsync_successData* resp);
+        static void connectedCb(void* ctx, char* cause);
 
         /**
          * @brief Connection failure callback
@@ -153,26 +148,6 @@ namespace SPSP::FarLayers::MQTT
          * @param cause Cause
          */
         static void connLostCb(void* ctx, char* cause);
-
-        /**
-         * @brief Subscription/unsubscription successful callback
-         *
-         * Passed to underlaying library.
-         *
-         * @param ctx Context
-         * @param resp Response
-         */
-        static void subUnsubSuccessCb(void* ctx, MQTTAsync_successData* resp);
-
-        /**
-         * @brief Subscription/unsubscription failure callback
-         *
-         * Passed to underlaying library.
-         *
-         * @param ctx Context
-         * @param resp Response
-         */
-        static void subUnsubFailureCb(void* ctx, MQTTAsync_failureData* resp);
 
         /**
          * @brief Subscription message callback

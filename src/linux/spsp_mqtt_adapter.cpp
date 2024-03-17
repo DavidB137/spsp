@@ -74,6 +74,8 @@ namespace SPSP::FarLayers::MQTT
 
     bool Adapter::connect()
     {
+        int ret;
+
         MQTTAsync_willOptions lastWillOpts = MQTTAsync_willOptions_initializer;
         MQTTAsync_SSLOptions sslOptions = MQTTAsync_SSLOptions_initializer;
         MQTTAsync_connectOptions connOpts = MQTTAsync_connectOptions_initializer;
@@ -90,18 +92,26 @@ namespace SPSP::FarLayers::MQTT
         sslOptions.enableServerCertAuth = !m_conf.connection.verifyCrt.empty();
         sslOptions.verify = !m_conf.connection.verifyCrt.empty();
 
+        connOpts.automaticReconnect = true;
         connOpts.keepAliveInterval = m_conf.connection.keepalive;
         connOpts.cleansession = true;
         connOpts.will = m_conf.lastWill.topic.empty() ? nullptr : &lastWillOpts;
         connOpts.username = m_conf.auth.username.c_str();
         connOpts.password = this->stringToCOrNull(m_conf.auth.password);
         connOpts.ssl = &sslOptions;
-        connOpts.onSuccess = &Adapter::connSuccessCb;
         connOpts.onFailure = &Adapter::connFailureCb;
         connOpts.context = this;
 
+        // Set connected callback
+        ret = MQTTAsync_setConnected(m_mqtt, this, &Adapter::connectedCb);
+        if (ret != MQTTASYNC_SUCCESS) {
+            SPSP_LOGE("Couldn't set connected callback: %s",
+                      MQTTAsync_strerror(ret));
+            return false;
+        }
+
         // Connect
-        auto ret = MQTTAsync_connect(m_mqtt, &connOpts);
+        ret = MQTTAsync_connect(m_mqtt, &connOpts);
         if (ret != MQTTASYNC_SUCCESS) {
             SPSP_LOGE("Connect: %s", MQTTAsync_strerror(ret));
         }
@@ -124,63 +134,40 @@ namespace SPSP::FarLayers::MQTT
 
     bool Adapter::subscribe(const std::string& topic)
     {
-        std::scoped_lock lock{m_subUnsubMutex};
-
+        int ret;
         MQTTAsync_responseOptions opts = MQTTAsync_responseOptions_initializer;
-        opts.onSuccess = &Adapter::subUnsubSuccessCb;
-        opts.onFailure = &Adapter::subUnsubFailureCb;
-        opts.context = this;
 
-        auto ret = MQTTAsync_subscribe(m_mqtt, topic.c_str(), m_conf.connection.qos, &opts);
+        ret = MQTTAsync_subscribe(m_mqtt, topic.c_str(), m_conf.connection.qos, &opts);
         if (ret != MQTTASYNC_SUCCESS) {
             return false;
         }
 
-        // Reset promise
-        m_subUnsubStatePromise = std::promise<bool>();
-
         // Wait for result
-        auto future = m_subUnsubStatePromise.get_future();
-        if (future.wait_for(5s) == std::future_status::timeout) {
-            SPSP_LOGW("Subscribe: timeout");
-            return false;
-        }
-
-        return future.get();
+        ret = MQTTAsync_waitForCompletion(m_mqtt, opts.token, 5000);
+        return ret == MQTTASYNC_SUCCESS;
     }
 
     bool Adapter::unsubscribe(const std::string& topic)
     {
-        std::scoped_lock lock{m_subUnsubMutex};
-
+        int ret;
         MQTTAsync_responseOptions opts = MQTTAsync_responseOptions_initializer;
-        opts.onSuccess = &Adapter::subUnsubSuccessCb;
-        opts.onFailure = &Adapter::subUnsubFailureCb;
-        opts.context = this;
 
-        auto ret = MQTTAsync_unsubscribe(m_mqtt, topic.c_str(), &opts);
+        ret = MQTTAsync_unsubscribe(m_mqtt, topic.c_str(), &opts);
         if (ret != MQTTASYNC_SUCCESS) {
             return false;
         }
 
-        // Reset promise
-        m_subUnsubStatePromise = std::promise<bool>();
-
         // Wait for result
-        auto future = m_subUnsubStatePromise.get_future();
-        if (future.wait_for(5s) == std::future_status::timeout) {
-            SPSP_LOGW("Unsubscribe: timeout");
-            return false;
-        }
-
-        return future.get();
+        ret = MQTTAsync_waitForCompletion(m_mqtt, opts.token, 5000);
+        return ret == MQTTASYNC_SUCCESS;
     }
 
-    void Adapter::connSuccessCb(void* ctx, MQTTAsync_successData* resp)
+    void Adapter::connectedCb(void* ctx, char* cause)
     {
         auto inst = static_cast<Adapter*>(ctx);
 
         SPSP_LOGI("Connected");
+
         if (inst->getConnectedCb() != nullptr) {
             inst->getConnectedCb()();
         }
@@ -194,22 +181,7 @@ namespace SPSP::FarLayers::MQTT
 
     void Adapter::connLostCb(void* ctx, char* cause)
     {
-        auto inst = static_cast<Adapter*>(ctx);
-
-        SPSP_LOGW("Connection lost. Attempting reconnection...");
-        inst->connect();
-    }
-
-    void Adapter::subUnsubSuccessCb(void* ctx, MQTTAsync_successData* resp)
-    {
-        auto inst = static_cast<Adapter*>(ctx);
-        inst->m_subUnsubStatePromise.set_value(true);
-    }
-
-    void Adapter::subUnsubFailureCb(void* ctx, MQTTAsync_failureData* resp)
-    {
-        auto inst = static_cast<Adapter*>(ctx);
-        inst->m_subUnsubStatePromise.set_value(false);
+        SPSP_LOGW("Connection lost. Reconnection will be done automatically...");
     }
 
     int Adapter::subMsgCb(void* ctx, char* topicC, int topicLen, MQTTAsync_message* msg)
