@@ -4,8 +4,8 @@
 #include <string>
 #include <thread>
 
-#include "spsp_mqtt.hpp"
-#include "spsp_mqtt_adapter.hpp"
+#include "spsp/mqtt.hpp"
+#include "spsp/mqtt_adapter.hpp"
 
 using namespace SPSP;
 using namespace std::chrono_literals;

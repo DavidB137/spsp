@@ -1,4 +1,4 @@
-#include "spsp.hpp"
+#include "spsp/spsp.hpp"
 
 extern "C" void app_main()
 {

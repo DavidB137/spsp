@@ -4,8 +4,8 @@
 #include <string>
 #include <thread>
 
-#include "spsp_local_broker.hpp"
-#include "spsp_node.hpp"
+#include "spsp/local_broker.hpp"
+#include "spsp/node.hpp"
 
 using namespace SPSP;
 using namespace std::chrono_literals;

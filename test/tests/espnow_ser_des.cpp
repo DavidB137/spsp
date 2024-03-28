@@ -1,6 +1,6 @@
 #include <catch2/catch_test_macros.hpp>
 
-#include "spsp_espnow_ser_des.hpp"
+#include "spsp/espnow_ser_des.hpp"
 
 using namespace SPSP;
 

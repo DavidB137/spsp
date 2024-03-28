@@ -3,7 +3,7 @@
 #include <unordered_map>
 #include <vector>
 
-#include "spsp_wildcard_trie.hpp"
+#include "spsp/wildcard_trie.hpp"
 
 using namespace SPSP;
 

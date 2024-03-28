@@ -51,7 +51,7 @@ support for monitor mode and packet injection.
 4. Rename `main.c` to `main.cpp` file inside `main` project directory
    and change it's content to:
    ```cpp
-   #include "spsp.hpp"
+   #include "spsp/spsp.hpp"
 
    extern "C" void app_main()
    {

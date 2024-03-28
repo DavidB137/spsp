@@ -4,10 +4,10 @@
 #include <string>
 #include <thread>
 
-#include "spsp_espnow.hpp"
-#include "spsp_espnow_adapter.hpp"
-#include "spsp_nodes_dummy.hpp"
-#include "spsp_wifi_dummy.hpp"
+#include "spsp/espnow.hpp"
+#include "spsp/espnow_adapter.hpp"
+#include "spsp/nodes_dummy.hpp"
+#include "spsp/wifi_dummy.hpp"
 
 using namespace SPSP;
 using namespace std::chrono_literals;

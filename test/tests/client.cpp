@@ -6,11 +6,11 @@
 #include <unordered_set>
 #include <vector>
 
-#include "spsp_client.hpp"
-#include "spsp_layers_dummy.hpp"
-#include "spsp_local_addr.hpp"
-#include "spsp_local_message.hpp"
-#include "spsp_version.hpp"
+#include "spsp/client.hpp"
+#include "spsp/layers_dummy.hpp"
+#include "spsp/local_addr.hpp"
+#include "spsp/local_message.hpp"
+#include "spsp/version.hpp"
 
 using namespace SPSP;
 using namespace std::chrono_literals;

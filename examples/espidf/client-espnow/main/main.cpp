@@ -1,6 +1,6 @@
 #include <chrono>
 
-#include "spsp.hpp"
+#include "spsp/spsp.hpp"
 
 using namespace std::chrono_literals;
 

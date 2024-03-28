@@ -1,7 +1,7 @@
 #include <catch2/catch_test_macros.hpp>
 
-#include "spsp_local_addr_mac.hpp"
-#include "spsp_mac.hpp"
+#include "spsp/local_addr_mac.hpp"
+#include "spsp/mac.hpp"
 
 using namespace SPSP;
 

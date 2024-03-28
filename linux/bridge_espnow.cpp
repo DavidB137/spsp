@@ -12,7 +12,7 @@
 #include <iostream>
 
 #include "ini.h"
-#include "spsp.hpp"
+#include "spsp/spsp.hpp"
 
 #define SAVE_OPTION(var, section, attr, type)             \
     do {                                                  \

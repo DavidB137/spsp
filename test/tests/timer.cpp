@@ -3,7 +3,7 @@
 #include <chrono>
 #include <future>
 
-#include "spsp_timer.hpp"
+#include "spsp/timer.hpp"
 
 using namespace SPSP;
 using namespace std::chrono_literals;
