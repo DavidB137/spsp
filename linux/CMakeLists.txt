@@ -14,8 +14,8 @@ file(GLOB lib_srcs CONFIGURE_DEPENDS
   "../src/linux/*.cpp"
 )
 file(GLOB lib_includes CONFIGURE_DEPENDS
-  "../include/common/*.hpp"
-  "../include/linux/*.hpp"
+  "../include/common/spsp/*.hpp"
+  "../include/linux/spsp/*.hpp"
 )
 
 # SPSP shared library
@@ -38,7 +38,7 @@ install(TARGETS spsp
   EXPORT spspTargets
   LIBRARY DESTINATION "${CMAKE_INSTALL_LIBDIR}"
 )
-install(FILES ${lib_includes} DESTINATION "${CMAKE_INSTALL_INCLUDEDIR}")
+install(FILES ${lib_includes} DESTINATION "${CMAKE_INSTALL_INCLUDEDIR}/spsp")
 
 # Export CMake config
 install(EXPORT spspTargets
