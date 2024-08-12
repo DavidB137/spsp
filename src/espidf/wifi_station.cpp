@@ -9,6 +9,7 @@
 
 #include <cstring>
 
+#include "esp_eap_client.h"
 #include "esp_mac.h"
 #include "esp_netif_sntp.h"
 #include "esp_wifi.h"
@@ -262,6 +263,67 @@ namespace SPSP::WiFi
 
             SPSP_ERROR_CHECK(esp_wifi_set_config(WIFI_IF_STA, &espWiFiConfig),
                              ConnectionError("Set WiFi config failed"));
+            if (!m_config.eapIdentity.empty()) {
+                SPSP_ERROR_CHECK(
+                    esp_eap_client_set_identity(
+                        (const uint8_t*)m_config.eapIdentity.c_str(),
+                        m_config.eapIdentity.length()
+                    ),
+                    ConnectionError("Set EAP identity failed")
+                );
+            }
+            if (!m_config.eapCACrt.empty()) {
+                SPSP_ERROR_CHECK(
+                    // Has to be NULL-terminated
+                    esp_eap_client_set_ca_cert(
+                        (const uint8_t*)m_config.eapCACrt.c_str(),
+                        m_config.eapCACrt.length() + 1
+                    ),
+                    ConnectionError("Set EAP CA certificate failed")
+                );
+            }
+            if (!m_config.eapCrt.empty() && !m_config.eapCrtKey.empty()) {
+                SPSP_ERROR_CHECK(
+                    // Has to be NULL-terminated
+                    esp_eap_client_set_certificate_and_key(
+                        (const uint8_t*)m_config.eapCrt.c_str(),
+                        m_config.eapCrt.length() + 1,
+                        (const uint8_t*)m_config.eapCrtKey.c_str(),
+                        m_config.eapCrtKey.length() + 1, nullptr, 0
+                    ),
+                    ConnectionError("Set EAP client certificate failed")
+                );
+            }
+            if (!m_config.eapUsername.empty()) {
+                SPSP_ERROR_CHECK(
+                    esp_eap_client_set_username(
+                        (const uint8_t*)m_config.eapUsername.c_str(),
+                        m_config.eapUsername.length()
+                    ),
+                    ConnectionError("Set EAP username failed")
+                );
+            }
+            if (!m_config.eapPassword.empty()) {
+                SPSP_ERROR_CHECK(
+                    esp_eap_client_set_password(
+                        (const uint8_t*)m_config.eapPassword.c_str(),
+                        m_config.eapPassword.length()
+                    ),
+                    ConnectionError("Set EAP password failed")
+                );
+            }
+            if (m_config.enableWPA3EAP192bit) {
+                SPSP_ERROR_CHECK(
+                    esp_eap_client_set_suiteb_192bit_certification(true),
+                    ConnectionError("Enable EAP WPA3-192 failed")
+                );
+            }
+            if (m_config.enableWPAEnterprise) {
+                SPSP_ERROR_CHECK(
+                    esp_wifi_sta_enterprise_enable(),
+                    ConnectionError("Enable WPA Enterprise failed")
+                );
+            }
 
             // No power saving for bridge (IMPORTANT!)
             esp_wifi_set_ps(WIFI_PS_NONE);

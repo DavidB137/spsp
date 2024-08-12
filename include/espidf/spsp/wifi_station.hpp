@@ -30,10 +30,21 @@ namespace SPSP::WiFi
     struct StationConfig
     {
         // Connection
-        std::string ssid = "";      //!< SSID
-        std::string password = "";  //!< Password
-        bool lockBssid = false;     //!< Whether to use only AP with MAC address `bssid`
-        uint8_t bssid[6];           //!< MAC address of AP
+        std::string ssid;        //!< SSID
+        std::string password;    //!< Password
+        bool lockBssid = false;  //!< Whether to use only AP with MAC address `bssid`
+        uint8_t bssid[6];        //!< MAC address of AP
+
+        // WPA Enterprise
+        // Required fields depend on chosen EAP type.
+        bool enableWPAEnterprise = false;
+        bool enableWPA3EAP192bit = false;  //!< Unavailable on some chips
+        std::string eapIdentity;
+        std::string eapCACrt;              //!< Certificate content, not filename
+        std::string eapCrt;                //!< Certificate content, not filename
+        std::string eapCrtKey;             //!< Certificate content, not filename
+        std::string eapUsername;
+        std::string eapPassword;
 
         // Network
         std::string hostnamePrefix = "spsp-";     //!< Hostname prefix (followed by MAC address)
